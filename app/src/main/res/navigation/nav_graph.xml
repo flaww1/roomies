@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/registrationFragment">
+
+    <fragment
+        android:id="@+id/registrationFragment"
+        android:name="pt.ipca.roomies.ui.authentication.registration.RegistrationFragment"
+        android:label="RegistrationFragment">
+
+        <action
+            android:id="@+id/action_registrationFragment_to_roleSelectionFragment"
+            app:destination="@id/roleSelectionFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/roleSelectionFragment"
+        android:name="pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationRoleSelectionFragment"
+        android:label="RoleSelectionFragment">
+
+        <action
+            android:id="@+id/action_roleSelectionFragment_to_registrationUserProfileInfoFragment"
+            app:destination="@id/registrationUserProfileInfoFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registrationUserProfileInfoFragment"
+        android:name="pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationUserProfileInfoFragment"
+        android:label="RegistrationUserProfileInfoFragment">
+
+        <action
+            android:id="@+id/action_registrationUserProfileInfoFragment_to_userInterestsFragment"
+            app:destination="@id/RegistrationUserInterestsFragment" />
+
+        <action
+            android:id="@+id/action_registrationUserProfileInfoFragment_to_roleSelectionFragment"
+            app:destination="@id/roleSelectionFragment"
+            app:popUpTo="@+id/registrationFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/RegistrationUserInterestsFragment"
+        android:name="pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationUserInterestsFragment"
+        android:label="RegistrationUserInterestsFragment">
+
+        <!-- Define other actions as needed -->
+    </fragment>
+
+    <!-- Add other fragments as needed -->
+
+</navigation>

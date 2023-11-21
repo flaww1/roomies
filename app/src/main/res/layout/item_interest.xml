@@ -1,0 +1,30 @@
+<!-- res/layout/item_interest_tag.xml -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <!-- You can add data binding variables if needed -->
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <CheckBox
+            android:id="@+id/checkboxInterest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Interest"/>
+
+        <!-- Add other views for interest details if needed -->
+        <TextView
+            android:id="@+id/textInterestTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Interest Tag"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+</layout>
