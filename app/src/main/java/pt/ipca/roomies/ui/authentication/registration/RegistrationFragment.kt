@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import pt.ipca.roomies.R
 import pt.ipca.roomies.databinding.FragmentRegistrationBinding
 
 class RegistrationFragment : Fragment() {
@@ -27,7 +29,7 @@ class RegistrationFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Set up UI interactions and observe ViewModel
-        binding.buttonRegister.setOnClickListener {
+        binding.nextButton.setOnClickListener {
             // Retrieve input values
             val firstName = binding.editTextFirstName.text.toString()
             val lastName = binding.editTextLastName.text.toString()
@@ -39,6 +41,10 @@ class RegistrationFragment : Fragment() {
             if (validateInputs(firstName, lastName, email, password, confirmPassword)) {
                 viewModel.register(firstName, lastName, email, password)
             }
+
+            findNavController().navigate(R.id.action_registrationFragment_to_roleSelectionFragment)
+
+
         }
     }
 

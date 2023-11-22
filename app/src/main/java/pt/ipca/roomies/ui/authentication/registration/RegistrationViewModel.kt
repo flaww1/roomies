@@ -1,14 +1,17 @@
 package pt.ipca.roomies.ui.authentication.registration
 
+import UserProfile
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import pt.ipca.roomies.data.entities.ProfileTags
-import pt.ipca.roomies.data.entities.User
-import pt.ipca.roomies.data.entities.UserProfile
+import User
+
 
 // RegistrationViewModel.kt
 class RegistrationViewModel : ViewModel() {
+    val _errorMessage = MutableLiveData<String>()
+    val errorMessage: LiveData<String> get() = _errorMessage
 
     private val _user = MutableLiveData<User>()
     val user: LiveData<User> get() = _user
@@ -35,5 +38,9 @@ class RegistrationViewModel : ViewModel() {
 
     fun register(firstName: String, lastName: String, email: String, password: String) {
         // Perform registration logic here
+    }
+
+    fun updateUserRole(role: String) {
+
     }
 }

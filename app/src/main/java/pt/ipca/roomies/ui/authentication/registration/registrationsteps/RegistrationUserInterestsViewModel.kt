@@ -2,6 +2,7 @@ package pt.ipca.roomies.ui.authentication.registration.registrationsteps
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import pt.ipca.roomies.data.entities.ProfileTags
 
 class RegistrationUserInterestsViewModel : ViewModel() {
     private val selectedInterestTags: MutableLiveData<List<String>> = MutableLiveData()
@@ -44,5 +45,9 @@ class RegistrationUserInterestsViewModel : ViewModel() {
 
         // Set the value of the selectedInterestTags LiveData to the updated list
         selectedInterestTags.value = updatedTags
+    }
+
+    fun updateProfileTags(profileTags: List<ProfileTags>) {
+
     }
 }

@@ -1,18 +1,19 @@
-package pt.ipca.roomies.data.entities
-
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
-@Entity(tableName = "users")
 data class User(
-    @PrimaryKey(autoGenerate = true)
-    val userId: Long = 0,
+    val userId: Int,
     val firstName: String,
     val lastName: String,
     val email: String,
     val password: String,
-    val registrationDate: Long,
+    val registrationDate: String,
     val userRating: Int,
-    val userRole: String,
-    val lastLogin: Long
+    val userRole: Roles,
 )
+
+enum class Roles
+{
+    ADMIN,
+    USER,
+    TENANT,
+    LANDLORD,
+    LEADER;
+}

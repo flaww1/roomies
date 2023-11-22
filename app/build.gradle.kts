@@ -60,6 +60,11 @@ dependencies {
     implementation ("androidx.navigation:navigation-fragment-ktx:2.7.5")
     implementation ("androidx.recyclerview:recyclerview:1.3.2")
     implementation ("androidx.viewpager2:viewpager2:1.0.0")
+    implementation ("com.google.firebase:firebase-database:20.3.0")
+    implementation ("com.google.firebase:firebase-storage:20.3.0")
+    implementation ("com.google.firebase:firebase-messaging:23.3.1")
+    implementation ("com.google.firebase:firebase-config:21.6.0")
+
 
 
 

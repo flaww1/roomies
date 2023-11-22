@@ -1,5 +1,6 @@
 package pt.ipca.roomies.ui.authentication.registration.registrationsteps
 
+import UserProfile
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -10,14 +11,16 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import pt.ipca.roomies.R
-import pt.ipca.roomies.data.entities.Gender
-import pt.ipca.roomies.data.entities.Occupation
-import pt.ipca.roomies.data.entities.Pronouns
 import pt.ipca.roomies.databinding.FragmentRegistrationUserProfileInfoBinding
+import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 
 class RegistrationUserProfileInfoFragment : Fragment() {
+
+    private lateinit var viewModel: RegistrationViewModel
+
 
     private var _binding: FragmentRegistrationUserProfileInfoBinding? = null
     private val binding get() = _binding!!
@@ -34,8 +37,11 @@ class RegistrationUserProfileInfoFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
+
     ): View {
         _binding = FragmentRegistrationUserProfileInfoBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(requireActivity()).get(RegistrationViewModel::class.java)
+
         return binding.root
     }
 
@@ -55,6 +61,15 @@ class RegistrationUserProfileInfoFragment : Fragment() {
         // Implement UI interactions
         binding.buttonNext.setOnClickListener {
             // Navigate to the next fragment (you might want to validate input here)
+            val firstName = binding.editTextFirstName.text.toString()
+            val lastName = binding.editTextLastName.text.toString()
+            val birthDate = binding.editTextBirthDate.text.toString()
+            val location = binding.editTextLocation.text.toString()
+            val gender = binding.spinnerGender.selectedItem.toString()
+            val pronouns = binding.spinnerPronouns.selectedItem.toString()
+            val occupation = binding.spinnerOccupation.selectedItem.toString()
+            val userProfile = UserProfile(firstName, lastName, birthDate, location, gender, pronouns, occupation)
+            viewModel.updateUserProfile(userProfile)
             findNavController().navigate(R.id.action_registrationUserProfileInfoFragment_to_userInterestsFragment)
         }
 
@@ -81,6 +96,7 @@ class RegistrationUserProfileInfoFragment : Fragment() {
         binding.spinnerOccupation.setOnItemSelectedListener { updateNextButtonState() }
 
     }
+
 
     private fun setupSpinner(spinner: Spinner, values: Array<String>) {
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, values)
