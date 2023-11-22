@@ -1,5 +1,6 @@
 package pt.ipca.roomies.ui.authentication.login
 
+import LoginViewModel
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity

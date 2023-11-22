@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Roomies</string>
+    <string name="gender_prompt">Select Gender</string>
+    <string name="pronouns_prompt">Select Pronouns</string>
+    <string name="occupation_prompt">Select Occupation</string>
+
+
 </resources>

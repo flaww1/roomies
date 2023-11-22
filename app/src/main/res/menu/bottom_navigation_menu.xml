@@ -1,0 +1,18 @@
+<!-- res/menu/bottom_navigation_menu.xml -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_home"
+        android:title="Home"
+        />
+
+    <item
+        android:id="@+id/navigation_messages"
+        android:title="Messages"
+            />
+
+    <item
+        android:id="@+id/navigation_profile"
+        android:title="Profile"
+         />
+</menu>

@@ -1,3 +1,5 @@
+
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -57,6 +59,7 @@ dependencies {
     implementation ("androidx.navigation:navigation-ui-ktx:2.7.5")
     implementation ("androidx.navigation:navigation-fragment-ktx:2.7.5")
     implementation ("androidx.recyclerview:recyclerview:1.3.2")
+    implementation ("androidx.viewpager2:viewpager2:1.0.0")
 
 
 

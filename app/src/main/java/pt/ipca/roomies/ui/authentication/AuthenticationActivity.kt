@@ -2,7 +2,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 
 import pt.ipca.roomies.R
-import pt.ipca.roomies.ui.authentication.login.LoginFragment
+import LoginFragment
+
 
 class AuthenticationActivity : AppCompatActivity() {
 

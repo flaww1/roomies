@@ -1,10 +1,10 @@
 package pt.ipca.roomies.ui.authentication.registration.registrationsteps
 
-// Inside RegistrationUserInterestsViewModel.kt
-
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class RegistrationUserInterestsViewModel : ViewModel() {
+    private val selectedInterestTags: MutableLiveData<List<String>> = MutableLiveData()
 
     // List of available interest tags
     private val availableInterestTags = listOf(
@@ -14,29 +14,35 @@ class RegistrationUserInterestsViewModel : ViewModel() {
         // Add more interests as needed
     )
 
-    // List to store user-selected interest tags
-    private val selectedInterestTags = mutableListOf<String>()
-
     // Function to get the list of available interest tags
     fun getAvailableInterestTags(): List<String> {
         return availableInterestTags
     }
 
     // Function to get the list of user-selected interest tags
-    fun getSelectedInterestTags(): List<String> {
+    fun getSelectedInterestTags(): MutableLiveData<List<String>> {
         return selectedInterestTags
     }
 
     // Function to update the user-selected interest tags
     fun updateSelectedInterestTags(tag: String, isSelected: Boolean) {
-        if (isSelected) {
-            // Add the tag to the selected list if it's selected
-            if (!selectedInterestTags.contains(tag)) {
-                selectedInterestTags.add(tag)
+        // Get the current list of selected interest tags
+        val currentTags = selectedInterestTags.value ?: emptyList()
+
+        // Create a new list for the updated selected interest tags
+        val updatedTags = if (isSelected) {
+            // Add the tag to the list if it's selected and it's not already in the list
+            if (tag !in currentTags) {
+                currentTags + tag
+            } else {
+                currentTags
             }
         } else {
-            // Remove the tag from the selected list if it's deselected
-            selectedInterestTags.remove(tag)
+            // Remove the tag from the list if it's deselected
+            currentTags - tag
         }
+
+        // Set the value of the selectedInterestTags LiveData to the updated list
+        selectedInterestTags.value = updatedTags
     }
 }

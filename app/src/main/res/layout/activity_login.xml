@@ -1,0 +1,23 @@
+<!-- res/layout/activity_rlogin.xml -->
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <!-- Add any data binding variables if needed -->
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.authentication.login.LoginActivity">
+
+        <!-- Other views in your activity -->
+
+
+        <!-- You can adjust the positioning based on your layout -->
+        />
+
+    </RelativeLayout>
+</layout>

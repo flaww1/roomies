@@ -50,21 +50,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:prompt="Select Gender"/>
+                android:prompt="@string/gender_prompt"/>
 
             <Spinner
                 android:id="@+id/spinnerPronouns"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:prompt="Select Pronouns"/>
+                android:prompt="@string/pronouns_prompt"/>
 
             <Spinner
                 android:id="@+id/spinnerOccupation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:prompt="Select Occupation"/>
+                android:prompt="@string/occupation_prompt"/>
 
             <Button
                 android:id="@+id/buttonBack"

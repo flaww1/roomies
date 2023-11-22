@@ -45,6 +45,10 @@
         android:name="pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationUserInterestsFragment"
         android:label="RegistrationUserInterestsFragment">
 
+        <action
+            android:id="@+id/action_registrationUserProfileInfoFragment_to_userInterestsFragment"
+            app:destination="@id/RegistrationUserInterestsFragment" />
+
         <!-- Define other actions as needed -->
     </fragment>
 
