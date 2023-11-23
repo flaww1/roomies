@@ -1,5 +1,6 @@
 package pt.ipca.roomies.ui.authentication.registration
 
+import RegistrationViewModel
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -28,24 +29,22 @@ class RegistrationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Set up UI interactions and observe ViewModel
         binding.nextButton.setOnClickListener {
-            // Retrieve input values
             val firstName = binding.editTextFirstName.text.toString()
             val lastName = binding.editTextLastName.text.toString()
             val email = binding.editTextEmail.text.toString()
             val password = binding.editTextPassword.text.toString()
             val confirmPassword = binding.editTextConfirmPassword.text.toString()
 
-            // Validate and perform registration logic
             if (validateInputs(firstName, lastName, email, password, confirmPassword)) {
                 viewModel.register(firstName, lastName, email, password)
+                navigateToRoleSelectionFragment()
             }
-
-            findNavController().navigate(R.id.action_registrationFragment_to_roleSelectionFragment)
-
-
         }
+    }
+
+    private fun navigateToRoleSelectionFragment() {
+        findNavController().navigate(R.id.action_registrationFragment_to_roleSelectionFragment)
     }
 
     private fun validateInputs(
@@ -56,7 +55,6 @@ class RegistrationFragment : Fragment() {
         confirmPassword: String
     ): Boolean {
         // Implement your validation logic here
-        // Return true if inputs are valid, false otherwise
         return true
     }
 

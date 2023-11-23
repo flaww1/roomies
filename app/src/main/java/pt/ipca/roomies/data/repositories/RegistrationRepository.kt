@@ -1,12 +1,15 @@
 package pt.ipca.roomies.data.repositories
 
+import RegistrationViewModel
 import User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
-import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
+import pt.ipca.roomies.data.entities.ProfileTags
+import pt.ipca.roomies.data.entities.UserTags
 
 
 class RegistrationRepository (private val viewModel: RegistrationViewModel) {
@@ -31,7 +34,8 @@ class RegistrationRepository (private val viewModel: RegistrationViewModel) {
             userDocumentReference.set(user).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     // The operation was successful
-                    auth.currentUser
+                    val currentUser = auth.currentUser
+                    updateUI(currentUser)
                 } else {
                     // The operation failed
 
@@ -49,6 +53,16 @@ class RegistrationRepository (private val viewModel: RegistrationViewModel) {
             viewModel._errorMessage.value = e.message
             return false
 
+        }
+    }
+
+
+    private fun updateUI(currentUser: FirebaseUser?) {
+        if (currentUser != null) {
+            // User is successfully registered, perform actions like navigating to the next screen
+        } else {
+            // Handle the case where currentUser is null (registration failed)
+            viewModel._errorMessage.value = "User registration failed"
         }
     }
 

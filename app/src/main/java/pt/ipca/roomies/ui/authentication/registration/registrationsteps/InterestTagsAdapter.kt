@@ -1,13 +1,17 @@
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.databinding.ItemInterestBinding
 
-
 class InterestTagsAdapter(
-    private var interestTags: List<String>,
-    private val onTagClickListener: (String, Boolean) -> Unit
+    private var interestTags: List<ProfileTags>,
+    private val onTagClickListener: (ProfileTags) -> Unit,
+    private val profileTagsRepository: ProfileTagsRepository,
+    private val userId: String
 ) : RecyclerView.Adapter<InterestTagsAdapter.ViewHolder>() {
+
+    private val selectedTags = mutableListOf<String>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemInterestBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -20,31 +24,38 @@ class InterestTagsAdapter(
 
         holder.itemView.setOnClickListener {
             holder.toggleSelection()
-            onTagClickListener.invoke(tag, holder.isSelected)
+            onTagClickListener.invoke(tag)
         }
-    }
-    fun updateData(newInterestTags: List<String>) {
-        this.interestTags = newInterestTags
-        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int = interestTags.size
 
+    fun updateData(newInterestTags: List<ProfileTags>) {
+        this.interestTags = newInterestTags
+        notifyDataSetChanged()
+    }
+
     inner class ViewHolder(private val binding: ItemInterestBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        var isSelected = false
-            private set
-
-        fun bind(tag: String) {
-            binding.textInterestTag.text = tag
+        fun bind(tag: ProfileTags) {
+            binding.textInterestTag.text = tag.tagName
+            binding.checkboxInterest.isChecked = selectedTags.contains(tag.tagId)
         }
 
         fun toggleSelection() {
-            isSelected = !isSelected
-            binding.root.isSelected = isSelected
+            val selectedTag = interestTags[adapterPosition]
+            if (selectedTags.contains(selectedTag.tagId)) {
+                selectedTags.remove(selectedTag.tagId)
+            } else {
+                selectedTags.add(selectedTag.tagId)
+            }
+            notifyItemChanged(adapterPosition)
+
+            // Update the UserTags table in Firestore
+            val tagId = selectedTag.tagId
+            val tagType = selectedTag.tagType
+            val isSelected = selectedTags.contains(selectedTag.tagId)
+            profileTagsRepository.associateTagWithUser(userId, tagId, tagType, isSelected)
         }
     }
-
-
 }
-

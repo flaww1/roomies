@@ -1,26 +1,23 @@
-import androidx.recyclerview.widget.RecyclerView
+package pt.ipca.roomies.ui.authentication.registration.registrationsteps
+
+import InterestTagsAdapter
+import ProfileTagsRepository
+import RegistrationViewModel
+import UserProfile
 import pt.ipca.roomies.databinding.FragmentRegistrationUserInterestsBinding
-import pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationUserInterestsViewModel
 import android.os.Bundle
 import android.view.ViewGroup
 import android.view.View
 import android.view.LayoutInflater
+import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
-import com.google.firebase.database.database
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
-import org.w3c.dom.Text
 import pt.ipca.roomies.R
 import pt.ipca.roomies.data.entities.ProfileTags
-import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
-
+import pt.ipca.roomies.data.entities.UserTags
 
 class RegistrationUserInterestsFragment : Fragment() {
 
@@ -29,23 +26,41 @@ class RegistrationUserInterestsFragment : Fragment() {
     private lateinit var viewModelRegistration: RegistrationViewModel
     private lateinit var adapter: InterestTagsAdapter
 
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ) {
         binding = FragmentRegistrationUserInterestsBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(this).get(RegistrationUserInterestsViewModel::class.java)
-        viewModelRegistration = ViewModelProvider(requireActivity()).get(RegistrationViewModel::class.java)
+        viewModel = ViewModelProvider(this)[RegistrationUserInterestsViewModel::class.java]
+        lateinit var profileTagsRepository: ProfileTagsRepository
 
-        // Initialize Adapter here
-        adapter = InterestTagsAdapter(listOf()) { tag, isSelected ->
-            viewModel.updateSelectedInterestTags(tag, isSelected)
+        viewModelRegistration =
+            ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
+
+        val user = viewModelRegistration._user.value
+        val userId = user?.userId
+
+        // Check if userId is not null
+        if (userId != null) {
+            // Initialize Adapter here
+            adapter = InterestTagsAdapter(listOf(), { tag ->
+                // Get the current list of selected interest tags
+                val currentTags = viewModel.getSelectedInterestTags().value ?: emptyList()
+
+                // Determine if the tag is selected
+                val isSelected = tag in currentTags
+
+                viewModel.updateSelectedInterestTags(
+                    tag,
+                    isSelected
+                )
+            }, profileTagsRepository, userId)
+
+            binding.recyclerViewInterests.adapter = adapter
         }
-        binding.recyclerViewInterests.adapter = adapter
-
-        return binding.root
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -54,12 +69,23 @@ class RegistrationUserInterestsFragment : Fragment() {
         binding.nextButton.setOnClickListener {
             // Navigate to the UserProfileInfoFragment
             val selectedInterests = viewModel.getSelectedInterestTags().value
-            val profileTags = selectedInterests.map { ProfileTags(it) }
-            viewModel.updateProfileTags(profileTags)
-            navigateToHomePage()
-            onFinalStepCompleted( )
 
+            if (selectedInterests != null && selectedInterests.isNotEmpty()) {
+                // Assuming you have default values or some logic to determine tagType
+                val tagType = "DefaultTagType"
 
+                // Update isSelected based on the selected tags
+                val updatedTags = selectedInterests.map { tag ->
+                    tag.copy(tagType = tagType, isSelected = true)
+                }
+
+                viewModel.updateProfileTags(updatedTags)
+                navigateToHomePage()
+                onFinalStepCompleted(updatedTags)
+            } else {
+                // Handle the case when selectedInterests is null or empty
+                // You may want to show a message or handle it appropriately
+            }
         }
 
         // Implement back button functionality
@@ -68,7 +94,7 @@ class RegistrationUserInterestsFragment : Fragment() {
             findNavController().popBackStack()
         }
         // Observe changes in the selected interest tags
-        viewModel.getSelectedInterestTags().observe(viewLifecycleOwner) { selectedTags ->
+        viewModel.getSelectedInterestTags().observe(viewLifecycleOwner) {
             // Handle changes, if needed
 
             // For example, update UI to reflect selected tags
@@ -77,62 +103,36 @@ class RegistrationUserInterestsFragment : Fragment() {
         // Populate the adapter with data
         adapter.updateData(viewModel.getAvailableInterestTags())
     }
+
     private fun navigateToHomePage() {
         // Use NavController to navigate to the next fragment
         findNavController().navigate(R.id.action_roleSelectionFragment_to_registrationUserProfileInfoFragment)
     }
 
-    fun onFinalStepCompleted(
-        firstName: String,
-        lastName: String,
-        email: String,
-        password: String,
-        role: String,
-        bio: String,
-        location: String,
-        pronouns: String,
-        gender: String,
-        occupation: String,
-        profilePictureUrl: String
-    ) {
-        val viewModel = ViewModelProvider(requireActivity()).get(RegistrationViewModel::class.java)
+    private suspend fun onFinalStepCompleted(selectedTags: List<ProfileTags>) {
+        val viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
+        val user = viewModel.user.value
 
-        // Observe user profile data
-        viewModel.userProfile.observe(viewLifecycleOwner) { userProfile ->
-            userProfile?.let {
-                // Assuming there's a method to convert UserProfile to a map
-                val userProfileMap = userProfile.toMap()
-
-                // Additional user data
-                val user = hashMapOf(
-                    "firstName" to firstName,
-                    "lastName" to lastName,
-                    "email" to email,
-                    "password" to password,
-                    "role" to role,
-                    "registrationDate" to FieldValue.serverTimestamp()
-                    // Add other user data here
-                )
-
-                // Combine user and user profile data
-                val userData = user + userProfileMap
-
-                // Save the combined data to Firestore or perform any other necessary actions
-                saveUserDataToFirestore(userData)
-            }
+        if (user != null) {
+            // Save selected tags to Firestore
+            saveSelectedTagsToFirestore(user.userId, selectedTags)
         }
     }
 
-    private fun saveUserDataToFirestore(userData: Map<String, Any>) {
-        val db = FirebaseFirestore.getInstance()
-        val usersCollection = db.collection("users")
+    private suspend fun saveSelectedTagsToFirestore(userId: String, selectedTags: List<ProfileTags>) {
+        val tagsCollection = firestore.collection("userTags")
 
-        Firebase.auth.currentUser?.uid?.let { userId ->
-            // Add the user document to the "users" collection
-            usersCollection.document(userId).set(userData)
+        // Save each selected tag to Firestore
+        selectedTags.forEach { tag ->
+            val userTag = UserTags(userId, tag.tagId, tag.tagType, isSelected = tag.isSelected)
+            tagsCollection.add(userTag).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Tag saved successfully
+                } else {
+                    // Failed to save tag
+                }
+            }
         }
-
-        // You can also add additional logic here if needed
     }
 
     // This extension function is used to convert UserProfile to a map
@@ -146,8 +146,5 @@ class RegistrationUserInterestsFragment : Fragment() {
             "occupation" to occupation
             // Add other profile fields as needed
         )
-    }
-    override fun onDestroyView() {
-        super.onDestroyView()
     }
 }

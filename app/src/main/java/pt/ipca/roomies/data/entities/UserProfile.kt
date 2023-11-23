@@ -1,7 +1,7 @@
-
+import pt.ipca.roomies.data.entities.SelectedTag
 
 data class UserProfile(
-    val userProfileId: String = 0,
+    val userProfileId: String,
     val userId: String, // Foreign key to link with User entity
     val profilePictureUrl: String,
     val location: String,
@@ -9,6 +9,8 @@ data class UserProfile(
     val pronouns: String,
     val gender: String,
     val occupation: String,
+    val selectedTags: List<SelectedTag>
+
     // Add other fields as needed
 )
 

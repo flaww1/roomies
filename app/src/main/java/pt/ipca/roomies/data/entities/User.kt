@@ -1,5 +1,5 @@
 data class User(
-    val userId: Int,
+    var userId: String,
     val firstName: String,
     val lastName: String,
     val email: String,

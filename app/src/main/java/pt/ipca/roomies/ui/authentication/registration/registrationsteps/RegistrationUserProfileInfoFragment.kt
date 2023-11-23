@@ -1,6 +1,5 @@
 package pt.ipca.roomies.ui.authentication.registration.registrationsteps
 
-import UserProfile
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -15,13 +14,15 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import pt.ipca.roomies.R
 import pt.ipca.roomies.databinding.FragmentRegistrationUserProfileInfoBinding
-import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
+import Occupation
+import Pronouns
+import Gender
+import UserProfile
+import RegistrationViewModel
 
 class RegistrationUserProfileInfoFragment : Fragment() {
 
     private lateinit var viewModel: RegistrationViewModel
-
-
     private var _binding: FragmentRegistrationUserProfileInfoBinding? = null
     private val binding get() = _binding!!
 
@@ -37,48 +38,45 @@ class RegistrationUserProfileInfoFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-
     ): View {
         _binding = FragmentRegistrationUserProfileInfoBinding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(requireActivity()).get(RegistrationViewModel::class.java)
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fun <T : Enum<T>> setupSpinner(spinner: Spinner, values: Array<T>) {
-            val enumStringValues = values.map { it.name }
-            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, enumStringValues)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner.adapter = adapter
-        }
-        // Initialize spinners with enum values
-        setupSpinner(binding.spinnerGender, Gender.values())
-        setupSpinner(binding.spinnerPronouns, Pronouns.values())
-        setupSpinner(binding.spinnerOccupation, Occupation.values())
 
-        // Implement UI interactions
+        setupSpinners()
+
         binding.buttonNext.setOnClickListener {
-            // Navigate to the next fragment (you might want to validate input here)
-            val firstName = binding.editTextFirstName.text.toString()
-            val lastName = binding.editTextLastName.text.toString()
-            val birthDate = binding.editTextBirthDate.text.toString()
-            val location = binding.editTextLocation.text.toString()
-            val gender = binding.spinnerGender.selectedItem.toString()
-            val pronouns = binding.spinnerPronouns.selectedItem.toString()
-            val occupation = binding.spinnerOccupation.selectedItem.toString()
-            val userProfile = UserProfile(firstName, lastName, birthDate, location, gender, pronouns, occupation)
-            viewModel.updateUserProfile(userProfile)
-            findNavController().navigate(R.id.action_registrationUserProfileInfoFragment_to_userInterestsFragment)
+            if (validateInputs()) {
+                navigateToUserInterestsFragment()
+            }
         }
 
         binding.buttonBack.setOnClickListener {
-            // Navigate back
             findNavController().popBackStack()
         }
 
-        // Enable/disable Next button based on EditText inputs and spinners
+        setupTextChangeListeners()
+        setupSpinnerListeners()
+    }
+
+    private fun setupSpinners() {
+        setupSpinner(binding.spinnerGender, Gender.values())
+        setupSpinner(binding.spinnerPronouns, Pronouns.values())
+        setupSpinner(binding.spinnerOccupation, Occupation.values())
+    }
+
+    private fun setupSpinner(spinner: Spinner, values: Array<out Enum<*>>) {
+        val stringValues = values.map { it.name }
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, stringValues)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+    }
+
+    private fun setupTextChangeListeners() {
         for (field in requiredFields) {
             field.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -90,22 +88,16 @@ class RegistrationUserProfileInfoFragment : Fragment() {
                 override fun afterTextChanged(s: Editable?) {}
             })
         }
+    }
 
+    private fun setupSpinnerListeners() {
         binding.spinnerGender.setOnItemSelectedListener { updateNextButtonState() }
         binding.spinnerPronouns.setOnItemSelectedListener { updateNextButtonState() }
         binding.spinnerOccupation.setOnItemSelectedListener { updateNextButtonState() }
-
     }
 
-
-    private fun setupSpinner(spinner: Spinner, values: Array<String>) {
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, values)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = adapter
-    }
-
-    private fun updateNextButtonState() {
-        binding.buttonNext.isEnabled = areFieldsFilled(requiredFields) &&
+    private fun validateInputs(): Boolean {
+        return areFieldsFilled(requiredFields) &&
                 binding.spinnerGender.selectedItemPosition != Spinner.INVALID_POSITION &&
                 binding.spinnerPronouns.selectedItemPosition != Spinner.INVALID_POSITION &&
                 binding.spinnerOccupation.selectedItemPosition != Spinner.INVALID_POSITION
@@ -113,6 +105,33 @@ class RegistrationUserProfileInfoFragment : Fragment() {
 
     private fun areFieldsFilled(fields: List<EditText>): Boolean {
         return fields.all { it.text.isNotBlank() }
+    }
+
+    private fun updateNextButtonState() {
+        binding.buttonNext.isEnabled = validateInputs()
+    }
+
+    private fun navigateToUserInterestsFragment() {
+        val firstName = binding.editTextFirstName.text.toString()
+        val lastName = binding.editTextLastName.text.toString()
+        val birthDate = binding.editTextBirthDate.text.toString()
+        val location = binding.editTextLocation.text.toString()
+        val gender = binding.spinnerGender.selectedItem.toString()
+        val pronouns = binding.spinnerPronouns.selectedItem.toString()
+        val occupation = binding.spinnerOccupation.selectedItem.toString()
+        // For now, provide placeholder values for userId and profilePictureUrl
+        val userProfile = UserProfile(
+            userProfileId = "placeholder_id",
+            userId = "placeholder_user_id",
+            profilePictureUrl = "placeholder_url",
+            location = location,
+            bio = "", // Add bio field if needed
+            pronouns = pronouns,
+            gender = gender,
+            occupation = occupation
+        )
+        viewModel.updateUserProfile(userProfile)
+        findNavController().navigate(R.id.action_registrationUserProfileInfoFragment_to_userInterestsFragment)
     }
 
     override fun onDestroyView() {
