@@ -1,6 +1,7 @@
 // RoleSelectionFragment.kt
 package pt.ipca.roomies.ui.authentication.registration.registrationsteps
 
+import RegistrationViewModel
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import pt.ipca.roomies.R
 import pt.ipca.roomies.databinding.FragmentRegistrationRoleSelectionBinding
-import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
+
 
 
 class RegistrationRoleSelectionFragment : Fragment() {

@@ -19,6 +19,8 @@ import Pronouns
 import Gender
 import UserProfile
 import RegistrationViewModel
+import android.widget.AdapterView
+import com.jaredrummler.materialspinner.MaterialSpinner
 
 class RegistrationUserProfileInfoFragment : Fragment() {
 
@@ -30,7 +32,7 @@ class RegistrationUserProfileInfoFragment : Fragment() {
         listOf(
             binding.editTextFirstName,
             binding.editTextLastName,
-            binding.editTextBirthDate,
+            binding.editTextBirthdate,
             binding.editTextLocation
         )
     }
@@ -69,13 +71,54 @@ class RegistrationUserProfileInfoFragment : Fragment() {
         setupSpinner(binding.spinnerOccupation, Occupation.values())
     }
 
-    private fun setupSpinner(spinner: Spinner, values: Array<out Enum<*>>) {
+    private fun setupSpinner(spinner: MaterialSpinner, values: Array<out Enum<*>>) {
         val stringValues = values.map { it.name }
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, stringValues)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = adapter
+        spinner.setItems(stringValues)
     }
 
+    private fun setupSpinnerListeners() {
+        binding.spinnerGender.setOnItemSelectedListener(object : MaterialSpinner.OnItemSelectedListener<String> {
+            override fun onItemSelected(view: MaterialSpinner?, position: Int, id: Long, item: String?) {
+                updateNextButtonState()
+            }
+
+            fun onNothingSelected(parent: MaterialSpinner?) {
+                // Do nothing or handle the case when nothing is selected
+            }
+        })
+
+        binding.spinnerPronouns.setOnItemSelectedListener(object : MaterialSpinner.OnItemSelectedListener<String> {
+            override fun onItemSelected(view: MaterialSpinner?, position: Int, id: Long, item: String?) {
+                updateNextButtonState()
+            }
+
+            fun onNothingSelected(parent: MaterialSpinner?) {
+                // Do nothing or handle the case when nothing is selected
+            }
+        })
+
+        binding.spinnerOccupation.setOnItemSelectedListener(object : MaterialSpinner.OnItemSelectedListener<String> {
+            override fun onItemSelected(view: MaterialSpinner?, position: Int, id: Long, item: String?) {
+                updateNextButtonState()
+            }
+
+            fun onNothingSelected(parent: MaterialSpinner?) {
+                // Do nothing or handle the case when nothing is selected
+            }
+        })
+    }
+
+    private fun Spinner.setOnItemSelectedListener(listener: (position: Int) -> Unit) {
+        onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                listener.invoke(position)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Handle nothing selected if needed
+            }
+        }
+    }
     private fun setupTextChangeListeners() {
         for (field in requiredFields) {
             field.addTextChangedListener(object : TextWatcher {
@@ -90,18 +133,13 @@ class RegistrationUserProfileInfoFragment : Fragment() {
         }
     }
 
-    private fun setupSpinnerListeners() {
-        binding.spinnerGender.setOnItemSelectedListener { updateNextButtonState() }
-        binding.spinnerPronouns.setOnItemSelectedListener { updateNextButtonState() }
-        binding.spinnerOccupation.setOnItemSelectedListener { updateNextButtonState() }
-    }
-
     private fun validateInputs(): Boolean {
         return areFieldsFilled(requiredFields) &&
-                binding.spinnerGender.selectedItemPosition != Spinner.INVALID_POSITION &&
-                binding.spinnerPronouns.selectedItemPosition != Spinner.INVALID_POSITION &&
-                binding.spinnerOccupation.selectedItemPosition != Spinner.INVALID_POSITION
+                binding.spinnerGender.selectedIndex != -1 &&
+                binding.spinnerPronouns.selectedIndex != -1 &&
+                binding.spinnerOccupation.selectedIndex != -1
     }
+
 
     private fun areFieldsFilled(fields: List<EditText>): Boolean {
         return fields.all { it.text.isNotBlank() }
@@ -114,11 +152,12 @@ class RegistrationUserProfileInfoFragment : Fragment() {
     private fun navigateToUserInterestsFragment() {
         val firstName = binding.editTextFirstName.text.toString()
         val lastName = binding.editTextLastName.text.toString()
-        val birthDate = binding.editTextBirthDate.text.toString()
+        val birthDate = binding.editTextBirthdate.text.toString()
         val location = binding.editTextLocation.text.toString()
-        val gender = binding.spinnerGender.selectedItem.toString()
-        val pronouns = binding.spinnerPronouns.selectedItem.toString()
-        val occupation = binding.spinnerOccupation.selectedItem.toString()
+        val gender = binding.spinnerGender.getItems<String>()[binding.spinnerGender.selectedIndex]
+        val pronouns = binding.spinnerPronouns.getItems<String>()[binding.spinnerPronouns.selectedIndex]
+        val occupation = binding.spinnerOccupation.getItems<String>()[binding.spinnerOccupation.selectedIndex]
+
         // For now, provide placeholder values for userId and profilePictureUrl
         val userProfile = UserProfile(
             userProfileId = "placeholder_id",
@@ -128,7 +167,8 @@ class RegistrationUserProfileInfoFragment : Fragment() {
             bio = "", // Add bio field if needed
             pronouns = pronouns,
             gender = gender,
-            occupation = occupation
+            occupation = occupation,
+            selectedTags = emptyList()
         )
         viewModel.updateUserProfile(userProfile)
         findNavController().navigate(R.id.action_registrationUserProfileInfoFragment_to_userInterestsFragment)
@@ -140,6 +180,5 @@ class RegistrationUserProfileInfoFragment : Fragment() {
     }
 }
 
-private fun Spinner.setOnItemSelectedListener(function: () -> Unit) {
 
-}
+

@@ -44,7 +44,7 @@ class RegistrationFragment : Fragment() {
     }
 
     private fun navigateToRoleSelectionFragment() {
-        findNavController().navigate(R.id.action_registrationFragment_to_roleSelectionFragment)
+        findNavController().navigate(R.id.action_registrationFragment_to_registrationRoleSelectionFragment)
     }
 
     private fun validateInputs(

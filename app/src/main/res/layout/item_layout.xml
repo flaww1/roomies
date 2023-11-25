@@ -5,11 +5,13 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/textItemName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Item Name"/>
+
 
     <!-- Add other views for item details if needed -->
 

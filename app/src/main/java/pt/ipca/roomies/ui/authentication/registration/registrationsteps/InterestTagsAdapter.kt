@@ -11,29 +11,7 @@ class InterestTagsAdapter(
     private val userId: String
 ) : RecyclerView.Adapter<InterestTagsAdapter.ViewHolder>() {
 
-    private val selectedTags = mutableListOf<String>()
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemInterestBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(binding)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val tag = interestTags[position]
-        holder.bind(tag)
-
-        holder.itemView.setOnClickListener {
-            holder.toggleSelection()
-            onTagClickListener.invoke(tag)
-        }
-    }
-
-    override fun getItemCount(): Int = interestTags.size
-
-    fun updateData(newInterestTags: List<ProfileTags>) {
-        this.interestTags = newInterestTags
-        notifyDataSetChanged()
-    }
+    private val selectedTags = mutableSetOf<String>()
 
     inner class ViewHolder(private val binding: ItemInterestBinding) : RecyclerView.ViewHolder(binding.root) {
 
@@ -44,18 +22,47 @@ class InterestTagsAdapter(
 
         fun toggleSelection() {
             val selectedTag = interestTags[adapterPosition]
-            if (selectedTags.contains(selectedTag.tagId)) {
-                selectedTags.remove(selectedTag.tagId)
+            val tagId = selectedTag.tagId
+
+            if (selectedTags.contains(tagId)) {
+                selectedTags.remove(tagId)
             } else {
-                selectedTags.add(selectedTag.tagId)
+                selectedTags.add(tagId)
             }
+
             notifyItemChanged(adapterPosition)
 
             // Update the UserTags table in Firestore
-            val tagId = selectedTag.tagId
             val tagType = selectedTag.tagType
-            val isSelected = selectedTags.contains(selectedTag.tagId)
+            val isSelected = selectedTags.contains(tagId)
             profileTagsRepository.associateTagWithUser(userId, tagId, tagType, isSelected)
         }
     }
-}
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val binding = ItemInterestBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
+    }
+
+    override fun getItemCount(): Int {
+        return interestTags.size
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val tag = interestTags[position]
+        holder.bind(tag)
+        holder.itemView.setOnClickListener {
+            holder.toggleSelection()
+            onTagClickListener.invoke(tag)
+        }
+    }
+
+    fun updateData(availableInterestTags: List<ProfileTags>) {
+        interestTags = availableInterestTags
+        notifyDataSetChanged()
+
+
+    }
+
+    }
+

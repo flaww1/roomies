@@ -16,12 +16,11 @@
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/landlordCheckbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"/>
-
 
         <TextView
             android:layout_width="wrap_content"
@@ -39,12 +38,11 @@
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/userCheckbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"/>
-
 
         <TextView
             android:layout_width="wrap_content"
@@ -56,14 +54,14 @@
 
     <!-- Add more fields as needed -->
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/backButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Back"
         android:layout_marginTop="16dp"/>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/nextButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

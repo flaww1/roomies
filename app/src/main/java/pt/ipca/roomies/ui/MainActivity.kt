@@ -1,48 +1,22 @@
-// MainActivity.kt
-package pt.ipca.roomies
+package pt.ipca.roomies.ui
 
 
-import LoginFragment
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
-import pt.ipca.roomies.databinding.ActivityMainBinding
-import pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationUserProfileInfoFragment
-
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
+import pt.ipca.roomies.R
+import pt.ipca.roomies.ui.authentication.UserViewModel
 
 class MainActivity : AppCompatActivity() {
-
-    private val viewModel: MainViewModel by viewModels()
-    private lateinit var binding: ActivityMainBinding
+    private lateinit var userViewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        Firebase.database.setPersistenceEnabled(true)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        // Set up the initial page with welcome message and buttons
-        viewModel.welcomeMessage.observe(this, { message ->
-            binding.tvWelcomeMessage.text = message
-        })
-
-        binding.btnRegister.setOnClickListener {
-            // Navigate to User Profile Info Fragment when Register button is clicked
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.container, RegistrationUserProfileInfoFragment())
-                .addToBackStack(null)  // Enable back navigation
-                .commit()
-        }
-
-        binding.btnLogin.setOnClickListener {
-            // Navigate to Login Fragment when Login button is clicked
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.container, LoginFragment())
-                .addToBackStack(null)  // Enable back navigation
-                .commit()
-        }
+        userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
     }
 }

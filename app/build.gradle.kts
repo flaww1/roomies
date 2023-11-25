@@ -65,6 +65,13 @@ dependencies {
     implementation ("com.google.firebase:firebase-storage:20.3.0")
     implementation ("com.google.firebase:firebase-messaging:23.3.1")
     implementation ("com.google.firebase:firebase-config:21.6.0")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation ("com.google.android.material:material:1.10.0")
+    implementation ("com.jaredrummler:material-spinner:1.3.1")
+
+
+
 
 
 

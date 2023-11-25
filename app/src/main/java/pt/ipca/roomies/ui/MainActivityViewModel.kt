@@ -1,5 +1,5 @@
 // MainViewModel.kt
-package pt.ipca.roomies
+package pt.ipca.roomies.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.LiveData

@@ -1,4 +1,3 @@
-<!-- res/layout/item_interest_tag.xml -->
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
@@ -13,14 +12,14 @@
         android:orientation="horizontal"
         android:padding="8dp">
 
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/checkboxInterest"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Interest"/>
 
         <!-- Add other views for interest details if needed -->
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textInterestTag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

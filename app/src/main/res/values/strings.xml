@@ -3,6 +3,10 @@
     <string name="gender_prompt">Select Gender</string>
     <string name="pronouns_prompt">Select Pronouns</string>
     <string name="occupation_prompt">Select Occupation</string>
+    <string name="don_t_have_an_account_register_here">Don\'t have an account? Register here.</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
 
 
 </resources>
