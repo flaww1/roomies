@@ -1,5 +1,10 @@
 package pt.ipca.roomies.ui.main
 
+import android.os.Bundle
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
+import pt.ipca.roomies.R
+
 class LandlordFragment: Fragment{
 
     fun onViewCreated(view: View, savedInstanceState: Bundle?) {

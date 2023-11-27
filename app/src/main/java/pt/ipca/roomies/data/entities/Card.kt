@@ -6,3 +6,8 @@ data class CardModel(
     val description: String,
     val imageUrl: String
 )
+
+data class RoomCardModel(
+    val  roomId : String,
+    val roomName: String
+)
