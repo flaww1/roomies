@@ -19,11 +19,11 @@ class MainFragment : Fragment() {
 
 
         view.findViewById<Button>(R.id.btnRegister).setOnClickListener {
-            findNavController().navigate(R.id.registrationFragment)
+            findNavController().navigate(R.id.action_mainFragment_to_registrationFragment)
         }
 
         view.findViewById<Button>(R.id.btnLogin).setOnClickListener {
-            findNavController().navigate(R.id.loginFragment)
+            findNavController().navigate(R.id.action_mainFragment_to_loginFragment)
         }
 
         return view

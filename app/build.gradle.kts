@@ -6,6 +6,7 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+
 android {
     namespace = "pt.ipca.roomies"
     compileSdk = 34
@@ -21,6 +22,8 @@ android {
     }
     buildFeatures.dataBinding = true
     buildFeatures.viewBinding = true
+
+    
 
 
     buildTypes {
@@ -38,6 +41,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+
+    sourceSets {
+
     }
 }
 
@@ -69,7 +76,7 @@ dependencies {
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation ("com.google.android.material:material:1.10.0")
     implementation ("com.jaredrummler:material-spinner:1.3.1")
-    implementation ("com.yuyakaido.android:card-stack-view:2.3.4")
+    implementation("com.github.yuyakaido:cardstackview:2.3.4")
     implementation ("it.xabaras.android:recyclerview-swipedecorator:1.4")
 
 

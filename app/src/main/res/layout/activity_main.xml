@@ -1,21 +1,25 @@
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- activity_main.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <data>
-        <!-- Add any data binding variables if needed -->
-    </data>
+    <!-- Other views in your activity -->
 
-    <RelativeLayout
+    <!-- Container for fragments -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.MainActivity">
+        android:layout_marginTop="16dp" />
 
-        <!-- Other views in your activity -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/nav_graph" />
 
-
-        <!-- You can adjust the positioning based on your layout -->
-        />
-
-    </RelativeLayout>
-</layout>
+</RelativeLayout>
