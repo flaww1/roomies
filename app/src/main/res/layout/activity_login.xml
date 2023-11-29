@@ -1,23 +1,26 @@
-<!-- res/layout/activity_rlogin.xml -->
-
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- activity_login.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <data>
-        <!-- Add any data binding variables if needed -->
-    </data>
+    <!-- Other views in your activity -->
 
-    <RelativeLayout
+    <FrameLayout
+        android:id="@+id/login_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.authentication.login.LoginActivity">
+        android:layout_marginTop="16dp" />
 
-        <!-- Other views in your activity -->
+    <!-- FragmentContainerView for navigation -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
 
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/nav_graph" />
 
-        <!-- You can adjust the positioning based on your layout -->
-        />
-
-    </RelativeLayout>
-</layout>
+</RelativeLayout>

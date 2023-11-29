@@ -20,7 +20,6 @@ class RegistrationRoleSelectionFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var viewModel: RegistrationViewModel
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -34,34 +33,23 @@ class RegistrationRoleSelectionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Implement UI interactions
         binding.nextButton.setOnClickListener {
-            val role = if (binding.userCheckbox.isChecked) "User" else "Landlord"
+            val role = if (binding.landlordRadioButton.isChecked) "Landlord" else "User"
             viewModel.updateUserRole(role)
             navigateToUserProfileInfo()
         }
 
-        // Implement back button functionality
         binding.backButton.setOnClickListener {
-            // Navigate back
             findNavController().popBackStack()
         }
 
-
-        // Enable/disable Next button based on checkbox selection
-        binding.userCheckbox.setOnCheckedChangeListener { _, isChecked ->
-            binding.userCheckbox.isEnabled = !isChecked
-            binding.nextButton.isEnabled = isChecked || binding.userCheckbox.isChecked
-        }
-
-        binding.landlordCheckbox.setOnCheckedChangeListener { _, isChecked ->
-            binding.landlordCheckbox.isEnabled = !isChecked
-            binding.nextButton.isEnabled = isChecked || binding.landlordCheckbox.isChecked
+        // Enable/disable Next button based on RadioButton selection
+        binding.roleSelectionGroup.setOnCheckedChangeListener { _, _ ->
+            binding.nextButton.isEnabled = binding.landlordRadioButton.isChecked || binding.userRadioButton.isChecked
         }
     }
 
     private fun navigateToUserProfileInfo() {
-        // Use NavController to navigate to the next fragment
         findNavController().navigate(R.id.action_roleSelectionFragment_to_registrationUserProfileInfoFragment)
     }
 
@@ -70,3 +58,4 @@ class RegistrationRoleSelectionFragment : Fragment() {
         _binding = null
     }
 }
+

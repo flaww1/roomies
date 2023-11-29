@@ -4,7 +4,7 @@ data class User(
     val lastName: String,
     val email: String,
     val password: String,
-    val registrationDate: String,
+    var registrationDate: String,
     val userRating: Int,
     val userRole: Roles,
 )

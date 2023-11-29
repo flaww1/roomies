@@ -1,30 +1,40 @@
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import pt.ipca.roomies.data.entities.ProfileTags
 
 // RegistrationViewModel.kt
 class RegistrationViewModel : ViewModel() {
-    // get current user
 
-    val _errorMessage = MutableLiveData<String>()
-    val errorMessage: LiveData<String> get() = _errorMessage
+    val _errorMessage = MutableLiveData<String?>()
+    val errorMessage: LiveData<String?> get() = _errorMessage
 
-    val _user = MutableLiveData<User>()
-    val user: LiveData<User> get() = _user
+    val _user = MutableLiveData<User?>()
+    val user: MutableLiveData<User?> get() = _user
 
-    private val _userProfile = MutableLiveData<UserProfile>()
-    val userProfile: LiveData<UserProfile> get() = _userProfile
+    fun setUser(user: User) {
+        _user.value = user
+    }
 
-    private val _profileTags = MutableLiveData<List<ProfileTags>>()
-    val profileTags: LiveData<List<ProfileTags>> get() = _profileTags
+    private val _userProfile = MutableLiveData<UserProfile?>()
+    val userProfile: LiveData<UserProfile?> get() = _userProfile
+
+    private val _profileTags = MutableLiveData<List<ProfileTags>?>()
+    val profileTags: LiveData<List<ProfileTags>?> get() = _profileTags
+
+    private val _selectedImageUri = MutableLiveData<Uri?>()
+    val selectedImageUri: LiveData<Uri?> get() = _selectedImageUri
 
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
 
-    // Additional methods for validation, saving data, etc.
+    fun updateSelectedImageUri(uri: Uri?) {
+        _selectedImageUri.value = uri
+    }
 
     fun updateUser(user: User) {
         _user.value = user
@@ -44,39 +54,26 @@ class RegistrationViewModel : ViewModel() {
 
     fun updateUserRole(role: String) {
         // Implement update user role logic
+
     }
 
-    fun saveUserDataToFirestore(user: User, userProfile: UserProfile) {
-        auth.createUserWithEmailAndPassword(user.email, user.password)
-            .addOnCompleteListener { registrationTask ->
-                if (registrationTask.isSuccessful) {
-                    val userId = registrationTask.result?.user?.uid ?: return@addOnCompleteListener
 
-                    user.userId = userId
-                    saveUserToFirestore(user, userId)
-                    saveUserProfileToFirestore(userProfile, userId)
-                } else {
-                    _errorMessage.value = registrationTask.exception?.message
-                }
-            }
+    private fun updateUI(currentUser: FirebaseUser?) {
+        if (currentUser != null) {
+            // User is successfully registered, perform actions like navigating to the next screen
+        } else {
+            // Handle the case where currentUser is null (registration failed)
+            _errorMessage.value = "User registration failed"
+        }
     }
 
-    private fun saveUserToFirestore(user: User, userId: String) {
-        firestore.collection("users").document(userId).set(user)
-            .addOnCompleteListener { userTask ->
-                if (!userTask.isSuccessful) {
-                    _errorMessage.value = "Failed to save user information"
-                }
-            }
-    }
 
-    private fun saveUserProfileToFirestore(userProfile: UserProfile, userId: String) {
-        firestore.collection("userProfiles").document(userId).set(userProfile)
-            .addOnCompleteListener { profileTask ->
-                if (!profileTask.isSuccessful) {
-                    _errorMessage.value = "Failed to save user profile information"
-                }
-            }
+    fun reset() {
+        _user.value = null
+        _userProfile.value = null
+        _profileTags.value = null
+        _errorMessage.value = null
+        _selectedImageUri.value = null
     }
 
 

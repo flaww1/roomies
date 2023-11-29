@@ -1,6 +1,7 @@
 package pt.ipca.roomies.ui
 
 
+import RegistrationViewModel
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -20,13 +21,26 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         FirebaseApp.initializeApp(this)
 
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
+
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHostFragment.navController
 
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, MainFragment())
-                .commit()
+            // Use the navigation controller to navigate to the start destination
+            navController.navigate(R.id.mainFragment)
         }
+    }
 
-        userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment)
+        return navController.navigateUp() || super.onSupportNavigateUp()
     }
 }
+
+
+
+
+
+
+

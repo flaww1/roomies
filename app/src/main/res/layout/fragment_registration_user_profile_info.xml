@@ -20,30 +20,6 @@
             android:orientation="vertical">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayoutFirstName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="First Name">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editTextFirstName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-               <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/textInputLayoutLastName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Last Name">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/editTextLastName"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputLayoutBirthdate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -52,7 +28,11 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextBirthdate"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:clickable="true"
+                    android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -61,11 +41,15 @@
                 android:layout_height="wrap_content"
                 android:hint="Location">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editTextLocation"
+                <AutoCompleteTextView
+                    style="@style/Widget.MaterialComponents.AutoCompleteTextView.FilledBox"
+                    android:id="@+id/autoCompleteTextViewLocation"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-               </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:hint="Location" />
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <com.jaredrummler.materialspinner.MaterialSpinner
                 android:id="@+id/spinnerGender"
@@ -73,14 +57,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:prompt="@string/gender_prompt"/>
-
-            <com.jaredrummler.materialspinner.MaterialSpinner
-
-                android:id="@+id/spinnerPronouns"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:prompt="@string/pronouns_prompt"/>
 
             <com.jaredrummler.materialspinner.MaterialSpinner
 
@@ -106,6 +82,25 @@
                 android:layout_marginTop="16dp"
                 android:text="Next"
                 android:enabled="false"/>
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonPickProfilePicture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pick Profile Picture"
+                android:layout_marginTop="16dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+            <ImageView
+                android:id="@+id/imageViewProfilePicture"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:scaleType="centerCrop"
+                android:layout_marginTop="16dp"
+                android:contentDescription="Profile picture preview." />
         </LinearLayout>
+
     </ScrollView>
 </LinearLayout>

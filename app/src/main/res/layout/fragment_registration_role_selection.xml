@@ -8,49 +8,28 @@
     android:padding="16dp"
     tools:context=".ui.authentication.registration.registrationsteps.RegistrationRoleSelectionFragment">
 
-    <!-- Landlord Selection -->
-    <LinearLayout
-        android:id="@+id/landlordPanel"
+    <RadioGroup
+        android:id="@+id/roleSelectionGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:orientation="vertical">
 
-        <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/landlordCheckbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"/>
-
-        <TextView
+        <RadioButton
+            android:id="@+id/landlordRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="I am a landlord"
             android:textSize="18sp"
             android:layout_marginStart="16dp"/>
-    </LinearLayout>
 
-    <!-- User Selection -->
-    <LinearLayout
-        android:id="@+id/userPanel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/userCheckbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"/>
-
-        <TextView
+        <RadioButton
+            android:id="@+id/userRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="I am a user"
             android:textSize="18sp"
             android:layout_marginStart="16dp"/>
-    </LinearLayout>
+    </RadioGroup>
 
     <!-- Add more fields as needed -->
 
