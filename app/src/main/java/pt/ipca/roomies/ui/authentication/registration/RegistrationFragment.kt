@@ -1,7 +1,5 @@
 package pt.ipca.roomies.ui.authentication.registration
 
-import RegistrationViewModel
-import User
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,7 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import pt.ipca.roomies.R
 import pt.ipca.roomies.databinding.FragmentRegistrationBinding
-import pt.ipca.roomies.ui.authentication.UserViewModel
+
 
 class RegistrationFragment : Fragment() {
     private lateinit var userId: String // Declare userId here
@@ -47,7 +45,7 @@ class RegistrationFragment : Fragment() {
             val confirmPassword = binding.editTextConfirmPassword.text.toString()
 
             if (validateInputs(firstName, lastName, email, password, confirmPassword)) {
-                // Call the function in RegistrationViewModel to set up initial user data
+                // Call the function in pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel to set up initial user data
                 viewModel.register(firstName, lastName, email, password)
 
                 // Navigate to the next step in the registration process

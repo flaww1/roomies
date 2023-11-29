@@ -1,3 +1,4 @@
+<!-- fragment_registration_user_interests.xml -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,6 +9,27 @@
     android:padding="16dp"
     tools:context=".ui.authentication.registration.registrationsteps.RegistrationUserInterestsFragment">
 
+    <!-- Section for Language tags -->
+    <TextView
+        android:id="@+id/tvSelectedLanguages"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Selected Languages"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewLanguages"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="2"
+        tools:listitem="@layout/item_interest" />
+
+    <!-- Section for Interest tags -->
     <TextView
         android:id="@+id/tvSelectedInterests"
         android:layout_width="match_parent"
@@ -17,9 +39,28 @@
         android:textStyle="bold"
         android:layout_marginBottom="16dp"/>
 
-    <!-- Replace RecyclerView with MaterialRecyclerView if it exists -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewInterests"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="2"
+        tools:listitem="@layout/item_interest" />
+
+    <!-- Section for Personality tags -->
+    <TextView
+        android:id="@+id/tvSelectedPersonality"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Selected Personality"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewPersonality"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"

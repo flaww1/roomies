@@ -1,17 +1,12 @@
 package pt.ipca.roomies.data.repositories
 
-import RegistrationViewModel
+import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 import User
 import UserProfile
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
-import pt.ipca.roomies.data.entities.ProfileTags
-import pt.ipca.roomies.data.entities.UserTags
 import java.util.Calendar
 
 

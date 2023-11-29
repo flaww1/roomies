@@ -59,7 +59,6 @@ class ProfileTagsRepository {
             .addOnFailureListener { e ->
                 onFailure.invoke(e)
             }
-
     }
 
 }

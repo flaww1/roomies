@@ -1,11 +1,8 @@
 package pt.ipca.roomies.ui.authentication.registration.registrationsteps
 
-import InterestTagsAdapter
 import ProfileTagsRepository
-import RegistrationViewModel
+import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 import User
-import UserProfile
-import android.annotation.SuppressLint
 import android.net.Uri
 import pt.ipca.roomies.databinding.FragmentRegistrationUserInterestsBinding
 import android.os.Bundle
@@ -14,7 +11,6 @@ import android.view.ViewGroup
 import android.view.View
 import android.view.LayoutInflater
 import android.widget.Toast
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -25,10 +21,9 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.launch
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.data.entities.TagType
 import pt.ipca.roomies.data.entities.UserTags
-import java.text.SimpleDateFormat
-import java.util.Date
 
 class RegistrationUserInterestsFragment : Fragment() {
 
@@ -37,6 +32,7 @@ class RegistrationUserInterestsFragment : Fragment() {
     private lateinit var viewModelRegistration: RegistrationViewModel
     private lateinit var adapter: InterestTagsAdapter
     private lateinit var profileTagsRepository: ProfileTagsRepository
+    private lateinit var selectedTagsByType: MutableMap<TagType, MutableSet<ProfileTags>>
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private var userId: String? = null // Use a nullable type
@@ -51,12 +47,24 @@ class RegistrationUserInterestsFragment : Fragment() {
             ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
         profileTagsRepository = ProfileTagsRepository()
 
+        // Initialize selectedTagsByType before using it
+        selectedTagsByType = mutableMapOf()
         // Initialize Adapter here
-        adapter = InterestTagsAdapter(listOf(), { tag ->
+        val onTagClickListener: (ProfileTags) -> Unit = { tag ->
             val currentTags = viewModel.fetchSelectedInterestTags().value ?: emptyList()
             val isSelected = tag in currentTags
             viewModel.updateSelectedInterestTags(tag, isSelected)
-        }, profileTagsRepository, userId ?: "")
+            adapter.toggleSelection(tag)
+        }
+
+        // Initialize Adapter here
+        adapter = InterestTagsAdapter(
+            listOf(),
+            onTagClickListener, // Pass onTagClickListener here
+            profileTagsRepository,
+            userId ?: "",
+            selectedTagsByType // Pass the selectedTagsByType map to the adapter
+        )
 
         binding.recyclerViewInterests.adapter = adapter
 
@@ -83,6 +91,24 @@ class RegistrationUserInterestsFragment : Fragment() {
             }
         }
 
+        // Ensure adapter is initialized
+        if (::adapter.isInitialized) {
+            // Set the layout manager
+            binding.recyclerViewInterests.layoutManager = LinearLayoutManager(requireContext())
+
+            // Fetch available interest tags and observe the LiveData
+            viewModel.fetchAvailableInterestTags()
+            viewModel.getAvailableInterestTags().observe(viewLifecycleOwner) { availableInterestTags ->
+                Log.d("InterestsFragment", "Available Interest Tags Changed: $availableInterestTags")
+
+                // Populate the adapter with data
+                adapter.updateData(availableInterestTags)
+            }
+        } else {
+            // Log an error or handle the case where the adapter is not initialized
+            Log.e("InterestsFragment", "Adapter is not initialized")
+        }
+
         // Rest of your onViewCreated method..
 
         if (::adapter.isInitialized) {
@@ -91,6 +117,7 @@ class RegistrationUserInterestsFragment : Fragment() {
             // Fetch available interest tags and observe the LiveData
             viewModel.fetchAvailableInterestTags()
             viewModel.getAvailableInterestTags().observe(viewLifecycleOwner) { availableInterestTags ->
+                Log.d("InterestsFragment", "Available Interest Tags Changed: $availableInterestTags")
                 // Populate the adapter with data
                 adapter.updateData(availableInterestTags)
             }
@@ -111,7 +138,7 @@ class RegistrationUserInterestsFragment : Fragment() {
         }
         // Implement UI interactions
         binding.nextButton.setOnClickListener {
-            // Fetch user data from RegistrationViewModel
+            // Fetch user data from pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
             val user = viewModelRegistration.user.value
 
             // Fetch selected interest tags from ViewModel
@@ -120,7 +147,7 @@ class RegistrationUserInterestsFragment : Fragment() {
             if (user != null && !selectedInterests.isNullOrEmpty()) {
                 // Update isSelected based on the selected tags
                 val updatedTags = selectedInterests.map { tag ->
-                    val tagType = TagType.INTEREST // replace INTEREST with the actual tagType
+                    val tagType = TagType.Interest // replace INTEREST with the actual tagType
 
                     // Create a UserTags object with the necessary information
                     UserTags(userTagId = null, userId = user.userId, tagId = tag.tagId, tagType = tagType, isSelected = true)
@@ -174,7 +201,7 @@ class RegistrationUserInterestsFragment : Fragment() {
         // Upload profile picture to Firebase Storage
         viewModelRegistration.selectedImageUri.value?.let { uploadProfilePicture(user.userId, it) }
 
-        // Call registerUser from RegistrationViewModel to complete the registration
+        // Call registerUser from pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel to complete the registration
         val registrationResult = viewModelRegistration.registerUser()
 
         // Check the registration result
@@ -186,12 +213,6 @@ class RegistrationUserInterestsFragment : Fragment() {
             // You can use viewModelRegistration.errorMessage.value to get the error message
             Toast.makeText(requireContext(), viewModelRegistration.errorMessage.value, Toast.LENGTH_SHORT).show()
         }
-    }
-
-// ...
-    private fun InterestTagsAdapter.updateUserId(userId: String) {
-        this.userId = userId
-        notifyDataSetChanged()
     }
 
     private fun updateProfilePictureUrl(userId: String, profilePictureUrl: String) {
@@ -211,7 +232,7 @@ class RegistrationUserInterestsFragment : Fragment() {
         val storageReference = storage.reference
         return storageReference.child("profile_pictures/${System.currentTimeMillis()}_${uri.lastPathSegment}")
     }
-    private suspend fun uploadProfilePicture(userId: String, imageUri: Uri) {
+    private fun uploadProfilePicture(userId: String, imageUri: Uri) {
         // Your image upload logic here
         // Use Firebase Storage or any other method to upload the image
 
@@ -228,7 +249,7 @@ class RegistrationUserInterestsFragment : Fragment() {
                 // Handle failure
             }
     }
-    private suspend fun saveSelectedTagsToFirestore(userId: String, selectedTags: List<UserTags>) {
+    private fun saveSelectedTagsToFirestore(userId: String, selectedTags: List<UserTags>) {
         val tagsCollection = firestore.collection("userTags")
 
         // Save each selected tag to Firestore
@@ -242,25 +263,15 @@ class RegistrationUserInterestsFragment : Fragment() {
             )
 
             // Add the userTag to Firestore
-            tagsCollection.add(userTag).addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // Tag saved successfully
-                } else {
-                    // Failed to save tag
+
+            tagsCollection.add(userTag)
+                .addOnSuccessListener {
+                    // User tag saved successfully
                 }
-            }
+                .addOnFailureListener {
+                    // Handle failure
+                }
         }
     }
 
-    // This extension function is used to convert UserProfile to a map
-    private fun UserProfile.toMap(): Map<String, Any> {
-        return mapOf(
-            "profilePictureUrl" to profilePictureUrl,
-            "location" to location,
-            "bio" to bio,
-            "gender" to gender,
-            "occupation" to occupation
-            // Add other profile fields as needed
-        )
-    }
 }

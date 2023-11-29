@@ -1,8 +1,8 @@
 package pt.ipca.roomies.ui.authentication.registration
 
-import RegistrationViewModel
+
 import android.os.Bundle
-import androidx.activity.viewModels
+
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import pt.ipca.roomies.databinding.ActivityRegistrationBinding

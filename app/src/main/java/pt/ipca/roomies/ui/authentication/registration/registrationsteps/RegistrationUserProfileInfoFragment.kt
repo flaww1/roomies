@@ -1,6 +1,6 @@
 package pt.ipca.roomies.ui.authentication.registration.registrationsteps
 
-import RegistrationViewModel
+import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -32,7 +32,7 @@ class RegistrationUserProfileInfoFragment : Fragment() {
     private var _binding: FragmentRegistrationUserProfileInfoBinding? = null
     private val binding get() = _binding!!
     private var selectedImageUri: Uri? = null
-    val locationsInPortugal = listOf("Porto", "Lisbon", "Faro", "Coimbra", "Braga", "Funchal", "Evora", "Aveiro", "Viseu")
+    private val locationsInPortugal = listOf("Porto", "Lisbon", "Faro", "Coimbra", "Braga", "Funchal", "Evora", "Aveiro", "Viseu")
 
 
     private val pickImageLauncher =
@@ -83,7 +83,7 @@ class RegistrationUserProfileInfoFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {}
         })
         binding.autoCompleteTextViewLocation.setOnItemClickListener { _, _, position, _ ->
-            val selectedLocation = adapter.getItem(position)
+            adapter.getItem(position)
             // Do something with the selected location
         }
 
@@ -122,27 +122,9 @@ class RegistrationUserProfileInfoFragment : Fragment() {
     }
 
     private fun setupSpinnerListeners() {
-        binding.spinnerGender.setOnItemSelectedListener(object :
-            MaterialSpinner.OnItemSelectedListener<String> {
-            override fun onItemSelected(view: MaterialSpinner?, position: Int, id: Long, item: String?) {
-                updateNextButtonState()
-            }
+        binding.spinnerGender.setOnItemSelectedListener { _, _, _, _ -> updateNextButtonState() }
 
-            fun onNothingSelected(parent: MaterialSpinner?) {
-                // Do nothing or handle the case when nothing is selected
-            }
-        })
-
-        binding.spinnerOccupation.setOnItemSelectedListener(object :
-            MaterialSpinner.OnItemSelectedListener<String> {
-            override fun onItemSelected(view: MaterialSpinner?, position: Int, id: Long, item: String?) {
-                updateNextButtonState()
-            }
-
-            fun onNothingSelected(parent: MaterialSpinner?) {
-                // Do nothing or handle the case when nothing is selected
-            }
-        })
+        binding.spinnerOccupation.setOnItemSelectedListener { _, _, _, _ -> updateNextButtonState() }
     }
 
     private fun setupTextChangeListeners() {

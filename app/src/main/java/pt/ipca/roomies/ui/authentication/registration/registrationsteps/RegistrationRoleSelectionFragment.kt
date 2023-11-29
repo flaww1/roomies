@@ -1,7 +1,7 @@
 // RoleSelectionFragment.kt
 package pt.ipca.roomies.ui.authentication.registration.registrationsteps
 
-import RegistrationViewModel
+import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -25,7 +25,7 @@ class RegistrationRoleSelectionFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRegistrationRoleSelectionBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(requireActivity()).get(RegistrationViewModel::class.java)
+        viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
 
         return binding.root
     }

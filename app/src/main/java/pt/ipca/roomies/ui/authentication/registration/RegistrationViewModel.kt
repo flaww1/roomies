@@ -1,3 +1,7 @@
+package pt.ipca.roomies.ui.authentication.registration
+
+import User
+import UserProfile
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -17,10 +21,8 @@ class RegistrationViewModel : ViewModel() {
     val user: LiveData<User?> get() = _user
 
     private val _userProfile = MutableLiveData<UserProfile?>()
-    val userProfile: LiveData<UserProfile?> get() = _userProfile
 
     private val _profileTags = MutableLiveData<List<ProfileTags>?>()
-    val profileTags: LiveData<List<ProfileTags>?> get() = _profileTags
 
     private val _selectedImageUri = MutableLiveData<Uri?>()
     val selectedImageUri: LiveData<Uri?> get() = _selectedImageUri
@@ -64,7 +66,16 @@ class RegistrationViewModel : ViewModel() {
     }
     fun register(firstName: String, lastName: String, email: String, password: String) {
         // Set up initial user data
-        val user = User(userId = "", firstName = firstName, lastName = lastName, email = email, userRole = "", password = password, registrationDate = 0, userRating = 0)
+        val user = User(
+            userId = "",
+            firstName = firstName,
+            lastName = lastName,
+            email = email,
+            userRole = "",
+            password = password,
+            registrationDate = 0,
+            userRating = 0
+        )
         val userProfile = UserProfile(
             userId = "",
             bio = "",

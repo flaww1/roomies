@@ -1,13 +1,13 @@
 package pt.ipca.roomies.data.entities
 
 data class ProfileTags(
-    val tagId: String,
-    val tagType: TagType,
-    val tagName: String,
-
-)
-
-
+    val tagId: String = "",
+    val tagName: String = "",
+    val tagType: TagType = TagType.Interest// Replace with an appropriate default value
+) {
+    // Default constructor with default values
+    constructor() : this("", "", TagType.Interest)
+}
 
 data class UserTags(
     val userTagId: String?,
@@ -17,10 +17,7 @@ data class UserTags(
     var isSelected: Boolean
 )
 enum class TagType {
-    INTEREST,
-    LIFESTYLE,
-    LANGUAGE,
-    // Add other types as needed
+    Language, Interest, Personality
 }
 
 data class SelectedTag(

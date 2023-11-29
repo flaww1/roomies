@@ -4,7 +4,6 @@ import ProfileTagsRepository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.auth.FirebaseUser
 import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.data.entities.TagType
 import pt.ipca.roomies.data.entities.UserTags
@@ -22,7 +21,7 @@ class RegistrationUserInterestsViewModel : ViewModel() {
     fun fetchAvailableInterestTags() {
         // Assuming ProfileTagsRepository has a function to get all interest tags
         profileTagsRepository.getTagsByType(
-            TagType.INTEREST,
+            TagType.Interest,
             onSuccess = { tags ->
                 availableInterestTags.value = tags
             },
@@ -59,7 +58,7 @@ class RegistrationUserInterestsViewModel : ViewModel() {
         // Update the association with the user
         val userId = "your_user_id" // replace with your actual user ID
         val tagId = tag.tagId
-        val tagType = TagType.INTEREST // replace INTEREST with the actual tagType
+        val tagType = TagType.Interest // replace INTEREST with the actual tagType
 
         profileTagsRepository.associateTagWithUser(userId, tagId, tagType, isSelected)
     }
