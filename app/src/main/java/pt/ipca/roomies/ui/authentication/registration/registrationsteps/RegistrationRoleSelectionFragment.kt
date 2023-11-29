@@ -39,10 +39,6 @@ class RegistrationRoleSelectionFragment : Fragment() {
             navigateToUserProfileInfo()
         }
 
-        binding.backButton.setOnClickListener {
-            findNavController().popBackStack()
-        }
-
         // Enable/disable Next button based on RadioButton selection
         binding.roleSelectionGroup.setOnCheckedChangeListener { _, _ ->
             binding.nextButton.isEnabled = binding.landlordRadioButton.isChecked || binding.userRadioButton.isChecked

@@ -12,6 +12,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.data.entities.UserTags
+import java.util.Calendar
 
 
 class RegistrationRepository(private val viewModel: RegistrationViewModel) {
@@ -30,8 +31,15 @@ class RegistrationRepository(private val viewModel: RegistrationViewModel) {
                 .build()
             authResult.user?.updateProfile(userProfileChangeRequest)?.await()
 
+            // Update user entity with registration date and userRating
+            val updatedUser = user.copy(
+                registrationDate = Calendar.getInstance().timeInMillis,
+                userRating = 0
+                // Add other fields as needed
+            )
+
             // Store user's role in Firestore
-            saveUserAndProfileToFirestore(user, userProfile)
+            saveUserAndProfileToFirestore(updatedUser, userProfile)
 
             return true
         } catch (e: Exception) {
@@ -58,6 +66,8 @@ class RegistrationRepository(private val viewModel: RegistrationViewModel) {
                 }
             }
     }
+
+
 
 }
 

@@ -8,7 +8,7 @@ class InterestTagsAdapter(
     private var interestTags: List<ProfileTags>,
     private val onTagClickListener: (ProfileTags) -> Unit,
     private val profileTagsRepository: ProfileTagsRepository,
-    private val userId: String
+    var userId: String
 ) : RecyclerView.Adapter<InterestTagsAdapter.ViewHolder>() {
 
     private val selectedTags = mutableSetOf<String>()

@@ -2,23 +2,19 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.FirebaseFirestore
 import pt.ipca.roomies.data.entities.ProfileTags
+import pt.ipca.roomies.data.repositories.RegistrationRepository
 
-// RegistrationViewModel.kt
 class RegistrationViewModel : ViewModel() {
 
+    private val registrationRepository = RegistrationRepository(this)
+    private val _userId = MutableLiveData<String?>()
+    val userId: LiveData<String?> get() = _userId
     val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> get() = _errorMessage
 
     val _user = MutableLiveData<User?>()
-    val user: MutableLiveData<User?> get() = _user
-
-    fun setUser(user: User) {
-        _user.value = user
-    }
+    val user: LiveData<User?> get() = _user
 
     private val _userProfile = MutableLiveData<UserProfile?>()
     val userProfile: LiveData<UserProfile?> get() = _userProfile
@@ -28,9 +24,6 @@ class RegistrationViewModel : ViewModel() {
 
     private val _selectedImageUri = MutableLiveData<Uri?>()
     val selectedImageUri: LiveData<Uri?> get() = _selectedImageUri
-
-    private val auth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
 
     fun updateSelectedImageUri(uri: Uri?) {
         _selectedImageUri.value = uri
@@ -48,26 +41,52 @@ class RegistrationViewModel : ViewModel() {
         _profileTags.value = tags
     }
 
-    fun register(firstName: String, lastName: String, email: String, password: String) {
-        // Perform registration logic here
+    suspend fun registerUser(): Boolean {
+        val user = _user.value
+        val userProfile = _userProfile.value
+
+        return if (user != null && userProfile != null) {
+            registrationRepository.registerUser(user, userProfile)
+        } else {
+            // Handle the case when user or userProfile is null
+            false
+        }
+    }
+    fun updateUserId(userId: String) {
+        _userId.value = userId
     }
 
     fun updateUserRole(role: String) {
-        // Implement update user role logic
-
-    }
-
-
-    private fun updateUI(currentUser: FirebaseUser?) {
-        if (currentUser != null) {
-            // User is successfully registered, perform actions like navigating to the next screen
-        } else {
-            // Handle the case where currentUser is null (registration failed)
-            _errorMessage.value = "User registration failed"
+        _user.value?.let { user ->
+            val updatedUser = user.copy(userRole = role)
+            updateUser(updatedUser)
         }
     }
+    fun register(firstName: String, lastName: String, email: String, password: String) {
+        // Set up initial user data
+        val user = User(userId = "", firstName = firstName, lastName = lastName, email = email, userRole = "", password = password, registrationDate = 0, userRating = 0)
+        val userProfile = UserProfile(
+            userId = "",
+            bio = "",
+            location = "",
+            gender = "",
+            occupation = "",
+            birthDate = "",  // Provide a default value
+            profilePictureUrl = "",  // Provide a default value
+            selectedTags = emptyList(),  // Provide a default value
+            userProfileId = ""  // Provide a default value
+        )
 
+        // Update LiveData in the ViewModel
+        setUser(user)
+        updateUserProfile(userProfile)
+        updateSelectedImageUri(null)
+        updateProfileTags(emptyList())
+    }
 
+    private fun setUser(user: User) {
+        _user.value = user
+    }
     fun reset() {
         _user.value = null
         _userProfile.value = null
@@ -77,4 +96,9 @@ class RegistrationViewModel : ViewModel() {
     }
 
 
+
+    fun handleRegistrationError(message: String?) {
+        _errorMessage.value = message
+
+    }
 }

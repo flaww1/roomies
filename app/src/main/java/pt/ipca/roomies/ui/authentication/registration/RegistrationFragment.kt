@@ -3,6 +3,7 @@ package pt.ipca.roomies.ui.authentication.registration
 import RegistrationViewModel
 import User
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,11 +11,13 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.google.firebase.auth.FirebaseAuth
 import pt.ipca.roomies.R
 import pt.ipca.roomies.databinding.FragmentRegistrationBinding
 import pt.ipca.roomies.ui.authentication.UserViewModel
 
 class RegistrationFragment : Fragment() {
+    private lateinit var userId: String // Declare userId here
 
     private val viewModel: RegistrationViewModel by viewModels()
 
@@ -31,6 +34,10 @@ class RegistrationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.user.observe(viewLifecycleOwner) { user ->
+            userId = user?.userId ?: ""
+            Log.d("RegistrationFragment", "Obtained userId: $userId")
+        }
 
         binding.nextButton.setOnClickListener {
             val firstName = binding.editTextFirstName.text.toString()
@@ -40,9 +47,11 @@ class RegistrationFragment : Fragment() {
             val confirmPassword = binding.editTextConfirmPassword.text.toString()
 
             if (validateInputs(firstName, lastName, email, password, confirmPassword)) {
+                // Call the function in RegistrationViewModel to set up initial user data
                 viewModel.register(firstName, lastName, email, password)
 
-                navigateToRoleSelectionFragment()
+                // Navigate to the next step in the registration process
+                registerUserWithEmailAndPassword(email, password)
             }
         }
         binding.backButton.setOnClickListener {
@@ -55,6 +64,13 @@ class RegistrationFragment : Fragment() {
         binding.editTextEmail.addTextChangedListener { updateNextButtonState() }
         binding.editTextPassword.addTextChangedListener { updateNextButtonState() }
         binding.editTextConfirmPassword.addTextChangedListener { updateNextButtonState() }
+        viewModel.userId.observe(viewLifecycleOwner) { userId ->
+            userId?.let {
+                // Update UI or perform actions based on the obtained userId
+                Log.d("RegistrationFragment", "Obtained userId: $userId")
+            }
+        }
+
     }
 
     private fun updateNextButtonState() {
@@ -121,7 +137,37 @@ class RegistrationFragment : Fragment() {
         // Return true only if all validations pass
         return isFirstNameValid && isLastNameValid && isEmailValid && isPasswordValid
     }
+    private fun registerUserWithEmailAndPassword(email: String, password: String) {
+        val firebaseAuth = FirebaseAuth.getInstance()
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener(requireActivity()) { task ->
+                if (task.isSuccessful) {
+                    // Registration successful, obtain the userId from the authenticated user
+                    val user = firebaseAuth.currentUser
+                    val userId = user?.uid
 
+                    if (userId != null) {
+                        // Update the user in the ViewModel with the obtained userId
+                        viewModel.updateUserId(userId)
+
+                        // Log the userId for debugging
+                        Log.d("RegistrationFragment", "Obtained userId: $userId")
+
+                        // Navigate to the next step in the registration process
+                        navigateToRoleSelectionFragment()
+                    } else {
+                        // Handle the case where userId is null
+                        Log.e("RegistrationFragment", "userId is null after successful registration")
+                    }
+                } else {
+                    // Registration failed, handle the error
+                    val exception = task.exception
+                    // Handle the exception and show an error message
+                    viewModel.handleRegistrationError(exception?.message)
+                    Log.e("RegistrationFragment", "Registration failed: ${exception?.message}")
+                }
+            }
+    }
 
 
     override fun onDestroyView() {

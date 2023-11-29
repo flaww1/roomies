@@ -4,9 +4,9 @@ data class User(
     val lastName: String,
     val email: String,
     val password: String,
-    var registrationDate: String,
+    var registrationDate: Long,
     val userRating: Int,
-    val userRole: Roles,
+    val userRole: String,
 )
 
 data class UserPreferences(
@@ -16,12 +16,5 @@ data class UserPreferences(
     val preferredLocation: String = ""
 )
 
-enum class Roles
-{
-    ADMIN,
-    USER,
-    TENANT,
-    LANDLORD,
-    LEADER;
-}
+
 
