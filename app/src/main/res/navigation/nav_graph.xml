@@ -99,7 +99,7 @@
             app:popUpToInclusive="true" />
     </fragment>
 
-    <!-- RegistrationUserInterestsFragment and its connections -->
+    <!-- pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationUserInterestsFragment and its connections -->
     <fragment
         android:id="@+id/registrationUserInterestsFragment"
         android:name="pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationUserInterestsFragment"

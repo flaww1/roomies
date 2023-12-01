@@ -1,14 +1,31 @@
 <!-- fragment_registration_user_interests.xml -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    tools:context=".ui.authentication.registration.registrationsteps.RegistrationUserInterestsFragment">
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
 
+    tools:context=".ui.authentication.registration.registrationsteps.RegistrationUserInterestsFragment"
+    >
+
+    <data>
+        <variable
+            name="viewModel"
+            type="pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationUserInterestsViewModel" />
+        <variable
+            name="interestTagsSelected"
+            type="Boolean" />
+        <variable
+            name="languageTagsSelected"
+            type="Boolean" />
+        <variable
+            name="personalityTagsSelected"
+            type="Boolean" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
     <!-- Section for Language tags -->
     <TextView
         android:id="@+id/tvSelectedLanguages"
@@ -76,7 +93,8 @@
         android:layout_height="wrap_content"
         android:text="Next"
         android:layout_marginTop="16dp"
-        android:enabled="false"/>
+        android:enabled="@{interestTagsSelected &amp;&amp; languageTagsSelected &amp;&amp; personalityTagsSelected}"
+        />
 
     <!-- Replace Button with MaterialButton -->
     <com.google.android.material.button.MaterialButton
@@ -85,4 +103,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Back"/>
-</LinearLayout>
+    </LinearLayout>
+
+</layout>
+

@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import pt.ipca.roomies.data.entities.ProfileTags
+import pt.ipca.roomies.data.entities.UserTags
 import pt.ipca.roomies.data.repositories.RegistrationRepository
 
 class RegistrationViewModel : ViewModel() {
@@ -26,6 +27,24 @@ class RegistrationViewModel : ViewModel() {
 
     private val _selectedImageUri = MutableLiveData<Uri?>()
     val selectedImageUri: LiveData<Uri?> get() = _selectedImageUri
+
+    private val _registrationState = MutableLiveData<RegistrationState>()
+
+    val registrationState: LiveData<RegistrationState> get() = _registrationState
+
+    // Function to update the registration state
+    fun updateRegistrationState(newState: RegistrationState) {
+        _registrationState.value = newState
+    }
+
+    // Enum class to represent different states of the registration process
+    enum class RegistrationState {
+        INITIAL,          // Initial state
+        ROLE_SELECTION,   // Role selection
+        PROFILE_INFO,     // Additional profile information
+        USER_INTERESTS,   // User interests
+        COMPLETED         // Registration completed
+    }
 
     fun updateSelectedImageUri(uri: Uri?) {
         _selectedImageUri.value = uri

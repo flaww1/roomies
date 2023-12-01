@@ -1,17 +1,15 @@
 package pt.ipca.roomies.ui.authentication.registration.registrationsteps
 
-import ProfileTagsRepository
-import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 import User
 import android.net.Uri
-import pt.ipca.roomies.databinding.FragmentRegistrationUserInterestsBinding
 import android.os.Bundle
 import android.util.Log
-import android.view.ViewGroup
-import android.view.View
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -24,18 +22,26 @@ import pt.ipca.roomies.R
 import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.data.entities.TagType
 import pt.ipca.roomies.data.entities.UserTags
+import pt.ipca.roomies.data.repositories.ProfileTagsRepository
+import pt.ipca.roomies.databinding.FragmentRegistrationUserInterestsBinding
+import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 
 class RegistrationUserInterestsFragment : Fragment() {
 
     private lateinit var binding: FragmentRegistrationUserInterestsBinding
     private lateinit var viewModel: RegistrationUserInterestsViewModel
     private lateinit var viewModelRegistration: RegistrationViewModel
-    private lateinit var adapter: InterestTagsAdapter
     private lateinit var profileTagsRepository: ProfileTagsRepository
-    private lateinit var selectedTagsByType: MutableMap<TagType, MutableSet<ProfileTags>>
+    private lateinit var selectedTagsByType: MutableMap<TagType, MutableLiveData<MutableSet<ProfileTags>>>
+    private val areTagsSelected: MutableMap<TagType, Boolean> = mutableMapOf()
+    private val selectedTags: MutableSet<ProfileTags> = mutableSetOf()
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private var userId: String? = null // Use a nullable type
+
+    private lateinit var adapterInterests: TagsAdapter
+    private lateinit var adapterLanguages: TagsAdapter
+    private lateinit var adapterPersonality: TagsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,160 +54,173 @@ class RegistrationUserInterestsFragment : Fragment() {
         profileTagsRepository = ProfileTagsRepository()
 
         // Initialize selectedTagsByType before using it
-        selectedTagsByType = mutableMapOf()
-        // Initialize Adapter here
-        val onTagClickListener: (ProfileTags) -> Unit = { tag ->
-            val currentTags = viewModel.fetchSelectedInterestTags().value ?: emptyList()
-            val isSelected = tag in currentTags
-            viewModel.updateSelectedInterestTags(tag, isSelected)
-            adapter.toggleSelection(tag)
+        selectedTagsByType = mutableMapOf<TagType, MutableLiveData<MutableSet<ProfileTags>>>().also { map ->
+            TagType.values().forEach { tagType ->
+                map[tagType] = MutableLiveData(mutableSetOf())
+            }
         }
 
         // Initialize Adapter here
-        adapter = InterestTagsAdapter(
-            listOf(),
-            onTagClickListener, // Pass onTagClickListener here
+        val onTagClickListener: (ProfileTags, Boolean) -> Unit = { tag, isSelected ->
+            val selectedTagsForType = selectedTagsByType[tag.tagType]?.value ?: mutableSetOf()
+            if (isSelected && !selectedTagsForType.contains(tag)) {
+                selectedTagsForType.add(tag)
+            } else if (!isSelected && selectedTagsForType.contains(tag)) {
+                selectedTagsForType.remove(tag)
+            }
+            selectedTagsByType[tag.tagType]?.value = selectedTagsForType
+            viewModel.updateSelectedTags(tag.tagType, tag, isSelected)
+            if (selectedTagsForType.isEmpty()) {
+                areTagsSelected[tag.tagType] = false
+            }
+        }
+        // Initialize Adapter here
+        adapterInterests = TagsAdapter(
+            emptyList(),
+            onTagClickListener,
             profileTagsRepository,
             userId ?: "",
-            selectedTagsByType // Pass the selectedTagsByType map to the adapter
+            selectedTagsByType = selectedTagsByType,
+            selectedTags = selectedTags
         )
 
-        binding.recyclerViewInterests.adapter = adapter
+        binding.recyclerViewInterests.adapter = adapterInterests
+
+        adapterLanguages = TagsAdapter(
+            emptyList(),
+            onTagClickListener,
+            profileTagsRepository,
+            userId ?: "",
+            selectedTagsByType = selectedTagsByType,
+            selectedTags = selectedTags
+        )
+
+        binding.recyclerViewLanguages.adapter = adapterLanguages
+
+        // Initialize Adapter for Personality
+        adapterPersonality = TagsAdapter(
+            emptyList(),
+            onTagClickListener,
+            profileTagsRepository,
+            userId ?: "",
+            selectedTagsByType = selectedTagsByType,
+            selectedTags = selectedTags
+        )
+
+        binding.recyclerViewPersonality.adapter = adapterPersonality
 
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("InterestsFragment", "onViewCreated")
 
         viewModelRegistration.user.observe(viewLifecycleOwner) { user ->
             userId = user?.userId ?: ""
-            Log.d("InterestsFragment", "User ID: $userId")
 
-            // Handle the case when userId is empty or null
             if (userId.isNullOrEmpty()) {
-                // Log an error or show a toast
                 Log.e("InterestsFragment", "User ID is empty or null")
                 Toast.makeText(requireContext(), "User ID is empty or null", Toast.LENGTH_SHORT).show()
-                // Return or show an error view
             } else {
-                // Update the userId in the adapter when it's available
-                adapter.updateUserId(userId ?: "")
+                adapterInterests.updateUserId(userId ?: "")
+                adapterLanguages.updateUserId(userId ?: "")
+                adapterPersonality.updateUserId(userId ?: "")
             }
         }
 
-        // Ensure adapter is initialized
-        if (::adapter.isInitialized) {
-            // Set the layout manager
+        if (::adapterInterests.isInitialized && ::adapterLanguages.isInitialized && ::adapterPersonality.isInitialized) {
             binding.recyclerViewInterests.layoutManager = LinearLayoutManager(requireContext())
 
-            // Fetch available interest tags and observe the LiveData
-            viewModel.fetchAvailableInterestTags()
-            viewModel.getAvailableInterestTags().observe(viewLifecycleOwner) { availableInterestTags ->
+            viewModel.availableTagsMap[TagType.Interest]?.observe(viewLifecycleOwner) { availableInterestTags ->
                 Log.d("InterestsFragment", "Available Interest Tags Changed: $availableInterestTags")
-
-                // Populate the adapter with data
-                adapter.updateData(availableInterestTags)
-            }
-        } else {
-            // Log an error or handle the case where the adapter is not initialized
-            Log.e("InterestsFragment", "Adapter is not initialized")
-        }
-
-        // Rest of your onViewCreated method..
-
-        if (::adapter.isInitialized) {
-            binding.recyclerViewInterests.layoutManager = LinearLayoutManager(requireContext())
-
-            // Fetch available interest tags and observe the LiveData
-            viewModel.fetchAvailableInterestTags()
-            viewModel.getAvailableInterestTags().observe(viewLifecycleOwner) { availableInterestTags ->
-                Log.d("InterestsFragment", "Available Interest Tags Changed: $availableInterestTags")
-                // Populate the adapter with data
-                adapter.updateData(availableInterestTags)
+                adapterInterests.updateData(viewModel.availableTagsMap[TagType.Interest]?.value ?: emptyList(), TagType.Interest)
             }
 
-            // ... (rest of the onViewCreated method)
-        } else {
-            // Log an error or handle the case where the adapter is not initialized
-            Log.e("InterestsFragment", "Adapter is not initialized")
-        }
+            viewModel.availableTagsMap[TagType.Language]?.observe(viewLifecycleOwner) { availableLanguageTags ->
+                Log.d("InterestsFragment", "Available Language Tags Changed: $availableLanguageTags")
+                adapterLanguages.updateData(viewModel.availableTagsMap[TagType.Language]?.value ?: emptyList(), TagType.Language)
+            }
 
-        binding.recyclerViewInterests.layoutManager = LinearLayoutManager(requireContext())
+            viewModel.availableTagsMap[TagType.Personality]?.observe(viewLifecycleOwner) { availablePersonalityTags ->
+                Log.d("InterestsFragment", "Available Personality Tags Changed: $availablePersonalityTags")
+                adapterPersonality.updateData(viewModel.availableTagsMap[TagType.Personality]?.value ?: emptyList(), TagType.Personality)
+            }
 
-        // Fetch available interest tags and observe the LiveData
-        viewModel.fetchAvailableInterestTags()
-        viewModel.getAvailableInterestTags().observe(viewLifecycleOwner) { availableInterestTags ->
-            // Populate the adapter with data
-            adapter.updateData(availableInterestTags)
-        }
-        // Implement UI interactions
-        binding.nextButton.setOnClickListener {
-            // Fetch user data from pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
-            val user = viewModelRegistration.user.value
+            selectedTagsByType.forEach { (tagType, selectedTagsLiveData) ->
+                selectedTagsLiveData.observe(viewLifecycleOwner) { selectedTags ->
+                    val areTagsSelected = selectedTags.isNotEmpty()
+                    Log.d("InterestsFragment", "TagType: $tagType, AreTagsSelected: $areTagsSelected")
+                    when (tagType) {
+                        TagType.Interest -> binding.interestTagsSelected = areTagsSelected
+                        TagType.Language -> binding.languageTagsSelected = areTagsSelected
+                        TagType.Personality -> binding.personalityTagsSelected = areTagsSelected
+                    }
 
-            // Fetch selected interest tags from ViewModel
-            val selectedInterests = viewModel.fetchSelectedInterestTags().value
-
-            if (user != null && !selectedInterests.isNullOrEmpty()) {
-                // Update isSelected based on the selected tags
-                val updatedTags = selectedInterests.map { tag ->
-                    val tagType = TagType.Interest // replace INTEREST with the actual tagType
-
-                    // Create a UserTags object with the necessary information
-                    UserTags(userTagId = null, userId = user.userId, tagId = tag.tagId, tagType = tagType, isSelected = true)
+                    binding.nextButton.isEnabled =
+                        binding.interestTagsSelected == true &&
+                                binding.languageTagsSelected == true &&
+                                binding.personalityTagsSelected == true
+                    Log.d("InterestsFragment", "Is Next Button Enabled: ${binding.nextButton.isEnabled}")
                 }
+            }
 
-                // Update the user's profile tags in the ViewModel
-                viewModel.updateProfileTags(updatedTags)
+
+        } else {
+            Log.e("InterestsFragment", "Adapters are not initialized")
+        }
+
+        binding.nextButton.setOnClickListener {
+            val user = viewModelRegistration.user.value
+            val selectedInterests = viewModel.selectedTagsMap[TagType.Interest]?.value
+            val selectedLanguages = viewModel.selectedTagsMap[TagType.Language]?.value
+            val selectedPersonality = viewModel.selectedTagsMap[TagType.Personality]?.value
+
+            if (user != null && !selectedInterests.isNullOrEmpty() && !selectedLanguages.isNullOrEmpty() && !selectedPersonality.isNullOrEmpty()) {
+                // Combine all selected tags into a single list
+                val allSelectedTags = mutableListOf<UserTags>()
+
+                // Map and add selected interests
+                allSelectedTags.addAll(selectedInterests)
+                // Map and add selected languages
+                allSelectedTags.addAll(selectedLanguages)
+                // Map and add selected personality
+                allSelectedTags.addAll(selectedPersonality)
+
+                // Update the ViewModel with all selected tags
+                viewModel.updateAllSelectedTags(allSelectedTags)
 
                 // Save user and selected tags to Firestore
                 lifecycleScope.launch {
-                    onFinalStepCompleted(user, updatedTags)
+                    onFinalStepCompleted(user, allSelectedTags)
                 }
             } else {
-                // Handle the case when selectedInterests is null or empty
-                // You may want to show a message or handle it appropriately
+                // Handle the case when selected tags are null or empty
+                Toast.makeText(requireContext(), "Selected tags are null or empty", Toast.LENGTH_SHORT).show()
             }
         }
 
 
-
-        // Implement back button functionality
         binding.backButton.setOnClickListener {
-            // Navigate back
             findNavController().popBackStack()
         }
-        // Observe changes in the selected interest tags
-        viewModel.fetchSelectedInterestTags().observe(viewLifecycleOwner) {
-            // Handle changes, if needed
-
-            // For example, update UI to reflect selected tags
-        }
-
-        // Populate the adapter with data
-    adapter.updateData(listOf())
     }
+
+
 
     private fun navigateToHomePage() {
         // Use NavController to navigate to the next fragment
         findNavController().navigate(R.id.action_roleSelectionFragment_to_registrationUserProfileInfoFragment)
     }
 
-    // Inside RegistrationUserInterestsFragment
-
-// ...
-
-    // Inside the function where you handle the final step of the registration process
     private suspend fun onFinalStepCompleted(user: User, selectedTags: List<UserTags>) {
         // Save selected tags to Firestore
-        saveSelectedTagsToFirestore(user.userId, selectedTags)
-
+        selectedTags.forEach { tag ->
+            profileTagsRepository.associateTagWithUser(user.userId, tag.tagId, tag.tagType, tag.isSelected)
+        }
         // Upload profile picture to Firebase Storage
         viewModelRegistration.selectedImageUri.value?.let { uploadProfilePicture(user.userId, it) }
 
-        // Call registerUser from pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel to complete the registration
+        // Call registerUser from RegistrationViewModel to complete the registration
         val registrationResult = viewModelRegistration.registerUser()
 
         // Check the registration result
@@ -227,11 +246,13 @@ class RegistrationUserInterestsFragment : Fragment() {
                 // Handle failure
             }
     }
+
     private fun getStorageReference(uri: Uri): StorageReference {
         val storage = FirebaseStorage.getInstance()
         val storageReference = storage.reference
         return storageReference.child("profile_pictures/${System.currentTimeMillis()}_${uri.lastPathSegment}")
     }
+
     private fun uploadProfilePicture(userId: String, imageUri: Uri) {
         // Your image upload logic here
         // Use Firebase Storage or any other method to upload the image
@@ -249,29 +270,6 @@ class RegistrationUserInterestsFragment : Fragment() {
                 // Handle failure
             }
     }
-    private fun saveSelectedTagsToFirestore(userId: String, selectedTags: List<UserTags>) {
-        val tagsCollection = firestore.collection("userTags")
 
-        // Save each selected tag to Firestore
-        selectedTags.forEach { tag ->
-            val userTag = UserTags(
-                userTagId = null,
-                userId = userId,
-                tagId = tag.tagId,
-                tagType = tag.tagType,
-                isSelected = true
-            )
-
-            // Add the userTag to Firestore
-
-            tagsCollection.add(userTag)
-                .addOnSuccessListener {
-                    // User tag saved successfully
-                }
-                .addOnFailureListener {
-                    // Handle failure
-                }
-        }
-    }
 
 }

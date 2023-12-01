@@ -1,3 +1,4 @@
+package pt.ipca.roomies.data.repositories
 import com.google.firebase.firestore.FirebaseFirestore
 import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.data.entities.TagType
@@ -60,6 +61,24 @@ class ProfileTagsRepository {
                 onFailure.invoke(e)
             }
     }
+    fun getAllTagTypes(onSuccess: (List<String>) -> Unit, onFailure: (Exception) -> Unit) {
+        // Use Firestore or any other data source to fetch all unique tag types from "profileTags" collection
+        val profileTagsCollection = FirebaseFirestore.getInstance().collection("profileTags")
 
+        profileTagsCollection.get()
+            .addOnSuccessListener { documents ->
+                val uniqueTagTypes = documents
+                    .mapNotNull { document ->
+                        document.getString("tagType")
+                    }
+                    .distinct()
+
+                onSuccess(uniqueTagTypes)
+            }
+            .addOnFailureListener { e ->
+                onFailure(e)
+            }
+    }
 }
+
 
