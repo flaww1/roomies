@@ -178,7 +178,7 @@ class RegistrationUserProfileInfoFragment : Fragment() {
 
         viewModelRegistration.updateSelectedImageUri(selectedImageUri)
         viewModelRegistration.updateUserProfile(userProfile)
-        findNavController().navigate(R.id.action_registrationUserProfileInfoFragment_to_userInterestsFragment)
+       // findNavController().navigate(R.id.action_registrationUserProfileInfoFragment_to_userInterestsFragment)
     }
 
     private fun openFilePicker() {

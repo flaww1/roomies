@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ui.main.HomePageActivity">
+    tools:context=".ui.main.HomeActivity">
 
     <FrameLayout
         android:id="@+id/container"

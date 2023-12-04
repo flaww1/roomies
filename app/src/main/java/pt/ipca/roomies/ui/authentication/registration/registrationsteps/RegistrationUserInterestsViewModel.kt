@@ -92,7 +92,7 @@ class RegistrationUserInterestsViewModel : ViewModel() {
             } else {
                 currentTags - tag
             }
-            selectedTagsMap[tagType]?.value = updatedTags
+            //selectedTagsMap[tagType]?.value = updatedTags
         }
     }
 }
@@ -105,4 +105,4 @@ class RegistrationUserInterestsViewModel : ViewModel() {
 
 
 
-}
+

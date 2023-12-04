@@ -7,7 +7,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import pt.ipca.roomies.data.entities.ProfileTags
-import pt.ipca.roomies.data.entities.UserTags
 import pt.ipca.roomies.data.repositories.RegistrationRepository
 
 class RegistrationViewModel : ViewModel() {

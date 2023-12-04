@@ -1,12 +1,12 @@
 package pt.ipca.roomies.data.repositories
 
-import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 import User
 import UserProfile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 import java.util.Calendar
 
 
@@ -62,7 +62,28 @@ class RegistrationRepository(private val viewModel: RegistrationViewModel) {
             }
     }
 
+    fun storeUserInFirestore(userId: String, email: String, password: String, firstName: String, lastName: String) {
+        // Create a user object with basic information
+        val user = User(
+            userId = userId,
+            firstName = firstName, // You may add these fields later in the profile editor
+            lastName = lastName,  // You may add these fields later in the profile editor
+            email = email,
+            userRole = "",
+            password = password,
+            registrationDate = Calendar.getInstance().timeInMillis,
+            userRating = 0
+            // Add other fields as needed
+        )
 
-
+        // Store user information in Firestore
+        val firestore = FirebaseFirestore.getInstance()
+        firestore.collection("users").document(userId).set(user)
+            .addOnCompleteListener { userTask ->
+                if (!userTask.isSuccessful) {
+                    viewModel._errorMessage.value = userTask.exception?.message ?: "Failed to save user information"
+            }
+    }
+    }
 }
 

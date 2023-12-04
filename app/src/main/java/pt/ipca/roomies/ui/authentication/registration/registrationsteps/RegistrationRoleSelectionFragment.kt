@@ -36,7 +36,9 @@ class RegistrationRoleSelectionFragment : Fragment() {
         binding.nextButton.setOnClickListener {
             val role = if (binding.landlordRadioButton.isChecked) "Landlord" else "User"
             viewModel.updateUserRole(role)
-            navigateToUserProfileInfo()
+            // Optionally, update user role in Firestore or other data store
+            // Navigate to the home fragment or main application screen
+            navigateToHomeFragment()
         }
 
         // Enable/disable Next button based on RadioButton selection
@@ -45,8 +47,8 @@ class RegistrationRoleSelectionFragment : Fragment() {
         }
     }
 
-    private fun navigateToUserProfileInfo() {
-        findNavController().navigate(R.id.action_roleSelectionFragment_to_registrationUserProfileInfoFragment)
+    private fun navigateToHomeFragment() {
+        findNavController().navigate(R.id.action_registrationRoleSelectionFragment_to_homeFragment)
     }
 
     override fun onDestroyView() {

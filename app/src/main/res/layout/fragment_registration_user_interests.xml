@@ -7,6 +7,7 @@
     tools:context=".ui.authentication.registration.registrationsteps.RegistrationUserInterestsFragment"
     >
 
+
     <data>
         <variable
             name="viewModel"

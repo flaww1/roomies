@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
@@ -150,16 +151,16 @@ class RegistrationUserInterestsFragment : Fragment() {
                 selectedTagsLiveData.observe(viewLifecycleOwner) { selectedTags ->
                     val areTagsSelected = selectedTags.isNotEmpty()
                     Log.d("InterestsFragment", "TagType: $tagType, AreTagsSelected: $areTagsSelected")
-                    when (tagType) {
-                        TagType.Interest -> binding.interestTagsSelected = areTagsSelected
-                        TagType.Language -> binding.languageTagsSelected = areTagsSelected
-                        TagType.Personality -> binding.personalityTagsSelected = areTagsSelected
-                    }
+                   // when (tagType) {
+                     //   TagType.Interest -> binding.interestTagsSelected = areTagsSelected
+                       // TagType.Language -> binding.languageTagsSelected = areTagsSelected
+                       // TagType.Personality -> binding.personalityTagsSelected = areTagsSelected
+                    //}
 
-                    binding.nextButton.isEnabled =
-                        binding.interestTagsSelected == true &&
-                                binding.languageTagsSelected == true &&
-                                binding.personalityTagsSelected == true
+              //      binding.nextButton.isEnabled =
+                //        binding.interestTagsSelected == true &&
+                  //              binding.languageTagsSelected == true &&
+                    //            binding.personalityTagsSelected == true
                     Log.d("InterestsFragment", "Is Next Button Enabled: ${binding.nextButton.isEnabled}")
                 }
             }
@@ -180,11 +181,11 @@ class RegistrationUserInterestsFragment : Fragment() {
                 val allSelectedTags = mutableListOf<UserTags>()
 
                 // Map and add selected interests
-                allSelectedTags.addAll(selectedInterests)
+                // allSelectedTags.addAll(selectedInterests)
                 // Map and add selected languages
-                allSelectedTags.addAll(selectedLanguages)
+                // allSelectedTags.addAll(selectedLanguages)
                 // Map and add selected personality
-                allSelectedTags.addAll(selectedPersonality)
+                // allSelectedTags.addAll(selectedPersonality)
 
                 // Update the ViewModel with all selected tags
                 viewModel.updateAllSelectedTags(allSelectedTags)
@@ -209,7 +210,7 @@ class RegistrationUserInterestsFragment : Fragment() {
 
     private fun navigateToHomePage() {
         // Use NavController to navigate to the next fragment
-        findNavController().navigate(R.id.action_roleSelectionFragment_to_registrationUserProfileInfoFragment)
+        //findNavController().navigate(R.id.action_roleSelectionFragment_to_registrationUserProfileInfoFragment)
     }
 
     private suspend fun onFinalStepCompleted(user: User, selectedTags: List<UserTags>) {
@@ -270,6 +271,7 @@ class RegistrationUserInterestsFragment : Fragment() {
                 // Handle failure
             }
     }
-
-
 }
+
+
+

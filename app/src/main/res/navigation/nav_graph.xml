@@ -65,8 +65,8 @@
         android:name="pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationRoleSelectionFragment"
         android:label="registrationRoleSelectionFragment">
         <action
-            android:id="@+id/action_roleSelectionFragment_to_registrationUserProfileInfoFragment"
-            app:destination="@id/registrationUserProfileInfoFragment" />
+            android:id="@+id/action_registrationRoleSelectionFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
         <action
             android:id="@+id/action_registrationRoleSelectionFragment_to_registrationFragment"
             app:destination="@id/registrationFragment"
@@ -78,47 +78,6 @@
             app:popUpTo="@id/mainFragment"
             app:popUpToInclusive="true" />
     </fragment>
-
-    <!-- RegistrationUserProfileFragment and its connections -->
-    <fragment
-        android:id="@+id/registrationUserProfileInfoFragment"
-        android:name="pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationUserProfileInfoFragment"
-        android:label="registrationUserProfileInfoFragment">
-        <action
-            android:id="@+id/action_registrationUserProfileInfoFragment_to_userInterestsFragment"
-            app:destination="@id/registrationUserInterestsFragment" />
-        <action
-            android:id="@+id/action_registrationUserProfileInfoFragment_to_registrationRoleSelectionFragment"
-            app:destination="@id/registrationRoleSelectionFragment"
-            app:popUpTo="@id/mainFragment"
-            app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_registrationUserProfileInfoFragment_to_mainFragment"
-            app:destination="@id/mainFragment"
-            app:popUpTo="@id/mainFragment"
-            app:popUpToInclusive="true" />
-    </fragment>
-
-    <!-- pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationUserInterestsFragment and its connections -->
-    <fragment
-        android:id="@+id/registrationUserInterestsFragment"
-        android:name="pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationUserInterestsFragment"
-        android:label="registrationUserInterestsFragment">
-        <action
-            android:id="@+id/action_registrationUserInterestsFragment_to_homeFragment"
-            app:destination="@id/homeFragment" />
-        <action
-            android:id="@+id/action_registrationUserInterestsFragment_to_registrationUserProfileFragment"
-            app:destination="@id/registrationUserProfileInfoFragment"
-            app:popUpTo="@id/mainFragment"
-            app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_registrationUserInterestsFragment_to_mainFragment"
-            app:destination="@id/mainFragment"
-            app:popUpTo="@id/mainFragment"
-            app:popUpToInclusive="true" />
-    </fragment>
-
 
     <!-- HomeFragment -->
     <fragment

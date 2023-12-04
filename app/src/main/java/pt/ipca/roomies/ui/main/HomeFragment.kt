@@ -1,4 +1,6 @@
 package pt.ipca.roomies.ui.main
 
-class HomeFragment {
+import androidx.fragment.app.Fragment
+
+class HomeFragment : Fragment() {
 }
