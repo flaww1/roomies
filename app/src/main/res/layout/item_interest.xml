@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewModel"
-            type="pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationUserInterestsViewModel" />
+            type="pt.ipca.roomies.ui.main.profile.ProfileUserInterestsViewModel" />
         <!-- Add other data binding variables if needed -->
     </data>
 
@@ -20,9 +20,10 @@
             android:id="@+id/checkboxInterest"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Interest">
+            android:layout_marginStart="8dp"
+            android:clickable="true"
+            android:focusable="false" /> <!-- Add this line -->
 
-        </com.google.android.material.checkbox.MaterialCheckBox>
 
         <!-- Add other views for interest details if needed -->
         <com.google.android.material.textview.MaterialTextView

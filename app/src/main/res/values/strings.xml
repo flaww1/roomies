@@ -7,6 +7,7 @@
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="email">Email</string>
+    <string name="create_profile_message">Looks like you don\'t have a profile created yet. let\'s do that now!</string>
 
 
 </resources>

@@ -1,6 +1,7 @@
 package pt.ipca.roomies.ui.authentication.login
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,9 +31,11 @@ class LoginFragment : Fragment() {
     private val viewModel: LoginViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d("pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment", "pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment onViewCreated")
+
         super.onViewCreated(view, savedInstanceState)
         userViewModel = activity?.run {
-            ViewModelProvider(this).get(UserViewModel::class.java)
+            ViewModelProvider(this)[UserViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
         // After the user logs in successfully
@@ -48,11 +51,12 @@ class LoginFragment : Fragment() {
 
         // Observe the login result
         viewModel.loginResult.observe(viewLifecycleOwner) { result ->
+            Log.d("LoginFragment", "Login result observed: $result")
             when (result) {
                 is LoginViewModel.LoginResult.Success -> {
 
-                    // Example: Navigate to the home screen
-                    findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+                    Log.d("LoginFragment", "Navigating to the next fragment")
+                    navigateToHomeFragment()
                 }
                 is LoginViewModel.LoginResult.Error -> {
                     // Handle login error, show a message to the user, etc.
@@ -62,6 +66,10 @@ class LoginFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun navigateToHomeFragment() {
+        findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
     }
 
 

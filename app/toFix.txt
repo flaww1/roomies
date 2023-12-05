@@ -1,0 +1,7 @@
+To Fix:
+
+- Use local storage to save the data of the user in the registration steps,
+for when the user exits the app and returns to the registration process, the data is not lost, and the user resumes the registration steps.
+
+
+

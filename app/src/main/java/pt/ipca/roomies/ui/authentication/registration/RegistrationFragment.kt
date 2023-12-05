@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.repositories.RegistrationRepository
 import pt.ipca.roomies.databinding.FragmentRegistrationBinding
 
 
@@ -18,6 +20,7 @@ class RegistrationFragment : Fragment() {
     private lateinit var userId: String // Declare userId here
 
     private val viewModel: RegistrationViewModel by viewModels()
+    private val registrationRepository = RegistrationRepository()
 
     private var _binding: FragmentRegistrationBinding? = null
     private val binding get() = _binding!!
@@ -145,6 +148,9 @@ class RegistrationFragment : Fragment() {
                     val userId = user?.uid
 
                     if (userId != null) {
+                        // Store user information in Firestore during the initial registration
+                        registrationRepository.storeUserInFirestore(userId, email, password, binding.editTextFirstName.text.toString(), binding.editTextLastName.text.toString())
+
                         // Update the user in the ViewModel with the obtained userId
                         viewModel.updateUserId(userId)
 
@@ -168,9 +174,5 @@ class RegistrationFragment : Fragment() {
     }
 
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        viewModel.reset()
-        _binding = null
-    }
+
 }

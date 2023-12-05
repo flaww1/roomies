@@ -1,0 +1,109 @@
+<!-- fragment_registration_user_interests.xml -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+
+    tools:context=".ui.main.profile.ProfileUserInterestsViewModel"
+    >
+
+
+    <data>
+        <variable
+            name="viewModel"
+            type="pt.ipca.roomies.ui.main.profile.ProfileUserInterestsViewModel" />
+        <variable
+            name="interestTagsSelected"
+            type="Boolean" />
+        <variable
+            name="languageTagsSelected"
+            type="Boolean" />
+        <variable
+            name="personalityTagsSelected"
+            type="Boolean" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <!-- Section for Language tags -->
+        <TextView
+            android:id="@+id/tvSelectedLanguages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Selected Languages"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewLanguages"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="vertical"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="2"
+            tools:listitem="@layout/item_interest" />
+
+        <!-- Section for Interest tags -->
+        <TextView
+            android:id="@+id/tvSelectedInterests"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Selected Interests"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewInterests"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="vertical"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="2"
+            tools:listitem="@layout/item_interest" />
+
+        <!-- Section for Personality tags -->
+        <TextView
+            android:id="@+id/tvSelectedPersonality"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Selected Personality"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewPersonality"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="vertical"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="2"
+            tools:listitem="@layout/item_interest" />
+
+        <!-- Replace Button with MaterialButton -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/nextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Next"
+            android:layout_marginTop="16dp"
+            android:enabled="@{interestTagsSelected &amp;&amp; languageTagsSelected &amp;&amp; personalityTagsSelected}"
+            />
+
+        <!-- Replace Button with MaterialButton -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Back"/>
+    </LinearLayout>
+
+</layout>
