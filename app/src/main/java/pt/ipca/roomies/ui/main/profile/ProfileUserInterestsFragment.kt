@@ -1,4 +1,4 @@
-package pt.ipca.roomies.ui.authentication.registration.registrationsteps
+package pt.ipca.roomies.ui.main.profile
 
 import User
 import android.net.Uri
@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
@@ -24,13 +23,13 @@ import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.data.entities.TagType
 import pt.ipca.roomies.data.entities.UserTags
 import pt.ipca.roomies.data.repositories.ProfileTagsRepository
-import pt.ipca.roomies.databinding.FragmentRegistrationUserInterestsBinding
+import pt.ipca.roomies.databinding.FragmentProfileUserInterestsBinding
 import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 
-class RegistrationUserInterestsFragment : Fragment() {
+class ProfileUserInterestsFragment : Fragment() {
 
-    private lateinit var binding: FragmentRegistrationUserInterestsBinding
-    private lateinit var viewModel: RegistrationUserInterestsViewModel
+    private lateinit var binding: FragmentProfileUserInterestsBinding
+    private lateinit var viewModel: ProfileUserInterestsViewModel
     private lateinit var viewModelRegistration: RegistrationViewModel
     private lateinit var profileTagsRepository: ProfileTagsRepository
     private lateinit var selectedTagsByType: MutableMap<TagType, MutableLiveData<MutableSet<ProfileTags>>>
@@ -48,8 +47,8 @@ class RegistrationUserInterestsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentRegistrationUserInterestsBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(this)[RegistrationUserInterestsViewModel::class.java]
+        binding = FragmentProfileUserInterestsBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(this)[ProfileUserInterestsViewModel::class.java]
         viewModelRegistration =
             ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
         profileTagsRepository = ProfileTagsRepository()
@@ -151,16 +150,16 @@ class RegistrationUserInterestsFragment : Fragment() {
                 selectedTagsLiveData.observe(viewLifecycleOwner) { selectedTags ->
                     val areTagsSelected = selectedTags.isNotEmpty()
                     Log.d("InterestsFragment", "TagType: $tagType, AreTagsSelected: $areTagsSelected")
-                   // when (tagType) {
-                     //   TagType.Interest -> binding.interestTagsSelected = areTagsSelected
-                       // TagType.Language -> binding.languageTagsSelected = areTagsSelected
-                       // TagType.Personality -> binding.personalityTagsSelected = areTagsSelected
-                    //}
+                    when (tagType) {
+                        TagType.Interest -> binding.interestTagsSelected = areTagsSelected
+                        TagType.Language -> binding.languageTagsSelected = areTagsSelected
+                        TagType.Personality -> binding.personalityTagsSelected = areTagsSelected
+                    }
 
-              //      binding.nextButton.isEnabled =
-                //        binding.interestTagsSelected == true &&
-                  //              binding.languageTagsSelected == true &&
-                    //            binding.personalityTagsSelected == true
+                    binding.nextButton.isEnabled =
+                        binding.interestTagsSelected == true &&
+                            binding.languageTagsSelected == true &&
+                               binding.personalityTagsSelected == true
                     Log.d("InterestsFragment", "Is Next Button Enabled: ${binding.nextButton.isEnabled}")
                 }
             }
@@ -181,11 +180,11 @@ class RegistrationUserInterestsFragment : Fragment() {
                 val allSelectedTags = mutableListOf<UserTags>()
 
                 // Map and add selected interests
-                // allSelectedTags.addAll(selectedInterests)
+                allSelectedTags.addAll(selectedInterests.map { convertToUserTags(it) })
                 // Map and add selected languages
-                // allSelectedTags.addAll(selectedLanguages)
+                allSelectedTags.addAll(selectedLanguages.map { convertToUserTags(it) })
                 // Map and add selected personality
-                // allSelectedTags.addAll(selectedPersonality)
+                allSelectedTags.addAll(selectedPersonality.map { convertToUserTags(it) })
 
                 // Update the ViewModel with all selected tags
                 viewModel.updateAllSelectedTags(allSelectedTags)
@@ -201,16 +200,28 @@ class RegistrationUserInterestsFragment : Fragment() {
         }
 
 
+
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
     }
 
+    private fun convertToUserTags(profileTag: ProfileTags): UserTags {
+        return UserTags(
+            userTagId = null, // Assuming userTagId is not available in ProfileTags
+            userId = userId ?: "", // Assuming userId is not available in ProfileTags
+            tagId = profileTag.tagId,
+            tagType = profileTag.tagType,
+            isSelected = profileTag.isSelected,
+            tagName = profileTag.tagName
+        )
+    }
 
 
-    private fun navigateToHomePage() {
+
+    private fun navigateToProfilePage() {
         // Use NavController to navigate to the next fragment
-        //findNavController().navigate(R.id.action_roleSelectionFragment_to_registrationUserProfileInfoFragment)
+        findNavController().navigate(R.id.action_profileUserInterestsFragment_to_profileFragment)
     }
 
     private suspend fun onFinalStepCompleted(user: User, selectedTags: List<UserTags>) {
@@ -218,60 +229,13 @@ class RegistrationUserInterestsFragment : Fragment() {
         selectedTags.forEach { tag ->
             profileTagsRepository.associateTagWithUser(user.userId, tag.tagId, tag.tagType, tag.isSelected)
         }
-        // Upload profile picture to Firebase Storage
-        viewModelRegistration.selectedImageUri.value?.let { uploadProfilePicture(user.userId, it) }
 
-        // Call registerUser from RegistrationViewModel to complete the registration
-        val registrationResult = viewModelRegistration.registerUser()
-
-        // Check the registration result
-        if (registrationResult) {
-            // Registration successful, navigate to the next fragment or perform other actions
-            navigateToHomePage()
-        } else {
-            // Registration failed, handle the error
-            // You can use viewModelRegistration.errorMessage.value to get the error message
-            Toast.makeText(requireContext(), viewModelRegistration.errorMessage.value, Toast.LENGTH_SHORT).show()
-        }
+        // Other operations specific to completing the user profile and navigating to the next fragment
+        navigateToProfilePage()
     }
 
-    private fun updateProfilePictureUrl(userId: String, profilePictureUrl: String) {
-        // Update the user's profile with the new profile picture URL in Firestore
-        val userCollection = firestore.collection("users")
-        userCollection.document(userId)
-            .update("profilePictureUrl", profilePictureUrl)
-            .addOnSuccessListener {
-                // Profile picture URL updated successfully
-            }
-            .addOnFailureListener {
-                // Handle failure
-            }
-    }
 
-    private fun getStorageReference(uri: Uri): StorageReference {
-        val storage = FirebaseStorage.getInstance()
-        val storageReference = storage.reference
-        return storageReference.child("profile_pictures/${System.currentTimeMillis()}_${uri.lastPathSegment}")
-    }
 
-    private fun uploadProfilePicture(userId: String, imageUri: Uri) {
-        // Your image upload logic here
-        // Use Firebase Storage or any other method to upload the image
 
-        // Example using Firebase Storage
-        val storageReference = getStorageReference(imageUri)
-        storageReference.putFile(imageUri)
-            .addOnSuccessListener {
-                storageReference.downloadUrl.addOnSuccessListener { downloadUrl ->
-                    // Update the user's profile with the download URL
-                    updateProfilePictureUrl(userId, downloadUrl.toString())
-                }
-            }
-            .addOnFailureListener {
-                // Handle failure
-            }
-    }
+
 }
-
-
-

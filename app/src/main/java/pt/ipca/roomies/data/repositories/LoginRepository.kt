@@ -1,3 +1,5 @@
+package pt.ipca.roomies.data.repositories
+
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.tasks.await

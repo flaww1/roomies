@@ -1,7 +1,5 @@
-package pt.ipca.roomies.ui.authentication.registration.registrationsteps
+package pt.ipca.roomies.ui.main.profile
 
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup

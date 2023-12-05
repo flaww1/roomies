@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".ui.authentication.registration.registrationsteps.RegistrationUserProfileInfoFragment">
+    tools:context=".ui.main.profile.RegistrationUserProfileInfoFragment">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -75,13 +75,13 @@
                 android:text="Back"/>
 
             <com.google.android.material.button.MaterialButton
-
-                android:id="@+id/buttonNext"
+                android:id="@+id/nextButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:text="Next"
-                android:enabled="false"/>
+                android:layout_marginTop="16dp"
+                />
+
 
 
             <com.google.android.material.button.MaterialButton
@@ -100,6 +100,15 @@
                 android:scaleType="centerCrop"
                 android:layout_marginTop="16dp"
                 android:contentDescription="Profile picture preview." />
+
+            <EditText
+                android:id="@+id/editTextBio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Bio"
+                android:inputType="textMultiLine"
+                android:maxLines="4"
+                android:autofillHints="Talk about yourself!" />
         </LinearLayout>
 
     </ScrollView>

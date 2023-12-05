@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewModel"
-            type="pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationUserInterestsViewModel" />
+            type="pt.ipca.roomies.ui.main.profile.ProfileUserInterestsViewModel" />
         <!-- Add other data binding variables if needed -->
     </data>
 

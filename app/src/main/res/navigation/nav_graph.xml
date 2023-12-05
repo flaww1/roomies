@@ -79,14 +79,42 @@
             app:popUpToInclusive="true" />
     </fragment>
 
-    <!-- HomeFragment -->
+    <!-- pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment -->
     <fragment
         android:id="@+id/homeFragment"
         android:name="pt.ipca.roomies.ui.main.HomeFragment"
         android:label="HomeFragment">
-        <!-- No back track action defined for HomeFragment -->
+        <!-- No back track action defined for pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment -->
+        <action
+            android:id="@+id/action_homeFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
     </fragment>
 
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="pt.ipca.roomies.ui.main.profile.ProfileFragment"
+        android:label="ProfileFragment">
+        <action
+            android:id="@+id/action_profileFragment_to_profileUserInfoFragment"
+            app:destination="@id/profileUserInfoFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/profileUserInfoFragment"
+        android:name="pt.ipca.roomies.ui.main.profile.ProfileUserInfoFragment"
+        android:label="ProfileUserInfoFragment">
+        <action
+            android:id="@+id/profileUserInfoFragment_to_profileUserInterestsFragment"
+            app:destination="@id/profileUserInterestsFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileUserInterestsFragment"
+        android:name="pt.ipca.roomies.ui.main.profile.ProfileUserInfoFragment"
+        android:label="ProfileUserInterestsFragment">
+        <action
+            android:id="@+id/action_profileUserInterestsFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+    </fragment>
     <!-- Add other fragments as needed -->
 
 </navigation>

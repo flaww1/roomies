@@ -3,6 +3,7 @@ package pt.ipca.roomies.ui.authentication.registration.registrationsteps
 
 import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,9 +36,10 @@ class RegistrationRoleSelectionFragment : Fragment() {
 
         binding.nextButton.setOnClickListener {
             val role = if (binding.landlordRadioButton.isChecked) "Landlord" else "User"
+            Log.d("RoleSelectionFragment", "Selected Role: $role")
+
             viewModel.updateUserRole(role)
-            // Optionally, update user role in Firestore or other data store
-            // Navigate to the home fragment or main application screen
+
             navigateToHomeFragment()
         }
 
@@ -51,9 +53,6 @@ class RegistrationRoleSelectionFragment : Fragment() {
         findNavController().navigate(R.id.action_registrationRoleSelectionFragment_to_homeFragment)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+
 }
 

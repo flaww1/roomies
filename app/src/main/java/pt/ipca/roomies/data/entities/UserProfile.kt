@@ -7,7 +7,6 @@ data class UserProfile(
     val bio: String,
     val gender: String,
     val occupation: String,
-    val selectedTags: List<SelectedTag>,
     val profilePictureUrl: String,
     val birthDate: String,
 

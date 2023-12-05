@@ -1,4 +1,4 @@
-package pt.ipca.roomies.ui.authentication.registration.registrationsteps
+package pt.ipca.roomies.ui.main.profile
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,7 +10,7 @@ import pt.ipca.roomies.data.entities.TagType
 import pt.ipca.roomies.data.entities.UserTags
 import pt.ipca.roomies.data.repositories.ProfileTagsRepository
 
-class RegistrationUserInterestsViewModel : ViewModel() {
+class ProfileUserInterestsViewModel : ViewModel() {
 
 
     private val profileTagsRepository = ProfileTagsRepository()
@@ -63,24 +63,6 @@ class RegistrationUserInterestsViewModel : ViewModel() {
         return selectedTagsMap[tagType] ?: MutableLiveData()
     }
 
-    // Generic function to update selected tags for a given tag type
-
-    private fun convertUserTagsToProfileTags(
-        userTags: List<UserTags>,
-        profileTags: List<ProfileTags>
-    ): List<ProfileTags> {
-        val profileTagMap = profileTags.associateBy { it.tagId }
-        return userTags.mapNotNull { userTag ->
-            profileTagMap[userTag.tagId]?.let { profileTag ->
-                profileTag.copy(tagName = profileTag.tagName)
-            }
-        }
-    }
-    fun updateProfileTags(userTags: List<UserTags>, tagType: TagType) {
-        val profileTags = availableTagsMap[tagType]?.value ?: emptyList()
-        val updatedProfileTags = convertUserTagsToProfileTags(userTags, profileTags)
-        selectedTagsMap[tagType]?.value = updatedProfileTags
-    }
 
     // Add a function to update all selected tags
     fun updateAllSelectedTags(allSelectedTags: List<UserTags>) {
@@ -92,11 +74,10 @@ class RegistrationUserInterestsViewModel : ViewModel() {
             } else {
                 currentTags - tag
             }
-            //selectedTagsMap[tagType]?.value = updatedTags
+           //selectedTagsMap[tagType]?.value = updatedTags
         }
     }
 }
-
 
 
 

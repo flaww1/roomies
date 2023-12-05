@@ -20,7 +20,7 @@ class RegistrationFragment : Fragment() {
     private lateinit var userId: String // Declare userId here
 
     private val viewModel: RegistrationViewModel by viewModels()
-    private val registrationRepository = RegistrationRepository(viewModel)
+    private val registrationRepository = RegistrationRepository()
 
     private var _binding: FragmentRegistrationBinding? = null
     private val binding get() = _binding!!
@@ -174,9 +174,5 @@ class RegistrationFragment : Fragment() {
     }
 
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        viewModel.reset()
-        _binding = null
-    }
+
 }

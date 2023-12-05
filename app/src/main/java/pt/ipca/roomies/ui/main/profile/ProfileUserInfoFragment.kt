@@ -1,4 +1,4 @@
-package pt.ipca.roomies.ui.authentication.registration.registrationsteps
+package pt.ipca.roomies.ui.main.profile
 
 import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 import android.content.Intent
@@ -17,21 +17,24 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.jaredrummler.materialspinner.MaterialSpinner
-import pt.ipca.roomies.R
 import Occupation
 import Gender
 import UserProfile
 import android.app.Activity.RESULT_OK
 import android.widget.ArrayAdapter
+import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
-import pt.ipca.roomies.databinding.FragmentRegistrationUserProfileInfoBinding
+import pt.ipca.roomies.data.repositories.ProfileRepository
+import pt.ipca.roomies.databinding.FragmentProfileUserInfoBinding
 import java.util.Calendar
 
-class RegistrationUserProfileInfoFragment : Fragment() {
+class ProfileUserInfoFragment : Fragment() {
     private lateinit var viewModelRegistration: RegistrationViewModel
-    private var _binding: FragmentRegistrationUserProfileInfoBinding? = null
+    private var _binding: FragmentProfileUserInfoBinding? = null
     private val binding get() = _binding!!
     private var selectedImageUri: Uri? = null
+    private val profileRepository = ProfileRepository()
     private val locationsInPortugal = listOf("Porto", "Lisbon", "Faro", "Coimbra", "Braga", "Funchal", "Evora", "Aveiro", "Viseu")
 
 
@@ -59,7 +62,7 @@ class RegistrationUserProfileInfoFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentRegistrationUserProfileInfoBinding.inflate(inflater, container, false)
+        _binding = FragmentProfileUserInfoBinding.inflate(inflater, container, false)
         viewModelRegistration = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
 
         return binding.root
@@ -96,9 +99,9 @@ class RegistrationUserProfileInfoFragment : Fragment() {
             }
         }
 
-        binding.buttonNext.setOnClickListener {
+        binding.nextButton.setOnClickListener {
             if (validateInputs()) {
-                navigateToUserInterestsFragment()
+                saveUserProfileAndNavigateToNextFragment()
             }
         }
 
@@ -153,33 +156,51 @@ class RegistrationUserProfileInfoFragment : Fragment() {
     }
 
     private fun updateNextButtonState() {
-        binding.buttonNext.isEnabled = validateInputs()
+        binding.nextButton.isEnabled = validateInputs()
     }
 
-    private fun navigateToUserInterestsFragment() {
+    private fun saveUserProfileAndNavigateToNextFragment() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+
         val birthDate = binding.editTextBirthdate.text.toString()
         val location = binding.autoCompleteTextViewLocation.text.toString()
-        val gender =
-            binding.spinnerGender.getItems<String>()[binding.spinnerGender.selectedIndex]
-        val occupation =
-            binding.spinnerOccupation.getItems<String>()[binding.spinnerOccupation.selectedIndex]
+        val gender = binding.spinnerGender.getItems<String>()[binding.spinnerGender.selectedIndex]
+        val occupation = binding.spinnerOccupation.getItems<String>()[binding.spinnerOccupation.selectedIndex]
+        val bio = binding.editTextBio.text.toString()
 
-        val userProfile = UserProfile(
-            userProfileId = "",
-            userId = "",
-            profilePictureUrl = selectedImageUri.toString(),
-            location = location,
-            bio = "",
-            gender = gender,
-            occupation = occupation,
-            birthDate = birthDate,
-            selectedTags = emptyList()
-        )
+        if (userId != null && selectedImageUri != null) {
 
-        viewModelRegistration.updateSelectedImageUri(selectedImageUri)
-        viewModelRegistration.updateUserProfile(userProfile)
-       // findNavController().navigate(R.id.action_registrationUserProfileInfoFragment_to_userInterestsFragment)
+            val userProfile = UserProfile(
+                userProfileId = "",
+                userId = userId,
+                profilePictureUrl = "", // Leave it empty for now
+                location = location,
+                bio = bio,
+                gender = gender,
+                occupation = occupation,
+                birthDate = birthDate,
+
+            )
+
+            profileRepository.createUserProfile(
+                userProfile,
+                onSuccess = {
+                    // Handle success, e.g., upload the profile picture and navigate to the next fragment
+                    profileRepository.uploadProfilePicture(userId, selectedImageUri!!)
+                },
+                onFailure = { e ->
+                    // Handle failure, e.g., show an error message
+                    Toast.makeText(requireContext(), "Failed to create user profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            )
+        } else {
+            // Handle the case where the user is not authenticated or selectedImageUri is null
+            Toast.makeText(requireContext(), "User not authenticated or no image selected", Toast.LENGTH_SHORT).show()
+        }
+
+        // You can also save the data to a repository or perform any necessary operations here.
     }
+
 
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
@@ -216,8 +237,4 @@ class RegistrationUserProfileInfoFragment : Fragment() {
         dpd.show(requireActivity().supportFragmentManager, "Datepickerdialog")
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
 }
