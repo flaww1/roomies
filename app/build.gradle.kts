@@ -55,6 +55,7 @@ dependencies {
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
+
     implementation("com.google.android.material:material:1.10.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.google.firebase:firebase-firestore-ktx:24.9.1")
@@ -82,12 +83,11 @@ dependencies {
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     implementation ("com.wdullaer:materialdatetimepicker:4.2.3")
 
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
 
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
 
-
-
-
-
+    implementation ("com.google.android.play:core:1.10.3")
 
 
 

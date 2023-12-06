@@ -21,10 +21,12 @@ import Occupation
 import Gender
 import UserProfile
 import android.app.Activity.RESULT_OK
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
+import pt.ipca.roomies.R
 import pt.ipca.roomies.data.repositories.ProfileRepository
 import pt.ipca.roomies.databinding.FragmentProfileUserInfoBinding
 import java.util.Calendar
@@ -187,6 +189,8 @@ class ProfileUserInfoFragment : Fragment() {
                 onSuccess = {
                     // Handle success, e.g., upload the profile picture and navigate to the next fragment
                     profileRepository.uploadProfilePicture(userId, selectedImageUri!!)
+                    Log.d("ProfileUserInfoFragment", "User profile created successfully, navigating to next fragment")
+                    findNavController().navigate(R.id.action_profileUserInfoFragment_to_profileUserInterestsFragment)
                 },
                 onFailure = { e ->
                     // Handle failure, e.g., show an error message

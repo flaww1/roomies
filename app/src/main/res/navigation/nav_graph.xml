@@ -79,12 +79,12 @@
             app:popUpToInclusive="true" />
     </fragment>
 
-    <!-- pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment -->
+    <!-- pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment -->
     <fragment
         android:id="@+id/homeFragment"
         android:name="pt.ipca.roomies.ui.main.HomeFragment"
         android:label="HomeFragment">
-        <!-- No back track action defined for pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment -->
+        <!-- No back track action defined for pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment -->
         <action
             android:id="@+id/action_homeFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
@@ -94,6 +94,7 @@
         android:id="@+id/profileFragment"
         android:name="pt.ipca.roomies.ui.main.profile.ProfileFragment"
         android:label="ProfileFragment">
+
         <action
             android:id="@+id/action_profileFragment_to_profileUserInfoFragment"
             app:destination="@id/profileUserInfoFragment" />
@@ -103,18 +104,39 @@
         android:name="pt.ipca.roomies.ui.main.profile.ProfileUserInfoFragment"
         android:label="ProfileUserInfoFragment">
         <action
-            android:id="@+id/profileUserInfoFragment_to_profileUserInterestsFragment"
+            android:id="@+id/action_profileUserInfoFragment_to_profileUserInterestsFragment"
             app:destination="@id/profileUserInterestsFragment"/>
     </fragment>
 
     <fragment
         android:id="@+id/profileUserInterestsFragment"
-        android:name="pt.ipca.roomies.ui.main.profile.ProfileUserInfoFragment"
+        android:name="pt.ipca.roomies.ui.main.profile.ProfileUserInterestsFragment"
         android:label="ProfileUserInterestsFragment">
         <action
             android:id="@+id/action_profileUserInterestsFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
     </fragment>
     <!-- Add other fragments as needed -->
+    <!-- res/navigation/nav_graph.xml -->
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="pt.ipca.roomies.ui.main.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_navigation_home_to_navigation_profile"
+            app:destination="@id/navigation_profile" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="pt.ipca.roomies.ui.main.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile_display" >
+        <action
+            android:id="@+id/action_navigation_profile_to_navigation_home"
+            app:destination="@id/navigation_home" />
+    </fragment>
+
 
 </navigation>
