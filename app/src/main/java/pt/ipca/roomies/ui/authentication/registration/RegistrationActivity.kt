@@ -2,6 +2,7 @@ package pt.ipca.roomies.ui.authentication.registration
 
 
 import android.os.Bundle
+import android.util.Log
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
@@ -16,6 +17,7 @@ class RegistrationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRegistrationBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        Log.d("RegistrationActivity", "Registration activity created")
 
         // Load the initial registration fragment
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment

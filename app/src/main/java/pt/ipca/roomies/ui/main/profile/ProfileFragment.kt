@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
+import androidx.navigation.fragment.findNavController
 import pt.ipca.roomies.R
 import pt.ipca.roomies.databinding.FragmentProfileCreateBinding
 import pt.ipca.roomies.databinding.FragmentProfileDisplayBinding
@@ -27,7 +29,7 @@ class ProfileFragment : Fragment() {
         createBinding = FragmentProfileCreateBinding.inflate(inflater, container, false)
         displayBinding = FragmentProfileDisplayBinding.inflate(inflater, container, false)
 
-        // Return one of the root views based on the user profile state
+        // Return the root view based on the user profile state
         return if (userProfile == null) createBinding.root else displayBinding.root
     }
 
@@ -52,20 +54,28 @@ class ProfileFragment : Fragment() {
         // Set click listener for the "Create Profile" button
         createBinding.buttonCreateProfile.setOnClickListener {
             // Navigate to the profile creation screen or perform the necessary actions
-            // (e.g., start a new activity or replace the fragment)
+            findNavController().navigate(R.id.action_profileFragment_to_profileUserInfoFragment)
+
         }
     }
 
     private fun showProfileDisplayLayout(userProfile: UserProfile) {
         // Customize the profile display layout as needed
-        //displayBinding.textViewNameAge.text = getString(R.string.profile_name_age, userProfile.name, userProfile.age)
-        // Populate other views based on the user's profile data
+        // Display user profile information in the layout
+        /*displayBinding.imageViewProfilePicture.setImageResource(userProfile.profilePictureUrl)
+        displayBinding.textViewNameAge.text = getString(
+            R.string.profile_name_age,
+            userProfile.name,
+            userProfile.age.toString()
+        )
+
+         */
+        displayBinding.textViewLocation.text = userProfile.location
+        displayBinding.textViewBio.text = userProfile.bio
 
         // Set click listener for the "Edit Profile" button
         displayBinding.buttonEditProfile.setOnClickListener {
-            // Navigate to the profile editing screen or perform the necessary actions
-            // (e.g., start a new activity or replace the fragment)
+
         }
     }
-
 }
