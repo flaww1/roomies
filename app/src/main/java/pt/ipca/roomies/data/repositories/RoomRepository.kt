@@ -9,25 +9,56 @@ class RoomRepository {
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-    suspend fun getRooms(habitationId: String): List<Room> {
-        // Assuming you have a "rooms" collection in Firestore under each habitation
-        return firestore.collection("habitations")
-            .document(habitationId)
-            .collection("rooms")
-            .get()
-            .await()
-            .toObjects(Room::class.java)
+    suspend fun createRoom(room: Room, onSuccess: (DocumentReference) -> Unit, onFailure: (Exception) -> Unit) {
+        try {
+            val documentReference = firestore.collection("rooms")
+                .add(room)
+                .await()
+            onSuccess(documentReference)
+        } catch (e: Exception) {
+            onFailure(e)
+        }
     }
 
-    suspend fun createRoom(habitationId: String, room: Room): DocumentReference {
-        // Assuming you have a "rooms" collection in Firestore under each habitation
-        return firestore.collection("habitations")
-            .document(habitationId)
-            .collection("rooms")
-            .add(room)
-            .await()
+    suspend fun getRooms(onSuccess: (List<Room>) -> Unit, onFailure: (Exception) -> Unit) {
+        try {
+            val rooms = firestore.collection("rooms")
+                .get()
+                .await()
+                .toObjects(Room::class.java)
+            onSuccess(rooms)
+        } catch (e: Exception) {
+            onFailure(e)
+        }
     }
 
-    // Add more methods as needed for room-related operations
+    suspend fun deleteRoom(roomId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        try {
+            firestore.collection("rooms")
+                .document(roomId)
+                .delete()
+                .await()
+            onSuccess()
+        } catch (e: Exception) {
+            onFailure(e)
+        }
+    }
+
+    suspend fun updateRoom(roomId: String, updatedRoom: Room, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        try {
+            firestore.collection("rooms")
+                .document(roomId)
+                .set(updatedRoom)
+                .await()
+            onSuccess()
+        } catch (e: Exception) {
+            onFailure(e)
+        }
+    }
+
+
+
+
+
 
 }

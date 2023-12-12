@@ -1,0 +1,75 @@
+<!-- res/layout/fragment_create_room.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/editTextDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Description"/>
+
+    <EditText
+        android:id="@+id/editTextPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:inputType="numberDecimal"
+        android:hint="Price"/>
+
+    <Spinner
+        android:id="@+id/spinnerRoomType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:entries="@array/room_types"
+        android:prompt="@string/choose_room_type"/>
+
+    <Spinner
+        android:id="@+id/spinnerRoomSize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:entries="@array/room_sizes"
+        android:prompt="@string/choose_room_size"/>
+
+    <Spinner
+        android:id="@+id/spinnerLeaseDuration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:entries="@array/lease_durations"
+        android:prompt="@string/choose_lease_duration"/>
+
+    <CheckBox
+        android:id="@+id/checkBoxAirConditioning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Air Conditioning"/>
+
+    <CheckBox
+        android:id="@+id/checkBoxHeating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Heating"/>
+
+    <!-- Add more checkboxes for other amenities -->
+
+    <Button
+        android:id="@+id/createRoomButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Create Room"
+        android:layout_marginTop="16dp"
+        android:enabled="false"/>
+
+    <Button
+        android:id="@+id/backButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        android:layout_marginTop="8dp"/>
+</LinearLayout>

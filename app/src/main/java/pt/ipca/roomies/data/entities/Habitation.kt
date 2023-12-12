@@ -3,6 +3,7 @@ package pt.ipca.roomies.data.entities
 import User
 
 data class Habitation (
+    val habitationId: String,
     val landlordId: String,
     val address: String,
     val city : Cities,
@@ -16,7 +17,7 @@ data class Habitation (
     val noiseLevel : NoiseLevels,
     val guestPolicy : GuestPolicies,
     val securityMeasures: SecurityMeasures,
-    val tentants : List<User>,
+    val tenants : List<User>,
 
 
 
