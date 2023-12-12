@@ -22,7 +22,7 @@ class ProfileTagsRepository {
 
     fun associateTagWithUser(userId: String, tagId: String, tagType: TagType, isSelected: Boolean) {
 
-        val userTag = UserTags(userTagId = null ,userId, tagId, tagType, isSelected)
+        val userTag = UserTags(userId, tagId, tagType, isSelected)
 
         // Query the UserTags table to find an existing entry for this user and tag
         db.collection("userTags")

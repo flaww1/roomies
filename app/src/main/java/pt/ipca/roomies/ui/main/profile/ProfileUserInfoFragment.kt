@@ -172,37 +172,34 @@ class ProfileUserInfoFragment : Fragment() {
 
         if (userId != null && selectedImageUri != null) {
 
+            // Update the user profile picture URL in Firestore
+            profileRepository.updateProfilePictureUrl(userId, selectedImageUri.toString())
+
+            // Create the UserProfile object with the updated profile picture URL
             val userProfile = UserProfile(
-                userProfileId = "",
                 userId = userId,
-                profilePictureUrl = "", // Leave it empty for now
+                profilePictureUrl = selectedImageUri.toString(),
                 location = location,
                 bio = bio,
                 gender = gender,
                 occupation = occupation,
-                birthDate = birthDate,
-
+                birthDate = birthDate
             )
 
             profileRepository.createUserProfile(
-                userProfile,
+                userProfile = userProfile,
                 onSuccess = {
-                    // Handle success, e.g., upload the profile picture and navigate to the next fragment
-                    profileRepository.uploadProfilePicture(userId, selectedImageUri!!)
-                    Log.d("ProfileUserInfoFragment", "User profile created successfully, navigating to next fragment")
+                    // Navigate to the next fragment
                     findNavController().navigate(R.id.action_profileUserInfoFragment_to_profileUserInterestsFragment)
                 },
                 onFailure = { e ->
-                    // Handle failure, e.g., show an error message
-                    Toast.makeText(requireContext(), "Failed to create user profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Error saving user profile: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             )
         } else {
             // Handle the case where the user is not authenticated or selectedImageUri is null
             Toast.makeText(requireContext(), "User not authenticated or no image selected", Toast.LENGTH_SHORT).show()
         }
-
-        // You can also save the data to a repository or perform any necessary operations here.
     }
 
 

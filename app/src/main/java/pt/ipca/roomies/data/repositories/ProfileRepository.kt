@@ -24,10 +24,15 @@ class ProfileRepository {
             }
     }
 
-    fun updateUserProfile(userProfile: UserProfile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    fun updateUserProfile(
+        documentId: String,
+        userProfile: UserProfile,
+        onSuccess: () -> Unit,  // Corrected type
+        onFailure: (Exception) -> Unit  // Corrected type
+    ) {
         // Add your logic to update the user profile data in Firestore
         db.collection("userProfiles")
-            .document(userProfile.userProfileId)
+            .document(documentId)
             .set(userProfile)
             .addOnSuccessListener {
                 onSuccess.invoke()
@@ -36,7 +41,6 @@ class ProfileRepository {
                 onFailure.invoke(e)
             }
     }
-
     // Add other methods as needed for profile-related operations
 
     // Example method to get a user profile by user ID
@@ -57,7 +61,7 @@ class ProfileRepository {
             }
     }
 
-    private fun updateProfilePictureUrl(userId: String, profilePictureUrl: String) {
+    fun updateProfilePictureUrl(userId: String, profilePictureUrl: String) {
         // Update the user's profile with the new profile picture URL in Firestore
         val userCollection = firestore.collection("users")
         userCollection.document(userId)

@@ -1,7 +1,5 @@
 package pt.ipca.roomies.ui.main.profile
 
-import User
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,12 +12,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.launch
 import pt.ipca.roomies.R
-import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.data.entities.TagType
 import pt.ipca.roomies.data.entities.UserTags
 import pt.ipca.roomies.data.repositories.ProfileTagsRepository
@@ -32,9 +29,10 @@ class ProfileUserInterestsFragment : Fragment() {
     private lateinit var viewModel: ProfileUserInterestsViewModel
     private lateinit var viewModelRegistration: RegistrationViewModel
     private lateinit var profileTagsRepository: ProfileTagsRepository
-    private lateinit var selectedTagsByType: MutableMap<TagType, MutableLiveData<MutableSet<ProfileTags>>>
+    private var selectedTagsByType =
+        mutableMapOf<TagType, MutableLiveData<MutableSet<UserTags>>>()
     private val areTagsSelected: MutableMap<TagType, Boolean> = mutableMapOf()
-    private val selectedTags: MutableSet<ProfileTags> = mutableSetOf()
+    private val selectedTags: MutableSet<UserTags> = mutableSetOf()
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private var userId: String? = null // Use a nullable type
@@ -54,14 +52,14 @@ class ProfileUserInterestsFragment : Fragment() {
         profileTagsRepository = ProfileTagsRepository()
 
         // Initialize selectedTagsByType before using it
-        selectedTagsByType = mutableMapOf<TagType, MutableLiveData<MutableSet<ProfileTags>>>().also { map ->
+        selectedTagsByType = mutableMapOf<TagType, MutableLiveData<MutableSet<UserTags>>>().also { map ->
             TagType.values().forEach { tagType ->
                 map[tagType] = MutableLiveData(mutableSetOf())
             }
         }
 
         // Initialize Adapter here
-        val onTagClickListener: (ProfileTags, Boolean) -> Unit = { tag, isSelected ->
+        val onTagClickListener: (UserTags, Boolean) -> Unit = { tag, isSelected ->
             val selectedTagsForType = selectedTagsByType[tag.tagType]?.value ?: mutableSetOf()
             if (isSelected && !selectedTagsForType.contains(tag)) {
                 selectedTagsForType.add(tag)
@@ -74,10 +72,12 @@ class ProfileUserInterestsFragment : Fragment() {
                 areTagsSelected[tag.tagType] = false
             }
         }
-        // Initialize Adapter here
+
+        // Initialize Adapter for Interests
         adapterInterests = TagsAdapter(
             emptyList(),
             onTagClickListener,
+            binding.recyclerViewInterests, // Pass the correct RecyclerView instance
             profileTagsRepository,
             userId ?: "",
             selectedTagsByType = selectedTagsByType,
@@ -86,9 +86,11 @@ class ProfileUserInterestsFragment : Fragment() {
 
         binding.recyclerViewInterests.adapter = adapterInterests
 
+        // Initialize Adapter for Languages
         adapterLanguages = TagsAdapter(
             emptyList(),
             onTagClickListener,
+            binding.recyclerViewLanguages, // Pass the correct RecyclerView instance
             profileTagsRepository,
             userId ?: "",
             selectedTagsByType = selectedTagsByType,
@@ -101,6 +103,7 @@ class ProfileUserInterestsFragment : Fragment() {
         adapterPersonality = TagsAdapter(
             emptyList(),
             onTagClickListener,
+            binding.recyclerViewPersonality, // Pass the correct RecyclerView instance
             profileTagsRepository,
             userId ?: "",
             selectedTagsByType = selectedTagsByType,
@@ -108,6 +111,7 @@ class ProfileUserInterestsFragment : Fragment() {
         )
 
         binding.recyclerViewPersonality.adapter = adapterPersonality
+
 
         return binding.root
     }
@@ -133,17 +137,20 @@ class ProfileUserInterestsFragment : Fragment() {
 
             viewModel.availableTagsMap[TagType.Interest]?.observe(viewLifecycleOwner) { availableInterestTags ->
                 Log.d("InterestsFragment", "Available Interest Tags Changed: $availableInterestTags")
-                adapterInterests.updateData(viewModel.availableTagsMap[TagType.Interest]?.value ?: emptyList(), TagType.Interest)
+                val userTagsList = availableInterestTags?.map { convertToUserTags(it) } ?: emptyList()
+                adapterInterests.updateData(userTagsList, TagType.Interest)
             }
 
             viewModel.availableTagsMap[TagType.Language]?.observe(viewLifecycleOwner) { availableLanguageTags ->
                 Log.d("InterestsFragment", "Available Language Tags Changed: $availableLanguageTags")
-                adapterLanguages.updateData(viewModel.availableTagsMap[TagType.Language]?.value ?: emptyList(), TagType.Language)
+                val userTagsList = availableLanguageTags?.map { convertToUserTags(it) } ?: emptyList()
+                adapterLanguages.updateData(userTagsList, TagType.Language)
             }
 
             viewModel.availableTagsMap[TagType.Personality]?.observe(viewLifecycleOwner) { availablePersonalityTags ->
                 Log.d("InterestsFragment", "Available Personality Tags Changed: $availablePersonalityTags")
-                adapterPersonality.updateData(viewModel.availableTagsMap[TagType.Personality]?.value ?: emptyList(), TagType.Personality)
+                val userTagsList = availablePersonalityTags?.map { convertToUserTags(it) } ?: emptyList()
+                adapterPersonality.updateData(userTagsList, TagType.Personality)
             }
 
             selectedTagsByType.forEach { (tagType, selectedTagsLiveData) ->
@@ -158,24 +165,24 @@ class ProfileUserInterestsFragment : Fragment() {
 
                     binding.nextButton.isEnabled =
                         binding.interestTagsSelected == true &&
-                            binding.languageTagsSelected == true &&
-                               binding.personalityTagsSelected == true
+                                binding.languageTagsSelected == true &&
+                                binding.personalityTagsSelected == true
                     Log.d("InterestsFragment", "Is Next Button Enabled: ${binding.nextButton.isEnabled}")
                 }
             }
-
 
         } else {
             Log.e("InterestsFragment", "Adapters are not initialized")
         }
 
         binding.nextButton.setOnClickListener {
-            val user = viewModelRegistration.user.value
-            val selectedInterests = viewModel.selectedTagsMap[TagType.Interest]?.value
-            val selectedLanguages = viewModel.selectedTagsMap[TagType.Language]?.value
-            val selectedPersonality = viewModel.selectedTagsMap[TagType.Personality]?.value
+            val user = FirebaseAuth.getInstance().currentUser
 
-            if (user != null && !selectedInterests.isNullOrEmpty() && !selectedLanguages.isNullOrEmpty() && !selectedPersonality.isNullOrEmpty()) {
+            if (user != null) {
+                val selectedInterests = selectedTagsByType[TagType.Interest]?.value ?: emptySet()
+                val selectedLanguages = selectedTagsByType[TagType.Language]?.value ?: emptySet()
+                val selectedPersonality = selectedTagsByType[TagType.Personality]?.value ?: emptySet()
+
                 // Combine all selected tags into a single list
                 val allSelectedTags = mutableListOf<UserTags>()
 
@@ -194,11 +201,10 @@ class ProfileUserInterestsFragment : Fragment() {
                     onFinalStepCompleted(user, allSelectedTags)
                 }
             } else {
-                // Handle the case when selected tags are null or empty
-                Toast.makeText(requireContext(), "Selected tags are null or empty", Toast.LENGTH_SHORT).show()
+                // Handle the case when the user is null
+                Toast.makeText(requireContext(), "User is null", Toast.LENGTH_SHORT).show()
             }
         }
-
 
 
         binding.backButton.setOnClickListener {
@@ -206,36 +212,36 @@ class ProfileUserInterestsFragment : Fragment() {
         }
     }
 
-    private fun convertToUserTags(profileTag: ProfileTags): UserTags {
-        return UserTags(
-            userTagId = null, // Assuming userTagId is not available in ProfileTags
-            userId = userId ?: "", // Assuming userId is not available in ProfileTags
-            tagId = profileTag.tagId,
-            tagType = profileTag.tagType,
-            isSelected = profileTag.isSelected,
-            tagName = profileTag.tagName
-        )
-    }
-
-
 
     private fun navigateToProfilePage() {
         // Use NavController to navigate to the next fragment
         findNavController().navigate(R.id.action_profileUserInterestsFragment_to_profileFragment)
     }
 
-    private suspend fun onFinalStepCompleted(user: User, selectedTags: List<UserTags>) {
-        // Save selected tags to Firestore
-        selectedTags.forEach { tag ->
-            profileTagsRepository.associateTagWithUser(user.userId, tag.tagId, tag.tagType, tag.isSelected)
-        }
+    private suspend fun onFinalStepCompleted(user: FirebaseUser?, selectedTags: List<UserTags>) {
+        // Check if the user is not null before proceeding
+        if (user != null) {
+            // Save selected tags to Firestore
+            selectedTags.forEach { tag ->
+                profileTagsRepository.associateTagWithUser(user.uid, tag.tagId, tag.tagType, tag.isSelected)
+            }
 
-        // Other operations specific to completing the user profile and navigating to the next fragment
-        navigateToProfilePage()
+            // Other operations specific to completing the user profile and navigating to the next fragment
+            navigateToProfilePage()
+        } else {
+            // Handle the case when the user is null
+            Toast.makeText(requireContext(), "User is null", Toast.LENGTH_SHORT).show()
+        }
     }
 
 
-
-
-
+    private fun convertToUserTags(profileTag: UserTags): UserTags {
+        return UserTags(
+            userId = userId ?: "", // You need to provide the appropriate value for userId
+            tagId = profileTag.tagId,
+            tagType = profileTag.tagType,
+            isSelected = profileTag.isSelected,
+            tagName = profileTag.tagName
+        )
+    }
 }

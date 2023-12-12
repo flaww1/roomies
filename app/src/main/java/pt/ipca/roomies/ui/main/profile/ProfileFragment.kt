@@ -17,6 +17,7 @@ class ProfileFragment : Fragment() {
 
     private lateinit var createBinding: FragmentProfileCreateBinding
     private lateinit var displayBinding: FragmentProfileDisplayBinding
+    private val viewModel by lazy { ProfileViewModel() }
 
     // Example user profile, replace this with the actual user profile data
     private var userProfile: UserProfile? = null
@@ -37,14 +38,20 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Check if the user has a profile
-        if (userProfile == null) {
-            // Display the profile creation layout
-            showProfileCreationLayout()
-        } else {
-            // Display the profile display layout
-            showProfileDisplayLayout(userProfile!!)
+        viewModel.userProfile.observe(viewLifecycleOwner) { userProfile ->
+            if (userProfile != null) {
+                // Display the profile display layout
+                showProfileDisplayLayout(userProfile)
+            } else {
+                // Display the profile creation layout
+                showProfileCreationLayout()
+            }
         }
+
+        // Fetch the user profile
+        viewModel.getUserProfile()
     }
+
 
     private fun showProfileCreationLayout() {
         // Customize the profile creation layout as needed
