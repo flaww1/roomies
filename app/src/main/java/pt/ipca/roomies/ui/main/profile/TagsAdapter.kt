@@ -7,23 +7,25 @@ import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.data.entities.TagType
+import pt.ipca.roomies.data.entities.UserTags
 import pt.ipca.roomies.data.repositories.ProfileTagsRepository
 import pt.ipca.roomies.databinding.ItemInterestBinding
 
 class TagsAdapter(
-    private var tags: List<ProfileTags>,
-    private val onTagClickListener: (ProfileTags, Boolean) -> Unit,
+    private var tags: List<UserTags>,
+    private val onTagClickListener: (UserTags, Boolean) -> Unit,
+    private val recyclerView: RecyclerView,
     private val profileTagsRepository: ProfileTagsRepository,
     private var userId: String,
-    private val selectedTagsByType: MutableMap<TagType, MutableLiveData<MutableSet<ProfileTags>>> = mutableMapOf(),
-    private val selectedTags: MutableSet<ProfileTags>
+    private val selectedTagsByType: MutableMap<TagType, MutableLiveData<MutableSet<UserTags>>> = mutableMapOf(),
+    private val selectedTags: MutableSet<UserTags>
 ) : RecyclerView.Adapter<TagsAdapter.ViewHolder>() {
 
-    fun isTagSelected(tag: ProfileTags): Boolean {
+    fun isTagSelected(tag: UserTags): Boolean {
         return selectedTags.contains(tag)
     }
 
-    fun toggleSelection(holder: ViewHolder, tag: ProfileTags) {
+    fun toggleSelection(holder: ViewHolder, tag: UserTags) {
         val selectedTagType = tag.tagType
         val selectedTagsForType = selectedTagsByType[selectedTagType]?.value ?: mutableSetOf()
 
@@ -42,6 +44,7 @@ class TagsAdapter(
         holder.binding.checkboxInterest.isChecked = isTagSelected(tag)
 
         // Notify the adapter that the item's visual state has changed
+        notifyItemChanged(holder.absoluteAdapterPosition)
     }
 
     inner class ViewHolder(val binding: ItemInterestBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -51,42 +54,25 @@ class TagsAdapter(
                 val position = absoluteAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     val tag = tags[position]
-                    onTagClickListener.invoke(tag, !isTagSelected(tag))
+                    toggleSelection(this, tag) // Call toggleSelection function
                 }
             }
 
-            binding.checkboxInterest.setOnCheckedChangeListener { _, isChecked ->
+            binding.checkboxInterest.setOnCheckedChangeListener { _, _ ->
                 val position = absoluteAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     val tag = tags[position]
-                    toggleSelection(tag, isChecked)
+                    toggleSelection(this, tag) // Call toggleSelection function
                 }
             }
         }
 
-        fun bind(tag: ProfileTags) {
+        fun bind(tag: UserTags) {
             binding.textInterestTag.text = tag.tagName
             // Set the initial state of the checkbox
             binding.checkboxInterest.isChecked = isTagSelected(tag)
         }
-
-        private fun toggleSelection(tag: ProfileTags, isChecked: Boolean) {
-            val selectedTagType = tag.tagType
-            val selectedTagsForType = selectedTagsByType[selectedTagType]?.value ?: mutableSetOf()
-
-            if (isChecked && !selectedTagsForType.contains(tag) && selectedTagsForType.size < 5) {
-                selectedTagsForType.add(tag)
-                Log.d("TagsAdapter", "Tag added: $tag")
-            } else if (!isChecked && selectedTagsForType.contains(tag)) {
-                selectedTagsForType.remove(tag)
-                Log.d("TagsAdapter", "Tag removed: $tag")
-            }
-
-            // Update the MutableLiveData
-            selectedTagsByType[selectedTagType]?.value = selectedTagsForType
-        }
     }
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -103,13 +89,21 @@ class TagsAdapter(
         return tags.size
     }
 
-    fun updateData(newTags: List<ProfileTags>, tagType: TagType) {
-        tags = newTags.filter { it.tagType == tagType }
-        notifyItemChanged(0, tags.size)
+    fun updateData(newTags: List<UserTags>, tagType: TagType) {
+        recyclerView.post {
+            tags = newTags.filter { it.tagType == tagType }
+            notifyDataSetChanged()
+        }
     }
 
+
     fun updateUserId(newUserId: String) {
-        userId = newUserId
-        notifyItemChanged(0, tags.size)
+
+
+        recyclerView.post {
+            userId = newUserId
+            notifyDataSetChanged()
+        }
+
     }
 }

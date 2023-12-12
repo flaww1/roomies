@@ -4,41 +4,42 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.data.entities.TagType
 import pt.ipca.roomies.data.entities.UserTags
 import pt.ipca.roomies.data.repositories.ProfileTagsRepository
 
+
+
+
 class ProfileUserInterestsViewModel : ViewModel() {
 
-
     private val profileTagsRepository = ProfileTagsRepository()
-    private val _selectedTags: MutableLiveData<Map<TagType, List<ProfileTags>>> = MutableLiveData()
+    private val selectedTagsByType =
+        mutableMapOf<TagType, MutableLiveData<MutableSet<UserTags>>>()
+    val availableTagsMap = mutableMapOf<TagType, MutableLiveData<List<UserTags>>>()
+    private val _selectedTags = mutableMapOf<TagType, MutableLiveData<List<UserTags>>>()
+    private val areTagsSelected = mutableMapOf<TagType, Boolean>()
 
-    val selectedTags: LiveData<Map<TagType, List<ProfileTags>>> get() = _selectedTags
-    // Create a map to store LiveData for each tag type
-    val selectedTagsMap = mutableMapOf<TagType, MutableLiveData<List<ProfileTags>>>()
-
-    // Create a map to store LiveData for each available tag type
-    val availableTagsMap = mutableMapOf<TagType, MutableLiveData<List<ProfileTags>>>()
-    fun updateSelectedTags(tagType: TagType, tag: ProfileTags, isSelected: Boolean) {
-        val currentTags = selectedTagsMap[tagType]?.value ?: emptyList()
-
-        val updatedTags = if (isSelected) {
-            currentTags + tag
-        } else {
-            currentTags - tag
+    // Expose a LiveData for external access
+    val selectedTags: LiveData<Map<TagType, List<UserTags>>>
+        get() = MutableLiveData<Map<TagType, List<UserTags>>>().apply {
+            _selectedTags.forEach { (tagType, mutableLiveData) ->
+                mutableLiveData.observeForever {
+                    value = _selectedTags.mapValues { entry ->
+                        entry.value.value ?: emptyList()
+                    }
+                }
+            }
         }
 
-        selectedTagsMap[tagType]?.value = updatedTags
-    }
-
     init {
-        // Initialize LiveData for each tag type
         TagType.values().forEach { tagType ->
-            selectedTagsMap[tagType] = MutableLiveData()
+            selectedTagsByType[tagType] = MutableLiveData()
             availableTagsMap[tagType] = MutableLiveData()
+            _selectedTags[tagType] = MutableLiveData()
             fetchAvailableTagsByType(tagType)
         }
     }
@@ -47,8 +48,16 @@ class ProfileUserInterestsViewModel : ViewModel() {
         viewModelScope.launch {
             profileTagsRepository.getTagsByType(
                 tagType,
-                onSuccess = { tags ->
-                    availableTagsMap[tagType]?.value = tags
+                onSuccess = { snapshots ->
+                    // Convert DocumentSnapshots to UserTags
+                    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                    val userTagsList = snapshots.map { snapshot ->
+                        //val profileTag = snapshot.documents[0].toObject(ProfileTags::class.java)
+                        val documentId = snapshot.tagId
+
+                        //convertToUserTags(profileTag!!, userId, documentId)
+                    }
+                  //  availableTagsMap[tagType]?.value = userTagsList
                 },
                 onFailure = { e ->
                     // Handle failure
@@ -56,34 +65,69 @@ class ProfileUserInterestsViewModel : ViewModel() {
                 }
             )
         }
+
+        selectedTagsByType.forEach { (tagType, selectedTagsLiveData) ->
+            selectedTagsLiveData.observeForever { selectedTags ->
+                val filteredAvailableTags = availableTagsMap[tagType]?.value?.filterNot {
+                    it in selectedTags
+                } ?: emptyList()
+                availableTagsMap[tagType]?.value = filteredAvailableTags
+            }
+        }
     }
 
-    // Generic function to fetch selected tags for a given tag type
-    fun fetchSelectedTags(tagType: TagType): LiveData<List<ProfileTags>> {
-        return selectedTagsMap[tagType] ?: MutableLiveData()
+
+
+    private fun convertToUserTags(profileTag: ProfileTags, userId: String, documentId: String): UserTags {
+        return UserTags(
+            userId = userId,
+            tagId = documentId,
+            tagType = profileTag.tagType,
+            isSelected = profileTag.isSelected,
+            tagName = profileTag.tagName
+        )
     }
 
 
-    // Add a function to update all selected tags
     fun updateAllSelectedTags(allSelectedTags: List<UserTags>) {
         allSelectedTags.forEach { tag ->
             val tagType = tag.tagType
-            val currentTags = selectedTagsMap[tagType]?.value ?: emptyList()
+            val currentTags = selectedTagsByType[tagType]?.value ?: mutableSetOf()
+
             val updatedTags = if (tag.isSelected) {
                 currentTags + tag
             } else {
                 currentTags - tag
             }
-           //selectedTagsMap[tagType]?.value = updatedTags
+
+            selectedTagsByType[tagType]?.value = updatedTags.toMutableSet()
+        }
+    }
+
+    fun updateAreTagsSelected(tagType: TagType) {
+        val selectedTags = selectedTagsByType[tagType]?.value ?: emptySet()
+        areTagsSelected[tagType] = selectedTags.isNotEmpty()
+    }
+
+    fun updateSelectedTags(
+        tagType: TagType,
+        tag: UserTags,
+        isSelected: Boolean
+    ) {
+        viewModelScope.launch {
+            val currentSelectedTags = selectedTagsByType[tagType]?.value ?: mutableSetOf()
+
+            if (isSelected) {
+                currentSelectedTags.add(tag)
+            } else {
+                currentSelectedTags.remove(tag)
+            }
+
+            selectedTagsByType[tagType]?.value = currentSelectedTags
+
+            areTagsSelected[tagType] = currentSelectedTags.isNotEmpty()
+
+            _selectedTags[tagType]?.value = currentSelectedTags.toList()
         }
     }
 }
-
-
-
-
-
-
-
-
-
