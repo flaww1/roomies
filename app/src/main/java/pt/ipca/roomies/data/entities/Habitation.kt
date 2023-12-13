@@ -3,7 +3,7 @@ package pt.ipca.roomies.data.entities
 import User
 
 data class Habitation(
-    val habitationId: String = "",
+    val habitationId: String? = "",
     val landlordId: String = "",
     val address: String = "",
     val city: Cities = Cities.AVEIRO,

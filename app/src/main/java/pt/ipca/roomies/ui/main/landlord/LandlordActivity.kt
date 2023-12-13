@@ -1,6 +1,7 @@
 package pt.ipca.roomies.ui.main.landlord
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -17,6 +18,7 @@ class LandlordActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_landlord)
+        val sharedHabitationViewModel: SharedHabitationViewModel by viewModels()
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.landlordNavHostFragment) as NavHostFragment

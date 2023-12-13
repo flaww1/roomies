@@ -22,6 +22,7 @@ class HabitationRepository {
         }
     }
 
+
     suspend fun getHabitations(onSuccess: (List<Habitation>) -> Unit, onFailure: (Exception) -> Unit) {
         try {
             val habitations = firestore.collection("habitations")

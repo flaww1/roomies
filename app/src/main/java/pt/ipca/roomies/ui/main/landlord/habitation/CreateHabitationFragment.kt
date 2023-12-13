@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 import pt.ipca.roomies.R
 import pt.ipca.roomies.data.entities.*
 import pt.ipca.roomies.databinding.FragmentCreateHabitationBinding
+import pt.ipca.roomies.ui.main.landlord.SharedHabitationViewModel
 
 class CreateHabitationFragment : Fragment() {
 
@@ -44,6 +45,9 @@ class CreateHabitationFragment : Fragment() {
     private lateinit var createHabitationButton: Button
     private lateinit var backButton: Button
     private lateinit var binding: FragmentCreateHabitationBinding
+    private val sharedHabitationViewModel: SharedHabitationViewModel by lazy {
+        ViewModelProvider(requireActivity())[SharedHabitationViewModel::class.java]
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -149,6 +153,7 @@ class CreateHabitationFragment : Fragment() {
 
                 // Call the ViewModel function to create the habitation
                 viewModel.createHabitation(habitation)
+                sharedHabitationViewModel.setSelectedHabitation(habitation, "") // Pass the documentId if available
                 findNavController().navigateUp()
 
             } else {

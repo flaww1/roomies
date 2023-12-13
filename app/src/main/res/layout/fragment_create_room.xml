@@ -1,74 +1,94 @@
-<!-- res/layout/fragment_create_room.xml -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- fragment_create_room.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/editTextDescription"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:hint="@string/description">
+        android:layout_height="match_parent">
 
-    </EditText>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/editTextPrice"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="8dp"
-        android:inputType="numberDecimal"
-        android:hint="@string/price"/>
+            <EditText
+                android:id="@+id/editTextDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/description"/>
 
-    <Spinner
-        android:id="@+id/spinnerRoomType"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="8dp"
-        android:prompt="@string/choose_room_type"/>
+            <EditText
+                android:id="@+id/editTextPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:inputType="numberDecimal"
+                android:hint="@string/price"/>
 
-    <Spinner
-        android:id="@+id/spinnerRoomSize"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:prompt="@string/choose_room_size"/>
+            <Spinner
+                android:id="@+id/spinnerRoomType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:prompt="@string/choose_room_type"/>
 
-    <Spinner
-        android:id="@+id/spinnerLeaseDuration"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:prompt="@string/choose_lease_duration"/>
+            <Spinner
+                android:id="@+id/spinnerRoomSize"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:prompt="@string/choose_room_size"/>
 
-    <CheckBox
-        android:id="@+id/checkBoxAirConditioning"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Air Conditioning"/>
+            <Spinner
+                android:id="@+id/spinnerLeaseDuration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:prompt="@string/choose_lease_duration"/>
 
-    <CheckBox
-        android:id="@+id/checkBoxHeating"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Heating"/>
+            <CheckBox
+                android:id="@+id/checkBoxAirConditioning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Air Conditioning"
+                android:minHeight="48dp"/> <!-- Adjust minHeight as needed -->
 
-    <!-- Add more checkboxes for other amenities -->
+            <CheckBox
+                android:id="@+id/checkBoxHeating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Heating"
+                android:minHeight="48dp"/> <!-- Adjust minHeight as needed -->
 
-    <Button
-        android:id="@+id/createRoomButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Create Room"
-        android:layout_marginTop="16dp"
-        android:enabled="false"/>
+            <Button
+                android:id="@+id/btnSelectImages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select Images"
+                android:layout_marginTop="16dp"
+                android:minHeight="48dp"/> <!-- Adjust minHeight as needed -->
 
-    <Button
-        android:id="@+id/backButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Back"
-        android:layout_marginTop="8dp"/>
-</LinearLayout>
+
+            <!-- Add more checkboxes for other amenities -->
+
+            <Button
+                android:id="@+id/createRoomButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Create Room"
+                android:layout_marginTop="16dp"
+                android:enabled="false"
+                android:minHeight="48dp"/> <!-- Adjust minHeight as needed -->
+
+            <Button
+                android:id="@+id/backButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Back"
+                android:layout_marginTop="8dp"
+                android:minHeight="48dp"/> <!-- Adjust minHeight as needed -->
+        </LinearLayout>
+    </ScrollView>
+</RelativeLayout>

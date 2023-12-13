@@ -4,18 +4,24 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import pt.ipca.roomies.R
 import pt.ipca.roomies.data.entities.Room
+import pt.ipca.roomies.ui.main.landlord.SharedHabitationViewModel
 
 class RoomFragment : Fragment() {
 
     private lateinit var viewModel: RoomViewModel
     private lateinit var roomRecyclerView: RecyclerView
+    private val sharedHabitationViewModel: SharedHabitationViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,7 +33,7 @@ class RoomFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(this).get(RoomViewModel::class.java)
+        viewModel = ViewModelProvider(this)[RoomViewModel::class.java]
 
         roomRecyclerView = view.findViewById(R.id.roomRecyclerView)
         roomRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -40,7 +46,15 @@ class RoomFragment : Fragment() {
                 }
 
                 override fun onDeleteRoomClick(room: Room) {
-                    viewModel.deleteRoom(room.roomId)  // Assuming "id" is the document ID
+                    val selectedHabitation = sharedHabitationViewModel.selectedHabitation.value
+
+                    if (selectedHabitation == null) {
+                        Toast.makeText(requireContext(), "No habitation selected", Toast.LENGTH_SHORT).show()
+                        findNavController().navigateUp()
+                        return
+                    }
+
+                    selectedHabitation.habitationId?.let { viewModel.deleteRoom(it, room.roomId) }
                 }
             })
         })
@@ -58,5 +72,13 @@ class RoomFragment : Fragment() {
                 viewModel.refreshRooms()
             }
         })
+
+
+        val fabCreateRoom: FloatingActionButton = view.findViewById(R.id.fabCreateRoom)
+        fabCreateRoom.setOnClickListener {
+            // Navigate to the habitation creation screen
+
+            findNavController().navigate(R.id.action_roomFragment_to_createRoomFragment)
+        }
     }
 }

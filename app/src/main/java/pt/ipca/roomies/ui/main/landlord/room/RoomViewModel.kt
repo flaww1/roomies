@@ -12,64 +12,75 @@ class RoomViewModel : ViewModel() {
 
     private val roomRepository = RoomRepository()
 
+    // LiveData for the list of rooms
     private val _rooms = MutableLiveData<List<Room>>()
     val rooms: LiveData<List<Room>> get() = _rooms
 
+    // LiveData for the currently selected room
     private val _selectedRoom = MutableLiveData<Room>()
     val selectedRoom: LiveData<Room> get() = _selectedRoom
 
+    // LiveData for room creation success (contains the document ID)
     private val _roomCreationSuccess = MutableLiveData<String?>()
     val roomCreationSuccess: LiveData<String?> get() = _roomCreationSuccess
+
+    // LiveData for room deletion success
     private val _roomDeletionSuccess = MutableLiveData<Boolean>()
     val roomDeletionSuccess: LiveData<Boolean> get() = _roomDeletionSuccess
 
-    fun createRoom(room: Room) {
+    // Function to create a room
+    fun createRoom(habitationId: String, room: Room) {
         viewModelScope.launch {
-            roomRepository.createRoom(room,
+            roomRepository.createRoom(
+                habitationId,
+                room,
                 onSuccess = { documentId ->
                     _roomCreationSuccess.value = documentId.toString()
-                    refreshRooms()
                 },
                 onFailure = { e ->
                     // Handle failure
-                    _roomCreationSuccess.value = null
                     println("Failed to create room: $e")
                 }
             )
         }
     }
 
+
+
+    // Function to refresh the list of rooms
     fun refreshRooms() {
         viewModelScope.launch {
-            roomRepository.getRooms(
+            roomRepository.getAllRooms(
                 onSuccess = { rooms ->
                     _rooms.value = rooms
                 },
                 onFailure = { e ->
                     // Handle failure
-                    println("Failed to fetch rooms: $e")
+                    println("Failed to retrieve rooms: $e")
                 }
             )
         }
     }
 
-    fun deleteRoom(roomId: String) {
+    // Function to delete a room
+    fun deleteRoom(habitationId: String, roomId: String) {
         viewModelScope.launch {
             roomRepository.deleteRoom(
+                habitationId,
                 roomId,
                 onSuccess = {
                     _roomDeletionSuccess.value = true
-                    refreshRooms()
                 },
                 onFailure = { e ->
                     // Handle failure
-                    _roomDeletionSuccess.value = false
                     println("Failed to delete room: $e")
                 }
             )
         }
     }
 
+
+    // Function to select a room
     fun selectRoom(room: Room) {
         _selectedRoom.value = room
     }

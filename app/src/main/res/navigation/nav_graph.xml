@@ -164,15 +164,43 @@
             android:id="@+id/action_habitationFragment_to_createHabitationFragment"
             app:destination="@id/createHabitationFragment" />
 
+        <action
+            android:id="@+id/action_habitationFragment_to_roomFragment"
+            app:destination="@id/roomFragment" />
+
 
     </fragment>
     <fragment
         android:id="@+id/createHabitationFragment"
         android:name="pt.ipca.roomies.ui.main.landlord.habitation.CreateHabitationFragment"
-        android:label="CreateHabitationFragment" />
+        android:label="CreateHabitationFragment" >
         <action
             android:id="@+id/action_createHabitationFragment_to_habitationFragment"
             app:destination="@id/habitationFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/roomFragment"
+        android:name="pt.ipca.roomies.ui.main.landlord.room.RoomFragment"
+        android:label="RoomFragment" >
+        <action
+            android:id="@+id/action_roomFragment_to_createRoomFragment"
+            app:destination="@id/createRoomFragment" />
+        <action
+            android:id="@+id/action_roomFragment_to_habitationFragment"
+            app:destination="@id/habitationFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/createRoomFragment"
+        android:name="pt.ipca.roomies.ui.main.landlord.room.CreateRoomFragment"
+        android:label="CreateRoomFragment" >
+        <action
+            android:id="@+id/action_createRoomFragment_to_roomFragment"
+            app:destination="@id/roomFragment" />
+    </fragment>
 
 
 

@@ -2,6 +2,7 @@ package pt.ipca.roomies.data.entities
 
 data class Room(
     val roomId: String = "",
+    val habitationId: String = "",
     val landlordId: String = "",
     val description: String = "",
     val price: Double = 0.0,
@@ -11,7 +12,7 @@ data class Room(
     val matches: List<String> = emptyList(),
     val createdAt: Long = 0,
     val updatedAt: Long = 0,
-    val roomImages: List<String> = emptyList(),
+    var roomImages: List<String> = emptyList(),
     val leaseDuration: LeaseDuration,
     val roomType: RoomType,
     val roomStatus: RoomStatus,

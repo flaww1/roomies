@@ -2,6 +2,8 @@ package pt.ipca.roomies.ui
 
 
 import android.os.Bundle
+import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
@@ -20,7 +22,7 @@ import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderF
 import com.google.firebase.initialize
 import pt.ipca.roomies.R
 import pt.ipca.roomies.ui.authentication.UserViewModel
-
+import pt.ipca.roomies.ui.main.landlord.SharedHabitationViewModel
 
 
 class MainActivity : AppCompatActivity() {
@@ -40,7 +42,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.navigation_messages -> {
                     // Handle navigation to dashboard
-                    //   findNavController().navigate(R.id.messagesFragment)
+                    // findNavController().navigate(R.id.messagesFragment)
                     true
                 }
                 R.id.navigation_habitations -> {
@@ -56,6 +58,9 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+
+
+
 
 
         Firebase.initialize(context = this)

@@ -9,9 +9,16 @@ class RoomRepository {
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-    suspend fun createRoom(room: Room, onSuccess: (DocumentReference) -> Unit, onFailure: (Exception) -> Unit) {
+    suspend fun createRoom(
+        habitationId: String,
+        room: Room,
+        onSuccess: (DocumentReference) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         try {
-            val documentReference = firestore.collection("rooms")
+            val documentReference = firestore.collection("habitations")
+                .document(habitationId)
+                .collection("rooms")
                 .add(room)
                 .await()
             onSuccess(documentReference)
@@ -20,7 +27,30 @@ class RoomRepository {
         }
     }
 
-    suspend fun getRooms(onSuccess: (List<Room>) -> Unit, onFailure: (Exception) -> Unit) {
+    // Retrieve rooms associated with a specific habitation
+    suspend fun getRoomsForHabitation(
+        habitationId: String,
+        onSuccess: (List<Room>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        try {
+            val rooms = firestore.collection("habitations")
+                .document(habitationId)
+                .collection("rooms")
+                .get()
+                .await()
+                .toObjects(Room::class.java)
+            onSuccess(rooms)
+        } catch (e: Exception) {
+            onFailure(e)
+        }
+    }
+
+    // Retrieve all rooms (not associated with a specific habitation)
+    suspend fun getAllRooms(
+        onSuccess: (List<Room>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         try {
             val rooms = firestore.collection("rooms")
                 .get()
@@ -32,9 +62,16 @@ class RoomRepository {
         }
     }
 
-    suspend fun deleteRoom(roomId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    suspend fun deleteRoom(
+        habitationId: String,
+        roomId: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         try {
-            firestore.collection("rooms")
+            firestore.collection("habitations")
+                .document(habitationId)
+                .collection("rooms")
                 .document(roomId)
                 .delete()
                 .await()
@@ -44,9 +81,17 @@ class RoomRepository {
         }
     }
 
-    suspend fun updateRoom(roomId: String, updatedRoom: Room, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    suspend fun updateRoom(
+        habitationId: String,
+        roomId: String,
+        updatedRoom: Room,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         try {
-            firestore.collection("rooms")
+            firestore.collection("habitations")
+                .document(habitationId)
+                .collection("rooms")
                 .document(roomId)
                 .set(updatedRoom)
                 .await()
@@ -55,10 +100,4 @@ class RoomRepository {
             onFailure(e)
         }
     }
-
-
-
-
-
-
 }
