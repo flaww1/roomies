@@ -39,30 +39,9 @@ class HomeFragment : Fragment() {
 
     private fun initView(view: View) {
         viewPager = view.findViewById(R.id.viewPager)
-        bottomNavigationView = view.findViewById(R.id.bottomNavigation)
         cardAdapter = CardAdapter(this, cardContents)
         viewPager.adapter = cardAdapter
 
-        // Set up the BottomNavigationView
-        bottomNavigationView.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.navigation_home -> {
-                    // Handle navigation to home
-                    true
-                }
-                R.id.navigation_messages -> {
-                    // Handle navigation to dashboard
-                    true
-                }
-                R.id.navigation_profile -> {
-                    // Handle navigation to notifications
-                    navController.navigate(R.id.profileFragment)
-
-                    true
-                }
-                else -> false
-            }
-        }
 
         // Optionally, customize ViewPager2 behavior
         viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL

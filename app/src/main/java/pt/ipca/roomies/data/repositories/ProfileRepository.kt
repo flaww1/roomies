@@ -1,6 +1,6 @@
 package pt.ipca.roomies.data.repositories
 
-import UserProfile
+import pt.ipca.roomies.data.entities.UserProfile
 import android.net.Uri
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore

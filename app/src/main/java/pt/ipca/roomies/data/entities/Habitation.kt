@@ -2,35 +2,40 @@ package pt.ipca.roomies.data.entities
 
 import User
 
-data class Habitation (
-    val landlordId: String,
-    val address: String,
-    val city : Cities,
-    val numberOfRooms : Int,
-    val numberOfBathrooms : Int,
-    val habitationType : HabitationType,
-    val description : String,
-    val habitationAmenities: HabitationAmenities,
-    val petsAllowed : Boolean,
-    val smokingPolicy : SmokingPolicies,
-    val noiseLevel : NoiseLevels,
-    val guestPolicy : GuestPolicies,
-    val securityMeasures: SecurityMeasures,
-    val tentants : List<User>,
-
-
-
-
+data class Habitation(
+    val habitationId: String = "",
+    val landlordId: String = "",
+    val address: String = "",
+    val city: Cities = Cities.AVEIRO,
+    val numberOfRooms: Int = 0,
+    val numberOfBathrooms: Int = 0,
+    val habitationType: HabitationType = HabitationType.APARTMENT,
+    val description: String = "",
+    val habitationAmenities: List<HabitationAmenities> = listOf(),
+    val securityMeasures: List<SecurityMeasures> = listOf(),
+    val petsAllowed: Boolean = false,
+    val smokingPolicy: SmokingPolicies = SmokingPolicies.SMOKING_NOT_ALLOWED,
+    val noiseLevel: NoiseLevels = NoiseLevels.QUIET,
+    val guestPolicy: GuestPolicies = GuestPolicies.GUESTS_NOT_ALLOWED,
+    val tenants: List<User> = listOf(),
 )
-enum class SecurityMeasures(s: String) {
-    SECURITY_CAMERAS("Security cameras"),
-    KEY_ENTRANCE("Locked entrance"),
-    SECURITY_GUARD("Security guard"),
-    CODED_ENTRANCE("Coded entrance"),
-    CARDED_ENTRANCE("Carded entrance"),
 
-    // Add other types as needed
+
+enum class HabitationAmenities {
+    INTERNET,
+    PARKING,
+    KITCHEN,
+    LAUNDRY
 }
+
+enum class SecurityMeasures {
+    SECURITY_CAMERAS,
+    KEY_ENTRANCE,
+    SECURITY_GUARD,
+    CODED_ENTRANCE,
+    CARDED_ENTRANCE
+}
+
 
 enum class GuestPolicies(s: String) {
     GUESTS_ALLOWED("Guests allowed"),
@@ -51,15 +56,6 @@ enum class SmokingPolicies(s: String) {
     // Add other types as needed
 }
 
-enum class HabitationAmenities(s: String) {
-
-    INTERNET("Internet"),
-    PARKING("Parking"),
-    KITCHEN("Kitchen"),
-    LAUNDRY("Laundry"),
-
-
-}
 
 enum class HabitationType(s: String) {
     APARTMENT("Apartment"),

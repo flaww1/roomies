@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Address -->
+            <EditText
+                android:id="@+id/editTextAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Address"
+                android:inputType="text"/>
+
+            <!-- City -->
+            <Spinner
+                android:id="@+id/spinnerCity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="City"/>
+
+            <!-- Number of Rooms -->
+            <EditText
+                android:id="@+id/editTextNumberOfRooms"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Number of Rooms"
+                android:inputType="number"/>
+
+            <!-- Number of Bathrooms -->
+            <EditText
+                android:id="@+id/editTextNumberOfBathrooms"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Number of Bathrooms"
+                android:inputType="number"/>
+
+            <!-- Habitation Type -->
+            <Spinner
+                android:id="@+id/spinnerHabitationType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Habitation Type"/>
+
+            <!-- Description -->
+            <EditText
+                android:id="@+id/editTextDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Description"
+                android:inputType="textMultiLine"
+                android:lines="4"/>
+
+            <!-- Habitation Amenities -->
+            <CheckBox
+                android:id="@+id/checkBoxInternet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Internet"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxParking"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Parking"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxKitchen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kitchen"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxLaundry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Laundry"/>
+
+            <!-- Pets Allowed -->
+            <CheckBox
+                android:id="@+id/checkBoxPetsAllowed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pets Allowed"/>
+
+            <!-- Smoking Policy -->
+            <Spinner
+                android:id="@+id/spinnerSmokingPolicy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Smoking Policy"/>
+
+            <!-- Noise Level -->
+            <Spinner
+                android:id="@+id/spinnerNoiseLevel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Noise Level"/>
+
+            <!-- Guest Policy -->
+            <Spinner
+                android:id="@+id/spinnerGuestPolicy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Guest Policy"/>
+
+            <!-- Security Measures -->
+            <CheckBox
+                android:id="@+id/checkBoxSecurityCameras"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Security Cameras"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxLockedEntrance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Locked Entrance"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxSecurityGuard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Security Guard"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxCodedEntrance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Coded Entrance"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxCardedEntrance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Carded Entrance"/>
+
+            <!-- Create Button -->
+            <Button
+                android:id="@+id/createHabitationButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Create Habitation"/>
+
+            <Button
+                android:id="@+id/backButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Back"/>
+        </LinearLayout>
+    </ScrollView>
+</RelativeLayout>

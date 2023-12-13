@@ -5,20 +5,20 @@ data class Room(
     val landlordId: String = "",
     val description: String = "",
     val price: Double = 0.0,
-    val roomAmenities: RoomAmenities ,
+    val roomAmenities: MutableList<RoomAmenities>,
     val likedByUsers: List<String> = emptyList(),
     val dislikedByUsers: List<String> = emptyList(),
     val matches: List<String> = emptyList(),
     val createdAt: Long = 0,
     val updatedAt: Long = 0,
-    val roomImages : List<String> = emptyList(),
-    val leaseDuration : LeaseDuration,
-    val roomType : RoomType ,
-    val roomStatus : RoomStatus,
-    val roomSize : RoomSize,
+    val roomImages: List<String> = emptyList(),
+    val leaseDuration: LeaseDuration,
+    val roomType: RoomType,
+    val roomStatus: RoomStatus,
+    val roomSize: RoomSize,
 
 
-)
+    )
 
 enum class RoomType(s: String) {
     SINGLE("Single"),
