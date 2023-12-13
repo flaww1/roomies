@@ -16,6 +16,7 @@ class HabitationViewModel : ViewModel() {
     val habitations: LiveData<List<Habitation>> get() = _habitations
 
     private val _selectedHabitation = MutableLiveData<Habitation>()
+    val selectedHabitation: LiveData<Habitation> get() = _selectedHabitation
 
     private val _habitationCreationSuccess = MutableLiveData<String?>()
     val habitationCreationSuccess: LiveData<String?> get() = _habitationCreationSuccess
@@ -24,30 +25,29 @@ class HabitationViewModel : ViewModel() {
     private val _habitationDeletionSuccess = MutableLiveData<Boolean>()
     val habitationDeletionSuccess: LiveData<Boolean> get() = _habitationDeletionSuccess
 
-    private val _habitationDocumentId = MutableLiveData<String?>()
-    val habitationDocumentId: LiveData<String?> get() = _habitationDocumentId
-
-
     private val habitationsRepository = HabitationRepository()
-    fun setHabitationDocumentId(documentId: String) {
-        _habitationDocumentId.value = documentId
-    }
+
     fun createHabitation(habitation: Habitation) {
         viewModelScope.launch {
             habitationRepository.createHabitation(habitation,
                 onSuccess = { documentId ->
-                    // Set the document ID in LiveData for further use
-                    _habitationDocumentId.value = documentId
-
-                    // Continue with your existing logic or refresh habitations
+                    // Launch a new coroutine to call updateHabitation
                     viewModelScope.launch {
-                        // Refresh habitations or perform any other action
-                        refreshHabitations()
+                        habitationRepository.updateHabitation(documentId, habitation.copy(habitationId = documentId),
+                            onSuccess = {
+                                _habitationCreationSuccess.value = documentId
+                                refreshHabitations()
+                            },
+                            onFailure = { e ->
+                                // Handle failure
+                                println("Failed to update habitationId: $e")
+                            }
+                        )
                     }
                 },
                 onFailure = { e ->
                     // Handle failure
-                    _habitationDocumentId.value = null
+                    _habitationCreationSuccess.value = null
                     println("Failed to create habitation: $e")
                 }
             )
