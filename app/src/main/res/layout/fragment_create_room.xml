@@ -9,23 +9,24 @@
     <EditText
         android:id="@+id/editTextDescription"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Description"/>
+        android:layout_height="match_parent"
+        android:hint="@string/description">
+
+    </EditText>
 
     <EditText
         android:id="@+id/editTextPrice"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginTop="8dp"
         android:inputType="numberDecimal"
-        android:hint="Price"/>
+        android:hint="@string/price"/>
 
     <Spinner
         android:id="@+id/spinnerRoomType"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginTop="8dp"
-        android:entries="@array/room_types"
         android:prompt="@string/choose_room_type"/>
 
     <Spinner
@@ -33,7 +34,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:entries="@array/room_sizes"
         android:prompt="@string/choose_room_size"/>
 
     <Spinner
@@ -41,7 +41,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:entries="@array/lease_durations"
         android:prompt="@string/choose_lease_duration"/>
 
     <CheckBox

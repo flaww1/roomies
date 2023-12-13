@@ -127,6 +127,9 @@
         <action
             android:id="@+id/action_navigation_home_to_navigation_profile"
             app:destination="@id/navigation_profile" />
+        <action
+            android:id="@+id/action_navigation_home_to_navigation_habitations"
+            app:destination="@id/navigation_habitations" />
     </fragment>
     <fragment
         android:id="@+id/navigation_profile"
@@ -136,7 +139,41 @@
         <action
             android:id="@+id/action_navigation_profile_to_navigation_home"
             app:destination="@id/navigation_home" />
+        <action
+            android:id="@+id/action_navigation_profile_to_navigation_habitations"
+            app:destination="@id/navigation_habitations" />
     </fragment>
+
+    <fragment
+        android:id="@+id/navigation_habitations"
+        android:name="pt.ipca.roomies.ui.main.landlord.habitation.HabitationFragment"
+        android:label="Habitations"
+        tools:layout="@layout/fragment_habitation" >
+        <action
+            android:id="@+id/action_navigation_habitations_to_navigation_habitation"
+            app:destination="@id/navigation_home" />
+        <action
+            android:id="@+id/action_navigation_habitations_to_navigation_profile"
+            app:destination="@id/navigation_profile" />
+    </fragment>
+    <fragment
+        android:id="@+id/habitationFragment"
+        android:name="pt.ipca.roomies.ui.main.landlord.habitation.HabitationFragment"
+        android:label="HabitationFragment" >
+        <action
+            android:id="@+id/action_habitationFragment_to_createHabitationFragment"
+            app:destination="@id/createHabitationFragment" />
+
+
+    </fragment>
+    <fragment
+        android:id="@+id/createHabitationFragment"
+        android:name="pt.ipca.roomies.ui.main.landlord.habitation.CreateHabitationFragment"
+        android:label="CreateHabitationFragment" />
+        <action
+            android:id="@+id/action_createHabitationFragment_to_habitationFragment"
+            app:destination="@id/habitationFragment" />
+
 
 
 </navigation>

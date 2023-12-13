@@ -7,8 +7,12 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
 import pt.ipca.roomies.R
 import pt.ipca.roomies.data.entities.Habitation
 
@@ -27,10 +31,17 @@ class HabitationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(this).get(HabitationViewModel::class.java)
+
+        viewModel = ViewModelProvider(this)[HabitationViewModel::class.java]
+
 
         habitationRecyclerView = view.findViewById(R.id.habitationRecyclerView)
         habitationRecyclerView.layoutManager = LinearLayoutManager(context)
+
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            viewModel.getHabitationsByLandlordId(currentUser.uid)
+        }
 
         // Observe the habitations LiveData
         viewModel.habitations.observe(viewLifecycleOwner, Observer { habitations ->
@@ -52,6 +63,7 @@ class HabitationFragment : Fragment() {
                         viewModel.deleteHabitation(habitation.habitationId)
                     }
 
+
                 }
             )
         })
@@ -71,5 +83,14 @@ class HabitationFragment : Fragment() {
                 viewModel.refreshHabitations()
             }
         })
+
+        val fabCreateHabitation: FloatingActionButton = view.findViewById(R.id.fabCreateHabitation)
+        fabCreateHabitation.setOnClickListener {
+            // Navigate to the habitation creation screen
+
+            findNavController().navigate(R.id.action_habitationFragment_to_createHabitationFragment)
+        }
+
+
     }
 }

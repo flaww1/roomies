@@ -5,16 +5,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Spinner
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import pt.ipca.roomies.R
 import pt.ipca.roomies.data.entities.LeaseDuration
+import pt.ipca.roomies.data.entities.Room
 import pt.ipca.roomies.data.entities.RoomAmenities
 import pt.ipca.roomies.data.entities.RoomSize
+import pt.ipca.roomies.data.entities.RoomStatus
 import pt.ipca.roomies.data.entities.RoomType
 
 class CreateRoomFragment : Fragment() {
@@ -31,6 +31,7 @@ class CreateRoomFragment : Fragment() {
     private lateinit var checkBoxHeating: CheckBox
     private lateinit var createRoomButton: Button
     private lateinit var backButton: Button
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -60,22 +61,52 @@ class CreateRoomFragment : Fragment() {
     }
 
     private fun setupViews() {
-        // Set up your spinner adapters here
-        // For example:
-        // val roomTypeAdapter = ArrayAdapter.createFromResource(requireContext(), R.array.room_types, android.R.layout.simple_spinner_item)
-        // roomTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        // spinnerRoomType.adapter = roomTypeAdapter
+        // Set up the spinners with appropriate adapters and data
+        val roomTypeAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, RoomType.values())
+        roomTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerRoomType.adapter = roomTypeAdapter
+
+        val roomSizeAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, RoomSize.values())
+        roomSizeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerRoomSize.adapter = roomSizeAdapter
+
+        val leaseDurationAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, LeaseDuration.values())
+        leaseDurationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerLeaseDuration.adapter = leaseDurationAdapter
     }
 
     private fun setupListeners() {
         createRoomButton.setOnClickListener {
             // Handle the logic for creating a room
-            // Retrieve values from views and create a Room object
-            // Example: viewModel.createRoom(room)
+            val room = Room(
+                description = editTextDescription.text.toString(),
+                price = editTextPrice.text.toString().toDouble(),
+                roomType = spinnerRoomType.selectedItem as RoomType,
+                roomSize = spinnerRoomSize.selectedItem as RoomSize,
+                leaseDuration = spinnerLeaseDuration.selectedItem as LeaseDuration,
+                roomAmenities = mutableListOf<RoomAmenities>().apply {
+                    if (checkBoxAirConditioning.isChecked) add(RoomAmenities.AIR_CONDITIONING)
+                    if (checkBoxHeating.isChecked) add(RoomAmenities.HEATING)
+                },
+                // Additional fields as needed
+                roomId = "", // You can generate a unique ID or leave it empty for Firestore to generate one
+                landlordId = "", // Replace with the actual landlord ID
+                roomStatus = RoomStatus.AVAILABLE, // Set default status or adjust as needed
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis(),
+                roomImages = emptyList(), // Add images if needed
+                likedByUsers = emptyList(), // Initialize empty lists
+                dislikedByUsers = emptyList(),
+                matches = emptyList()
+            )
+
+            // Call the ViewModel function to create the room
+            viewModel.createRoom(room)
         }
 
         backButton.setOnClickListener {
-            // Handle navigation back to the main screen
+            findNavController().navigateUp() // Use navigateUp instead of popBackStack
         }
     }
+
 }

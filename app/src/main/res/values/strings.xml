@@ -8,6 +8,12 @@
     <string name="password">Password</string>
     <string name="email">Email</string>
     <string name="create_profile_message">Looks like you don\'t have a profile created yet. let\'s do that now!</string>
+    <string name="create_habitation">Create Habitation</string>
+    <string name="description">Description</string>
+    <string name="price">Price</string>
+    <string name="choose_room_type" />
+    <string name="choose_room_size" />
+    <string name="choose_lease_duration" />
 
 
 </resources>

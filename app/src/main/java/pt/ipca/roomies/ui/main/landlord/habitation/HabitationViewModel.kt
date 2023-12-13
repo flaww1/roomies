@@ -25,12 +25,25 @@ class HabitationViewModel : ViewModel() {
     private val _habitationDeletionSuccess = MutableLiveData<Boolean>()
     val habitationDeletionSuccess: LiveData<Boolean> get() = _habitationDeletionSuccess
 
+    private val habitationsRepository = HabitationRepository()
+
     fun createHabitation(habitation: Habitation) {
         viewModelScope.launch {
             habitationRepository.createHabitation(habitation,
                 onSuccess = { documentId ->
-                    _habitationCreationSuccess.value = documentId
-                    refreshHabitations()
+                    // Launch a new coroutine to call updateHabitation
+                    viewModelScope.launch {
+                        habitationRepository.updateHabitation(documentId, habitation.copy(habitationId = documentId),
+                            onSuccess = {
+                                _habitationCreationSuccess.value = documentId
+                                refreshHabitations()
+                            },
+                            onFailure = { e ->
+                                // Handle failure
+                                println("Failed to update habitationId: $e")
+                            }
+                        )
+                    }
                 },
                 onFailure = { e ->
                     // Handle failure
@@ -41,11 +54,13 @@ class HabitationViewModel : ViewModel() {
         }
     }
 
+
     fun refreshHabitations() {
         viewModelScope.launch {
             habitationRepository.getHabitations(
                 onSuccess = { habitations ->
                     _habitations.value = habitations
+                    println("Fetched habitations: $habitations") // Add this line
                 },
                 onFailure = { e ->
                     // Handle failure
@@ -91,4 +106,20 @@ class HabitationViewModel : ViewModel() {
             )
         }
     }
+
+    fun getHabitationsByLandlordId(landlordId: String) {
+        viewModelScope.launch {
+            habitationRepository.getHabitationsByLandlordId(
+                landlordId,
+                onSuccess = { habitations ->
+                    _habitations.value = habitations
+                },
+                onFailure = { e ->
+                    // Handle failure
+                    println("Failed to fetch habitations: $e")
+                }
+            )
+        }
+    }
+
 }

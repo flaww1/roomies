@@ -17,11 +17,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.jaredrummler.materialspinner.MaterialSpinner
-import Occupation
-import Gender
-import UserProfile
+import pt.ipca.roomies.data.entities.Occupation
+import pt.ipca.roomies.data.entities.Gender
+import pt.ipca.roomies.data.entities.UserProfile
 import android.app.Activity.RESULT_OK
-import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
@@ -175,7 +174,7 @@ class ProfileUserInfoFragment : Fragment() {
             // Update the user profile picture URL in Firestore
             profileRepository.updateProfilePictureUrl(userId, selectedImageUri.toString())
 
-            // Create the UserProfile object with the updated profile picture URL
+            // Create the pt.ipca.roomies.data.entities.UserProfile object with the updated profile picture URL
             val userProfile = UserProfile(
                 userId = userId,
                 profilePictureUrl = selectedImageUri.toString(),

@@ -1,18 +1,16 @@
+package pt.ipca.roomies.data.entities
+
 import pt.ipca.roomies.data.entities.SelectedTag
 
 data class UserProfile(
-    val userId: String, // Foreign key to link with User entity
-    val location: String,
-    val bio: String,
-    val gender: String,
-    val occupation: String,
-    val profilePictureUrl: String,
-    val birthDate: String,
-
-    // Add other fields as needed
-) {
-
-}
+    val bio: String = "",
+    val birthDate: String = "",
+    val gender: String = "",
+    val location: String = "",
+    val occupation: String = "",
+    val profilePictureUrl: String = "",
+    val userId: String = ""
+)
 
 enum class Occupation {
     STUDENT,

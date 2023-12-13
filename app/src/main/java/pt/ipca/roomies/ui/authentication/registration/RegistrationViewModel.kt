@@ -1,14 +1,12 @@
 package pt.ipca.roomies.ui.authentication.registration
 
 import User
-import UserProfile
+import pt.ipca.roomies.data.entities.UserProfile
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.data.repositories.RegistrationRepository
 

@@ -8,6 +8,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.AppCheckProvider
@@ -28,6 +29,33 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+
+        bottomNavigationView.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_home -> {
+                    // Handle navigation to home
+                    findNavController(R.id.nav_host_fragment).navigate(R.id.homeFragment)
+                    true
+                }
+                R.id.navigation_messages -> {
+                    // Handle navigation to dashboard
+                    //   findNavController().navigate(R.id.messagesFragment)
+                    true
+                }
+                R.id.navigation_habitations -> {
+                    // Handle navigation to notifications
+                    findNavController(R.id.nav_host_fragment).navigate(R.id.habitationFragment)
+                    true
+                }
+                R.id.navigation_profile -> {
+                    // Handle navigation to profile
+                    findNavController(R.id.nav_host_fragment).navigate(R.id.profileFragment)
+                    true
+                }
+                else -> false
+            }
+        }
 
 
         Firebase.initialize(context = this)

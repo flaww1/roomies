@@ -1,19 +1,27 @@
 package pt.ipca.roomies.ui.main.landlord.habitation
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import com.google.firebase.auth.FirebaseAuth
 import pt.ipca.roomies.R
 import pt.ipca.roomies.data.entities.*
+import pt.ipca.roomies.databinding.FragmentCreateHabitationBinding
 
 class CreateHabitationFragment : Fragment() {
 
-    private lateinit var viewModel: HabitationViewModel // Replace with your actual ViewModel
-
+    private val viewModel: HabitationViewModel by lazy {
+        ViewModelProvider(this)[HabitationViewModel::class.java]
+    }
     private lateinit var addressEditText: EditText
     private lateinit var citySpinner: Spinner
     private lateinit var numberOfRoomsEditText: EditText
@@ -35,18 +43,19 @@ class CreateHabitationFragment : Fragment() {
     private lateinit var cardedEntranceCheckBox: CheckBox
     private lateinit var createHabitationButton: Button
     private lateinit var backButton: Button
+    private lateinit var binding: FragmentCreateHabitationBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_create_habitation, container, false)
+    ): View {
+        binding = FragmentCreateHabitationBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(this).get(HabitationViewModel::class.java) // Replace with your actual ViewModel
         addressEditText = view.findViewById(R.id.editTextAddress)
         citySpinner = view.findViewById(R.id.spinnerCity)
         numberOfRoomsEditText = view.findViewById(R.id.editTextNumberOfRooms)
@@ -74,30 +83,22 @@ class CreateHabitationFragment : Fragment() {
     }
 
     private fun setupSpinners() {
-        // Set up the spinners with appropriate adapters and data
-        val cityAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, Cities.values())
-        cityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        citySpinner.adapter = cityAdapter
-
-        val habitationTypeAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, HabitationType.values())
-        habitationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        habitationTypeSpinner.adapter = habitationTypeAdapter
-
-        val smokingPolicyAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, SmokingPolicies.values())
-        smokingPolicyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        smokingPolicySpinner.adapter = smokingPolicyAdapter
-
-        val noiseLevelAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, NoiseLevels.values())
-        noiseLevelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        noiseLevelSpinner.adapter = noiseLevelAdapter
-
-        val guestPolicyAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, GuestPolicies.values())
-        guestPolicyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        guestPolicySpinner.adapter = guestPolicyAdapter
+        citySpinner.adapter = createEnumAdapter(Cities.values())
+        habitationTypeSpinner.adapter = createEnumAdapter(HabitationType.values())
+        smokingPolicySpinner.adapter = createEnumAdapter(SmokingPolicies.values())
+        noiseLevelSpinner.adapter = createEnumAdapter(NoiseLevels.values())
+        guestPolicySpinner.adapter = createEnumAdapter(GuestPolicies.values())
     }
+
+
+
 
     private fun setupButtons() {
         createHabitationButton.isEnabled = false // Initially, create button is disabled
+        addressEditText.addTextChangedListener(getTextWatcher())
+        numberOfRoomsEditText.addTextChangedListener(getTextWatcher())
+        numberOfBathroomsEditText.addTextChangedListener(getTextWatcher())
+        descriptionEditText.addTextChangedListener(getTextWatcher())
 
         createHabitationButton.setOnClickListener {
             // Retrieve data from UI elements
@@ -111,7 +112,7 @@ class CreateHabitationFragment : Fragment() {
             val parking = parkingCheckBox.isChecked
             val kitchen = kitchenCheckBox.isChecked
             val laundry = laundryCheckBox.isChecked
-            val petsAllowed = petsAllowedCheckBox.isChecked
+            val petsAllowed: Boolean = petsAllowedCheckBox.isChecked
             val smokingPolicy = smokingPolicySpinner.selectedItem as SmokingPolicies
             val noiseLevel = noiseLevelSpinner.selectedItem as NoiseLevels
             val guestPolicy = guestPolicySpinner.selectedItem as GuestPolicies
@@ -121,40 +122,115 @@ class CreateHabitationFragment : Fragment() {
             val codedEntrance = codedEntranceCheckBox.isChecked
             val cardedEntrance = cardedEntranceCheckBox.isChecked
 
-            // Enable or disable create button based on input validation
-            createHabitationButton.isEnabled = isInputValid(address, numberOfRooms, numberOfBathrooms, description)
+            val isValid = isInputValid(address, numberOfRooms, numberOfBathrooms, description)
+            createHabitationButton.isEnabled = isValid
 
-            // Create a Habitation object with the retrieved data
-            val habitation = Habitation(
-                habitationId = "", // You can generate a unique ID or leave it empty for Firestore to generate one
-                landlordId = "", // Replace with the actual landlord ID
-                address = address,
-                city = city,
-                numberOfRooms = numberOfRooms,
-                numberOfBathrooms = numberOfBathrooms,
-                habitationType = habitationType,
-                description = description,
-                habitationAmenities = HabitationAmenities(internet, parking, kitchen, laundry),
-                petsAllowed = petsAllowed,
-                smokingPolicy = smokingPolicy,
-                noiseLevel = noiseLevel,
-                guestPolicy = guestPolicy,
-                securityMeasures = SecurityMeasures(securityCameras, lockedEntrance, securityGuard, codedEntrance, cardedEntrance),
-                tenants = emptyList() // Initially, there are no tenants
-            )
+            Log.d("CreateHabitationFragment", "Button Enabled: $isValid")
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            if (currentUser != null) {
+                Log.d("CreateHabitationFragment", "Current user: ${currentUser.uid}")
+                val habitation = Habitation(
+                    habitationId = "", // You can generate a unique ID or leave it empty for Firestore to generate one
+                    landlordId = currentUser.uid, // Replace with the actual landlord ID
+                    address = address,
+                    city = city,
+                    numberOfRooms = numberOfRooms ?: 0, // Use the Elvis operator to provide a default value if numberOfRooms is null
+                    numberOfBathrooms = numberOfBathrooms ?: 0, // Use the Elvis operator to provide a default value if numberOfBathrooms is null
+                    habitationType = habitationType,
+                    description = description,
+                    habitationAmenities = getCheckedAmenities().toList(),
+                    securityMeasures = getCheckedSecurityMeasures().toList(),
+                    petsAllowed = petsAllowed ?: false, // Use the Elvis operator to provide a default value if petsAllowed is null
+                    smokingPolicy = smokingPolicy,
+                    noiseLevel = noiseLevel,
+                    guestPolicy = guestPolicy,
+                    tenants = emptyList() // Initially, there are no tenants
+                )
 
-            // Call the ViewModel function to create the habitation
-            viewModel.createHabitation(habitation)
+                // Call the ViewModel function to create the habitation
+                viewModel.createHabitation(habitation)
+                findNavController().navigateUp()
+
+            } else {
+                // Handle user not signed in
+                Toast.makeText(context, "User not signed in", Toast.LENGTH_SHORT).show()
+            }
+
         }
+
+
 
         backButton.setOnClickListener {
-            // Handle back button click (navigate back to the main screen)
-            // Implement navigation logic as needed
+            findNavController().navigateUp() // Use navigateUp instead of popBackStack
+
+        }
+
+        viewModel.habitationCreationSuccess.observe(viewLifecycleOwner, Observer { documentId ->
+            if (documentId != null) {
+                Toast.makeText(context, "Habitation created with ID: $documentId", Toast.LENGTH_SHORT).show()
+                findNavController().navigateUp()
+            } else {
+                Toast.makeText(context, "Failed to create habitation", Toast.LENGTH_SHORT).show()
+            }
+        })
+
+    }
+    private fun getTextWatcher(): TextWatcher {
+        return object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+                // code before text is changed
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                // code when text is changing
+            }
+
+            override fun afterTextChanged(s: Editable) {
+                // code after text has changed
+                createHabitationButton.isEnabled = isInputValid(
+                    addressEditText.text.toString(),
+                    numberOfRoomsEditText.text.toString().toIntOrNull(),
+                    numberOfBathroomsEditText.text.toString().toIntOrNull(),
+                    descriptionEditText.text.toString()
+                )
+            }
         }
     }
-
-    private fun isInputValid(address: String, numberOfRooms: Int?, numberOfBathrooms: Int?, description: String): Boolean {
-        // Implement your input validation logic here
-        return !address.isBlank() && numberOfRooms != null && numberOfRooms > 0 && numberOfBathrooms != null && numberOfBathrooms > 0 && !description.isBlank()
+    private fun isInputValid(
+        address: String,
+        numberOfRooms: Int?,
+        numberOfBathrooms: Int?,
+        description: String
+    ): Boolean {
+        return address.isNotBlank() && numberOfRooms != null && numberOfRooms > 0 &&
+                numberOfBathrooms != null && numberOfBathrooms > 0 && description.isNotBlank()
     }
+
+
+
+    private fun getCheckedAmenities(): Set<HabitationAmenities> {
+        return setOf(
+            HabitationAmenities.INTERNET.takeIf { internetCheckBox.isChecked },
+            HabitationAmenities.PARKING.takeIf { parkingCheckBox.isChecked },
+            HabitationAmenities.KITCHEN.takeIf { kitchenCheckBox.isChecked },
+            HabitationAmenities.LAUNDRY.takeIf { laundryCheckBox.isChecked }
+        ).filterNotNull().toSet()
+    }
+
+    private fun getCheckedSecurityMeasures(): Set<SecurityMeasures> {
+        return setOf(
+            SecurityMeasures.SECURITY_CAMERAS.takeIf { securityCamerasCheckBox.isChecked },
+            SecurityMeasures.KEY_ENTRANCE.takeIf { lockedEntranceCheckBox.isChecked },
+            SecurityMeasures.SECURITY_GUARD.takeIf { securityGuardCheckBox.isChecked },
+            SecurityMeasures.CODED_ENTRANCE.takeIf { codedEntranceCheckBox.isChecked },
+            SecurityMeasures.CARDED_ENTRANCE.takeIf { cardedEntranceCheckBox.isChecked }
+        ).filterNotNull().toSet()
+    }
+
+    private inline fun <reified T : Enum<T>> createEnumAdapter(values: Array<T>): ArrayAdapter<T> {
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, values)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        return adapter
+    }
+
 }

@@ -1,7 +1,5 @@
 package pt.ipca.roomies.data.entities
 
-import UserProfile
-
 data class ProfileTags(
     val tagId: String = "",
     val tagName: String = "",

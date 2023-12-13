@@ -58,5 +58,36 @@ class HabitationRepository {
         }
     }
 
+    suspend fun getHabitationsByLandlordId(landlordId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        try {
+            firestore.collection("habitations")
+                .whereEqualTo("landlordId", landlordId)
+                .get()
+                .await()
+                .toObjects(Habitation::class.java)
+            onSuccess()
+        } catch (e: Exception) {
+            onFailure(e)
+        }
+
+    }
+
+
+    suspend fun getHabitationsByLandlordId(
+        landlordId: String,
+        onSuccess: (List<Habitation>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        try {
+            val habitations = firestore.collection("habitations")
+                .whereEqualTo("landlordId", landlordId) // Assuming landlordId is the field in habitations
+                .get()
+                .await()
+                .toObjects(Habitation::class.java)
+            onSuccess(habitations)
+        } catch (e: Exception) {
+            onFailure(e)
+        }
+    }
     // Add more methods as needed for habitation-related operations
 }

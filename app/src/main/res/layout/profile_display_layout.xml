@@ -1,7 +1,7 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="16dp">
 
@@ -19,7 +19,7 @@
         android:id="@+id/textViewNameAge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="John Doe, 25"
+        android:text=""
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal"
@@ -30,7 +30,7 @@
         android:id="@+id/textViewLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New York, NY"
+        android:text=""
         android:textSize="16sp"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="16dp"/>
@@ -40,7 +40,7 @@
         android:id="@+id/textViewBio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        android:text=""
         android:textSize="16sp"
         android:layout_marginBottom="16dp"/>
 
@@ -68,4 +68,8 @@
         android:layout_height="wrap_content"
         android:text="Edit Profile"
         android:layout_gravity="center_horizontal"/>
+
+
+
 </LinearLayout>
+

@@ -1,0 +1,28 @@
+<!-- profile_combined_layout.xml -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <include
+            android:id="@+id/layoutProfileCreation"
+            layout="@layout/profile_creation_layout"
+            android:visibility="gone" />
+
+        <!-- Dynamic Profile Display Layout -->
+        <include
+            android:id="@+id/layoutProfileDisplay"
+            layout="@layout/profile_display_layout"
+            android:visibility="gone" />
+
+
+
+    </LinearLayout>
+
+</ScrollView>
