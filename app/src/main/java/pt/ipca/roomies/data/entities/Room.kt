@@ -6,7 +6,7 @@ data class Room(
     val landlordId: String = "",
     val description: String = "",
     val price: Double = 0.0,
-    val roomAmenities: MutableList<RoomAmenities>,
+    val roomAmenities: List<RoomAmenities>,
     val likedByUsers: List<String> = emptyList(),
     val dislikedByUsers: List<String> = emptyList(),
     val matches: List<String> = emptyList(),

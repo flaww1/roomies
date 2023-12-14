@@ -9,14 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import pt.ipca.roomies.R
 import pt.ipca.roomies.data.entities.*
 import pt.ipca.roomies.databinding.FragmentCreateHabitationBinding
-import pt.ipca.roomies.ui.main.landlord.SharedHabitationViewModel
 
 class CreateHabitationFragment : Fragment() {
 
@@ -45,10 +43,10 @@ class CreateHabitationFragment : Fragment() {
     private lateinit var createHabitationButton: Button
     private lateinit var backButton: Button
     private lateinit var binding: FragmentCreateHabitationBinding
-    private val sharedHabitationViewModel: SharedHabitationViewModel by lazy {
-        ViewModelProvider(requireActivity())[SharedHabitationViewModel::class.java]
-    }
 
+    private val habitationViewModel: HabitationViewModel by lazy {
+        ViewModelProvider(requireActivity())[HabitationViewModel::class.java]
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -144,7 +142,7 @@ class CreateHabitationFragment : Fragment() {
                     description = description,
                     habitationAmenities = getCheckedAmenities().toList(),
                     securityMeasures = getCheckedSecurityMeasures().toList(),
-                    petsAllowed = petsAllowed ?: false, // Use the Elvis operator to provide a default value if petsAllowed is null
+                    petsAllowed = petsAllowed, // Use the Elvis operator to provide a default value if petsAllowed is null
                     smokingPolicy = smokingPolicy,
                     noiseLevel = noiseLevel,
                     guestPolicy = guestPolicy,
@@ -153,7 +151,6 @@ class CreateHabitationFragment : Fragment() {
 
                 // Call the ViewModel function to create the habitation
                 viewModel.createHabitation(habitation)
-                sharedHabitationViewModel.setSelectedHabitation(habitation, "") // Pass the documentId if available
                 findNavController().navigateUp()
 
             } else {
@@ -170,14 +167,18 @@ class CreateHabitationFragment : Fragment() {
 
         }
 
-        viewModel.habitationCreationSuccess.observe(viewLifecycleOwner, Observer { documentId ->
+        viewModel.habitationCreationSuccess.observe(viewLifecycleOwner) { documentId ->
             if (documentId != null) {
-                Toast.makeText(context, "Habitation created with ID: $documentId", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Habitation created with ID: $documentId",
+                    Toast.LENGTH_SHORT
+                ).show()
                 findNavController().navigateUp()
             } else {
                 Toast.makeText(context, "Failed to create habitation", Toast.LENGTH_SHORT).show()
             }
-        })
+        }
 
     }
     private fun getTextWatcher(): TextWatcher {

@@ -1,12 +1,16 @@
 package pt.ipca.roomies.ui.main.landlord.room
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import pt.ipca.roomies.data.entities.Habitation
 import pt.ipca.roomies.data.entities.Room
+import pt.ipca.roomies.data.repositories.HabitationRepository
 import pt.ipca.roomies.data.repositories.RoomRepository
+import pt.ipca.roomies.ui.main.landlord.habitation.HabitationViewModel
 
 class RoomViewModel : ViewModel() {
 
@@ -27,6 +31,21 @@ class RoomViewModel : ViewModel() {
     // LiveData for room deletion success
     private val _roomDeletionSuccess = MutableLiveData<Boolean>()
     val roomDeletionSuccess: LiveData<Boolean> get() = _roomDeletionSuccess
+    private val _selectedHabitation = MutableLiveData<Habitation?>()
+
+    private val habitationRepository = HabitationRepository()
+    private val habitationViewModel: HabitationViewModel = HabitationViewModel()
+
+    init {
+        // Observe the selectedHabitation from HabitationViewModel
+        habitationViewModel.selectedHabitation.observeForever {
+            _selectedHabitation.value = it
+            // Whenever selectedHabitation changes, fetch rooms
+            it?.habitationId?.let { habitationId ->
+                getRoomsByHabitationId(habitationId)
+            }
+        }
+    }
 
     // Function to create a room
     fun createRoom(habitationId: String, room: Room) {
@@ -41,10 +60,25 @@ class RoomViewModel : ViewModel() {
                     // Handle failure
                     println("Failed to create room: $e")
                 }
+
+            )
+
+        }
+    }
+    fun getRoomsByHabitationId(habitationId: String) {
+        viewModelScope.launch {
+            habitationRepository.getRoomsByHabitationId(
+                habitationId,
+                onSuccess = { rooms ->
+                    _rooms.value = rooms
+                },
+                onFailure = { e ->
+                    // Handle failure
+                    Log.e("RoomViewModel", "Failed to fetch rooms: $e")
+                }
             )
         }
     }
-
 
 
     // Function to refresh the list of rooms

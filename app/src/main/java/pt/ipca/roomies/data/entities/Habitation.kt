@@ -3,7 +3,7 @@ package pt.ipca.roomies.data.entities
 import User
 
 data class Habitation(
-    val habitationId: String? = "",
+    var habitationId: String? , // Set it to String? (nullable) to allow Firestore to generate the ID
     val landlordId: String = "",
     val address: String = "",
     val city: Cities = Cities.AVEIRO,
@@ -18,7 +18,12 @@ data class Habitation(
     val noiseLevel: NoiseLevels = NoiseLevels.QUIET,
     val guestPolicy: GuestPolicies = GuestPolicies.GUESTS_NOT_ALLOWED,
     val tenants: List<User> = listOf(),
-)
+) {
+    // No-argument constructor for Firebase Firestore deserialization
+    constructor() : this("", "", "", Cities.AVEIRO, 0, 0, HabitationType.APARTMENT, "", listOf(), listOf(),
+        false, SmokingPolicies.SMOKING_NOT_ALLOWED, NoiseLevels.QUIET, GuestPolicies.GUESTS_NOT_ALLOWED, listOf())
+}
+
 
 
 enum class HabitationAmenities {

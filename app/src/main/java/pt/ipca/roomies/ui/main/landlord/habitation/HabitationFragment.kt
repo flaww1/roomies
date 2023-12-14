@@ -1,6 +1,7 @@
 package pt.ipca.roomies.ui.main.landlord.habitation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,8 +31,6 @@ class HabitationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-
         viewModel = ViewModelProvider(this)[HabitationViewModel::class.java]
 
 
@@ -43,47 +42,74 @@ class HabitationFragment : Fragment() {
             viewModel.getHabitationsByLandlordId(currentUser.uid)
         }
 
-        // Observe the habitations LiveData
-        viewModel.habitations.observe(viewLifecycleOwner, Observer { habitations ->
+        viewModel.habitations.observe(viewLifecycleOwner) { habitations ->
+            Log.d("HabitationFragment", "Loaded Habitations: $habitations")
+
+            val updatedHabitations = mutableListOf<Habitation>()
+
+            // Filter the habitations list to only include habitations that belong to the current user
+            habitations.forEach { habitation ->
+                if (habitation.landlordId == currentUser?.uid) {
+                    updatedHabitations.add(habitation)
+                }
+            }
+
+
+            // Update the RecyclerView adapter with the modified habitations list
             habitationRecyclerView.adapter = HabitationAdapter(
-                habitations,
+                updatedHabitations,
                 object : HabitationAdapter.OnHabitationClickListener {
                     override fun onHabitationClick(habitation: Habitation) {
-                        // Navigate to a new fragment or activity that displays the rooms associated with the clicked habitation
+                        Log.d("HabitationFragment", "Clicked on Habitation: $habitation")
+                        val selectedHabitationId = habitation.habitationId
+                        if (selectedHabitationId != null) {
+                            if (selectedHabitationId.isBlank()) {
+                                Log.d("HabitationFragment", "Selected Habitation ID is null or empty.")
+                            } else {
+                                Log.d(
+                                    "HabitationFragment",
+                                    "Selected Habitation: $selectedHabitationId"
+
+
+                                )
+                                viewModel.setSelectedHabitationId(selectedHabitationId)
+
+                            }
+                        }
+
                         viewModel.selectHabitation(habitation)
                         findNavController().navigate(R.id.action_habitationFragment_to_roomFragment)
                     }
 
                     override fun onEditHabitationClick(habitation: Habitation) {
-                        // Handle the edit action for the clicked habitation
-                        // Example: navigate to the edit screen or show an edit dialog
+                        // Navigate to the habitation editing screen
+                        viewModel.selectHabitation(habitation)
+                        //findNavController().navigate(R.id.action_habitationFragment_to_editHabitationFragment)
                     }
 
                     override fun onDeleteHabitationClick(habitation: Habitation) {
-                        // Handle the delete action for the clicked habitation
-                        habitation.habitationId?.let { viewModel.deleteHabitation(it) }
+                        viewModel.deleteHabitation(habitation.habitationId!!)
                     }
-
-
                 }
             )
-        })
+        }
+
 
         // Observe the creation success LiveData
-        viewModel.habitationCreationSuccess.observe(viewLifecycleOwner, Observer { documentId ->
+        viewModel.habitationCreationSuccess.observe(viewLifecycleOwner) { documentId ->
             documentId?.let {
                 // The habitation has been created successfully, use the documentId if needed
                 viewModel.refreshHabitations()
             }
-        })
+        }
 
         // Observe the deletion success LiveData
-        viewModel.habitationDeletionSuccess.observe(viewLifecycleOwner, Observer { deletionSuccess ->
+        viewModel.habitationDeletionSuccess.observe(viewLifecycleOwner) { deletionSuccess ->
             if (deletionSuccess == true) {
                 // The habitation has been deleted successfully, use this information as needed
                 viewModel.refreshHabitations()
             }
-        })
+        }
 
         val fabCreateHabitation: FloatingActionButton = view.findViewById(R.id.fabCreateHabitation)
         fabCreateHabitation.setOnClickListener {

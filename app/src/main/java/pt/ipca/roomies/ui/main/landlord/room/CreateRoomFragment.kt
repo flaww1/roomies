@@ -4,28 +4,19 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import pt.ipca.roomies.R
-import pt.ipca.roomies.data.entities.LeaseDuration
-import pt.ipca.roomies.data.entities.Room
-import pt.ipca.roomies.data.entities.RoomAmenities
-import pt.ipca.roomies.data.entities.RoomSize
-import pt.ipca.roomies.data.entities.RoomStatus
-import pt.ipca.roomies.data.entities.RoomType
-import pt.ipca.roomies.ui.main.landlord.SharedHabitationViewModel
+import pt.ipca.roomies.data.entities.*
+import pt.ipca.roomies.ui.main.landlord.habitation.HabitationViewModel
 
 class CreateRoomFragment : Fragment() {
 
@@ -41,8 +32,9 @@ class CreateRoomFragment : Fragment() {
     private lateinit var btnSelectImages: Button
     private lateinit var selectedImages: MutableList<Uri>
     private val MAX_IMAGES = 5
-    private val sharedHabitationViewModel: SharedHabitationViewModel by activityViewModels()
-    private val viewModel: RoomViewModel by viewModels()  // Initialize RoomViewModel
+    private val habitationViewModel: HabitationViewModel by viewModels()
+    private val roomViewModel: RoomViewModel by viewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -52,7 +44,12 @@ class CreateRoomFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initializeViews(view)
+        setupViews()
+        setupListeners()
+    }
 
+    private fun initializeViews(view: View) {
         editTextDescription = view.findViewById(R.id.editTextDescription)
         editTextPrice = view.findViewById(R.id.editTextPrice)
         spinnerRoomType = view.findViewById(R.id.spinnerRoomType)
@@ -64,12 +61,15 @@ class CreateRoomFragment : Fragment() {
         backButton = view.findViewById(R.id.backButton)
         btnSelectImages = view.findViewById(R.id.btnSelectImages)
         selectedImages = mutableListOf()
-
-        setupViews()
-        setupListeners()
     }
 
     private fun setupViews() {
+        setupSpinners()
+        setupHabitationObserver()
+        setupInputValidation()
+    }
+
+    private fun setupSpinners() {
         spinnerRoomType.adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_dropdown_item,
@@ -87,31 +87,33 @@ class CreateRoomFragment : Fragment() {
             android.R.layout.simple_spinner_dropdown_item,
             LeaseDuration.values()
         )
+    }
 
-        sharedHabitationViewModel.selectedHabitation.observe(viewLifecycleOwner, Observer { habitation ->
+    private fun setupHabitationObserver() {
+        habitationViewModel.selectedHabitation.observe(viewLifecycleOwner) { habitation ->
             if (habitation == null) {
-                Toast.makeText(requireContext(), "No habitation selected", Toast.LENGTH_SHORT).show()
+                showToast("No habitation selected")
                 findNavController().navigateUp()
-                return@Observer
             }
-        })
+        }
+    }
 
+    private fun setupInputValidation() {
         editTextDescription.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                if (editTextDescription.text.isEmpty()) {
-                    editTextDescription.error = "Description cannot be empty"
-                }
+            if (!hasFocus && editTextDescription.text.isEmpty()) {
+                editTextDescription.error = "Description cannot be empty"
             }
         }
 
         editTextPrice.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                if (editTextPrice.text.isEmpty()) {
-                    editTextPrice.error = "Price cannot be empty"
-                }
+            if (!hasFocus && editTextPrice.text.isEmpty()) {
+                editTextPrice.error = "Price cannot be empty"
             }
         }
+    }
 
+    private fun showToast(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
     private fun setupListeners() {
@@ -129,37 +131,55 @@ class CreateRoomFragment : Fragment() {
     }
 
     private fun createRoom() {
-        val habitationId = sharedHabitationViewModel.selectedHabitation.value?.habitationId
-        if (habitationId.isNullOrBlank()) {
-            Toast.makeText(requireContext(), "Invalid habitation ID", Toast.LENGTH_SHORT).show()
+        val habitation = habitationViewModel.selectedHabitation.value
+        if (habitation == null || habitation.habitationId?.isBlank() != false) {
+            showToast("Invalid habitation ID")
             return
         }
 
-        val room = Room(
+        val room = createRoomObject(habitation.habitationId!!)
+
+        if (selectedImages.isNotEmpty()) {
+            uploadImages(selectedImages.take(MAX_IMAGES)) { imageUrls ->
+                room.roomImages = imageUrls
+                roomViewModel.createRoom("habitations/${habitation.habitationId}/rooms", room)
+            }
+        } else {
+            roomViewModel.createRoom("habitations/${habitation.habitationId}/rooms", room)
+        }
+    }
+
+    private fun createRoomObject(habitationId: String): Room {
+        return Room(
             habitationId = habitationId,
             description = editTextDescription.text.toString(),
             price = editTextPrice.text.toString().toDouble(),
             roomType = spinnerRoomType.selectedItem as RoomType,
             roomSize = spinnerRoomSize.selectedItem as RoomSize,
             leaseDuration = spinnerLeaseDuration.selectedItem as LeaseDuration,
-            roomAmenities = mutableListOf<RoomAmenities>().apply {
-                if (checkBoxAirConditioning.isChecked) add(RoomAmenities.AIR_CONDITIONING)
-                if (checkBoxHeating.isChecked) add(RoomAmenities.HEATING)
-            },
+            roomAmenities = getSelectedAmenities(),
             roomStatus = RoomStatus.AVAILABLE,
             roomImages = emptyList()
         )
-
-        if (selectedImages.isNotEmpty()) {
-            uploadImages(selectedImages.take(MAX_IMAGES)) { imageUrls ->
-                room.roomImages = imageUrls
-                viewModel.createRoom("habitations/$habitationId/rooms", room)
-            }
-        } else {
-            viewModel.createRoom("habitations/$habitationId/rooms", room)
-        }
     }
 
+
+    private fun getSelectedAmenities(): List<RoomAmenities> {
+        val amenities = mutableListOf<RoomAmenities>()
+        if (checkBoxAirConditioning.isChecked) amenities.add(RoomAmenities.AIR_CONDITIONING)
+        if (checkBoxHeating.isChecked) amenities.add(RoomAmenities.HEATING)
+        return amenities
+    }
+
+    private fun openFilePicker() {
+        if (selectedImages.size < MAX_IMAGES) {
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.type = "image/*"
+            pickImageLauncher.launch(intent)
+        } else {
+            showToast("Maximum $MAX_IMAGES images allowed.")
+        }
+    }
 
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -171,20 +191,6 @@ class CreateRoomFragment : Fragment() {
                 }
             }
         }
-
-    private fun openFilePicker() {
-        if (selectedImages.size < MAX_IMAGES) {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "image/*"
-            pickImageLauncher.launch(intent)
-        } else {
-            Toast.makeText(
-                requireContext(),
-                "Maximum $MAX_IMAGES images allowed.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
 
     private fun updateSelectImagesButton() {
         btnSelectImages.text = "Select Images (${selectedImages.size}/$MAX_IMAGES)"

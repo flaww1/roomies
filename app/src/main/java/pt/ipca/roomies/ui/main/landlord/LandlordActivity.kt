@@ -18,7 +18,6 @@ class LandlordActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_landlord)
-        val sharedHabitationViewModel: SharedHabitationViewModel by viewModels()
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.landlordNavHostFragment) as NavHostFragment

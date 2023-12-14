@@ -64,6 +64,11 @@ class LoginFragment : Fragment() {
                     // Example: Show an error message
                     Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                 }
+
+                else -> {
+                    // Handle other cases
+
+                }
             }
         }
     }
