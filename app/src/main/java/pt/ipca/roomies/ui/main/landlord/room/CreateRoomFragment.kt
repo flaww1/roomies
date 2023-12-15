@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
@@ -31,9 +33,9 @@ class CreateRoomFragment : Fragment() {
     private lateinit var backButton: Button
     private lateinit var btnSelectImages: Button
     private lateinit var selectedImages: MutableList<Uri>
+    private lateinit var roomViewModel: RoomViewModel
+    private lateinit var habitationViewModel: HabitationViewModel
     private val MAX_IMAGES = 5
-    private val habitationViewModel: HabitationViewModel by viewModels()
-    private val roomViewModel: RoomViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,6 +46,8 @@ class CreateRoomFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        habitationViewModel = ViewModelProvider(requireActivity())[HabitationViewModel::class.java]
+        roomViewModel = ViewModelProvider(requireActivity())[RoomViewModel::class.java]
         initializeViews(view)
         setupViews()
         setupListeners()
@@ -126,28 +130,33 @@ class CreateRoomFragment : Fragment() {
         }
 
         createRoomButton.setOnClickListener {
-            createRoom()
+            createOrUpdateRoom()
         }
     }
 
-    private fun createRoom() {
+    private fun createOrUpdateRoom() {
         val habitation = habitationViewModel.selectedHabitation.value
         if (habitation == null || habitation.habitationId?.isBlank() != false) {
             showToast("Invalid habitation ID")
             return
         }
 
-        val room = createRoomObject(habitation.habitationId!!)
+        Log.d("CreateRoomFragment", "Creating a room for habitation: ${habitation.habitationId}")
 
-        if (selectedImages.isNotEmpty()) {
-            uploadImages(selectedImages.take(MAX_IMAGES)) { imageUrls ->
-                room.roomImages = imageUrls
-                roomViewModel.createRoom("habitations/${habitation.habitationId}/rooms", room)
-            }
+        val room = if (roomViewModel.selectedRoom.value != null) {
+            // If selectedRoom is not null, it means we are updating an existing room
+            updateRoomObject(habitation.habitationId!!, roomViewModel.selectedRoom.value!!)
         } else {
-            roomViewModel.createRoom("habitations/${habitation.habitationId}/rooms", room)
+            // If selectedRoom is null, it means we are creating a new room
+            createRoomObject(habitation.habitationId!!)
         }
+
+        // Create the room in Firestore and get the DocumentReference
+        roomViewModel.createRoom(room)
+        findNavController().navigateUp()
     }
+
+
 
     private fun createRoomObject(habitationId: String): Room {
         return Room(
@@ -163,6 +172,21 @@ class CreateRoomFragment : Fragment() {
         )
     }
 
+
+    private fun updateRoomObject(habitationId: String, existingRoom: Room): Room {
+        return Room(
+            roomId = existingRoom.roomId,
+            habitationId = habitationId,
+            description = editTextDescription.text.toString(),
+            price = editTextPrice.text.toString().toDouble(),
+            roomType = spinnerRoomType.selectedItem as RoomType,
+            roomSize = spinnerRoomSize.selectedItem as RoomSize,
+            leaseDuration = spinnerLeaseDuration.selectedItem as LeaseDuration,
+            roomAmenities = getSelectedAmenities(),
+            roomStatus = RoomStatus.AVAILABLE,
+            roomImages = existingRoom.roomImages
+        )
+    }
 
     private fun getSelectedAmenities(): List<RoomAmenities> {
         val amenities = mutableListOf<RoomAmenities>()

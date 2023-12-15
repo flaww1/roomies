@@ -8,12 +8,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 import pt.ipca.roomies.R
 import pt.ipca.roomies.data.entities.Habitation
 
@@ -31,7 +33,7 @@ class HabitationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[HabitationViewModel::class.java]
+        viewModel = ViewModelProvider(requireActivity())[HabitationViewModel::class.java]
 
 
         habitationRecyclerView = view.findViewById(R.id.habitationRecyclerView)
@@ -68,16 +70,26 @@ class HabitationFragment : Fragment() {
                             } else {
                                 Log.d(
                                     "HabitationFragment",
-                                    "Selected Habitation: $selectedHabitationId"
+                                    "Selected Habitation Before setSelectedHabitationId: $selectedHabitationId"
 
 
                                 )
-                                viewModel.setSelectedHabitationId(selectedHabitationId)
+                                viewModel.viewModelScope.launch {
+                                    viewModel.setSelectedHabitationId(selectedHabitationId)
+                                }
+
+                                val selectedHabitation = viewModel.selectedHabitation.value
+                                Log.d(
+                                    "HabitationFragment",
+                                    "Selected Habitation After setSelectedHabitationId : $selectedHabitation"
+                                )
+
 
                             }
                         }
 
                         viewModel.selectHabitation(habitation)
+                        Log.d("HabitationFragment", "Selected Habitation after selectHabitation: $habitation")
                         findNavController().navigate(R.id.action_habitationFragment_to_roomFragment)
                     }
 

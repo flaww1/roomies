@@ -1,9 +1,8 @@
 package pt.ipca.roomies.data.entities
 
 data class Room(
-    val roomId: String = "",
+    var roomId: String? = "",
     val habitationId: String = "",
-    val landlordId: String = "",
     val description: String = "",
     val price: Double = 0.0,
     val roomAmenities: List<RoomAmenities>,
@@ -16,10 +15,29 @@ data class Room(
     val leaseDuration: LeaseDuration,
     val roomType: RoomType,
     val roomStatus: RoomStatus,
-    val roomSize: RoomSize,
-
-
+    val roomSize: RoomSize
+) {
+    constructor() : this(
+        "",
+        "",
+        "",
+        0.0,
+        listOf(),
+        listOf(),
+        listOf(),
+        listOf(),
+        0,
+        0,
+        emptyList(),
+        LeaseDuration.ONE_MONTH,
+        RoomType.SINGLE,
+        RoomStatus.AVAILABLE,
+        RoomSize.SMALL
     )
+}
+
+
+
 
 enum class RoomType(s: String) {
     SINGLE("Single"),

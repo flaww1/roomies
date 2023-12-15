@@ -1,5 +1,6 @@
 package pt.ipca.roomies.ui.main.landlord.room
 
+import android.icu.lang.UCharacter.GraphemeClusterBreak.L
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -31,9 +32,8 @@ class RoomFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        roomViewModel = ViewModelProvider(this)[RoomViewModel::class.java]
-        habitationViewModel = ViewModelProvider(this)[HabitationViewModel::class.java]
-
+        roomViewModel = ViewModelProvider(requireActivity())[RoomViewModel::class.java]
+        habitationViewModel = ViewModelProvider(requireActivity())[HabitationViewModel::class.java]
 
         roomRecyclerView = view.findViewById(R.id.roomRecyclerView)
         roomRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -55,6 +55,7 @@ class RoomFragment : Fragment() {
                 override fun onRoomClick(room: Room) {
                     // Navigate to a new fragment or activity that displays the details of the clicked room
                     roomViewModel.selectRoom(room)
+                   // findNavController().navigate(R.id.action_roomFragment_to_roomDetailFragment)
                 }
 
                 override fun onDeleteRoomClick(room: Room) {
@@ -70,13 +71,8 @@ class RoomFragment : Fragment() {
                         return
                     }
 
-                    selectedHabitation.habitationId.let {
-                        if (it != null) {
-                            roomViewModel.deleteRoom(
-                                it,
-                                room.roomId
-                            )
-                        }
+                    selectedHabitation.habitationId?.let { habitationId ->
+                        room.roomId?.let { roomViewModel.deleteRoom(habitationId, it) }
                     }
                 }
             })
@@ -99,7 +95,19 @@ class RoomFragment : Fragment() {
         val fabCreateRoom: FloatingActionButton = view.findViewById(R.id.fabCreateRoom)
         fabCreateRoom.setOnClickListener {
             // Navigate to the room creation screen
-            findNavController().navigate(R.id.action_roomFragment_to_createRoomFragment)
+            val selectedHabitation = habitationViewModel.selectedHabitation.value
+            if (selectedHabitation == null || selectedHabitation.habitationId.isNullOrBlank()) {
+                Toast.makeText(
+                    requireContext(),
+                    "No habitation selected",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                return@setOnClickListener
+
+L            } else {
+                findNavController().navigate(R.id.action_roomFragment_to_createRoomFragment)
+            }
         }
     }
 }

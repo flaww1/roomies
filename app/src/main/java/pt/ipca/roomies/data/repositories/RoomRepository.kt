@@ -9,34 +9,22 @@ class RoomRepository {
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-    suspend fun createRoom(
-        habitationId: String,
-        room: Room,
-        onSuccess: (DocumentReference) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        try {
-            val documentReference = firestore.collection("habitations")
-                .document(habitationId)
-                .collection("rooms")
-                .add(room)
-                .await()
-            onSuccess(documentReference)
-        } catch (e: Exception) {
-            onFailure(e)
-        }
+    // In RoomRepository
+    suspend fun createRoom(room: Room): DocumentReference {
+        return firestore.collection("rooms")
+            .add(room)
+            .await()
     }
 
-    // Retrieve rooms associated with a specific habitation
+
     suspend fun getRoomsForHabitation(
         habitationId: String,
         onSuccess: (List<Room>) -> Unit,
         onFailure: (Exception) -> Unit
     ) {
         try {
-            val rooms = firestore.collection("habitations")
-                .document(habitationId)
-                .collection("rooms")
+            val rooms = firestore.collection("rooms")
+                .whereEqualTo("habitationId", habitationId)
                 .get()
                 .await()
                 .toObjects(Room::class.java)
@@ -46,7 +34,6 @@ class RoomRepository {
         }
     }
 
-    // Retrieve all rooms (not associated with a specific habitation)
     suspend fun getAllRooms(
         onSuccess: (List<Room>) -> Unit,
         onFailure: (Exception) -> Unit
@@ -63,15 +50,12 @@ class RoomRepository {
     }
 
     suspend fun deleteRoom(
-        habitationId: String,
         roomId: String,
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
         try {
-            firestore.collection("habitations")
-                .document(habitationId)
-                .collection("rooms")
+            firestore.collection("rooms")
                 .document(roomId)
                 .delete()
                 .await()
@@ -82,19 +66,17 @@ class RoomRepository {
     }
 
     suspend fun updateRoom(
-        habitationId: String,
-        roomId: String,
-        updatedRoom: Room,
+        room: Room,
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
         try {
-            firestore.collection("habitations")
-                .document(habitationId)
-                .collection("rooms")
-                .document(roomId)
-                .set(updatedRoom)
-                .await()
+            room.roomId?.let {
+                firestore.collection("rooms")
+                    .document(it)
+                    .set(room)
+                    .await()
+            }
             onSuccess()
         } catch (e: Exception) {
             onFailure(e)

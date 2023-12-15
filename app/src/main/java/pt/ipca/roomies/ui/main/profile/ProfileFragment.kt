@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.play.integrity.internal.c
 import com.google.firebase.auth.FirebaseAuth
 import pt.ipca.roomies.R
 import java.text.ParseException
@@ -33,7 +34,9 @@ class ProfileFragment : Fragment() {
     private lateinit var textViewLocation: TextView
     private lateinit var textViewBio: TextView
     private lateinit var linearLayoutTags: LinearLayout
-    private val viewModel by lazy { ViewModelProvider(this)[ProfileViewModel::class.java] }
+
+    private lateinit var textViewMessage: TextView
+    private var viewModel = ProfileViewModel()
     private val currentUser = FirebaseAuth.getInstance().currentUser
     private var userProfile: UserProfile? = null
 
@@ -56,6 +59,7 @@ class ProfileFragment : Fragment() {
         textViewBio = combinedProfileLayout.findViewById(R.id.textViewBio)
         linearLayoutTags = combinedProfileLayout.findViewById(R.id.linearLayoutTags)
 
+        textViewMessage = createProfileLayout.findViewById<TextView>(R.id.textViewMessage)
 
 
         // Return the combined layout with initial visibility settings
@@ -63,21 +67,24 @@ class ProfileFragment : Fragment() {
     }
 
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel = ViewModelProvider(requireActivity())[ProfileViewModel::class.java]
 
-        viewModel.userProfile.observe(viewLifecycleOwner) { fetchedUserProfile ->
-            userProfile = fetchedUserProfile
+        viewModel.userProfile.observe(viewLifecycleOwner) { userProfile ->
             if (userProfile != null) {
                 // User has a profile, show display layout and hide create layout
-                showProfileDisplayLayout(userProfile!!)
-                Log.d("ProfileFragment", "User Profile Display: $userProfile")
+                showProfileDisplayLayout(userProfile)
+                Log.d("ProfileFragment", "User Profile: $userProfile")
             } else {
                 // User does not have a profile, show create layout and hide display layout
                 showProfileCreationLayout()
-                Log.d("ProfileFragment", "User Profile Creation")
+                Log.d("ProfileFragment", "User does not have a profile")
             }
         }
+
+
 
 
         // Fetch the user profile
@@ -88,17 +95,20 @@ class ProfileFragment : Fragment() {
 
 
     private fun showProfileCreationLayout() {
+
         Log.d("ProfileFragment", "Profile Creation Layout Visibility: ${createProfileLayout.visibility}")
+
         // Set visibility for profile creation layout
         createProfileLayout.visibility = View.VISIBLE
 
         // Set visibility for profile display layout
         displayProfileLayout.visibility = View.GONE
 
-        // Customize other views as needed...
+        textViewMessage.text = "You don't have a profile yet. Create one now!"
     }
 
     private fun showProfileDisplayLayout(userProfile: UserProfile) {
+
         Log.d("ProfileFragment", "User Profile Display: $userProfile")
 
         // Set visibility for profile creation layout

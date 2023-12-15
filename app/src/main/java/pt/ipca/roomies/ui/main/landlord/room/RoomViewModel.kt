@@ -6,11 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import pt.ipca.roomies.data.entities.Habitation
 import pt.ipca.roomies.data.entities.Room
-import pt.ipca.roomies.data.repositories.HabitationRepository
 import pt.ipca.roomies.data.repositories.RoomRepository
-import pt.ipca.roomies.ui.main.landlord.habitation.HabitationViewModel
 
 class RoomViewModel : ViewModel() {
 
@@ -24,62 +21,79 @@ class RoomViewModel : ViewModel() {
     private val _selectedRoom = MutableLiveData<Room>()
     val selectedRoom: LiveData<Room> get() = _selectedRoom
 
-    // LiveData for room creation success (contains the document ID)
-    private val _roomCreationSuccess = MutableLiveData<String?>()
-    val roomCreationSuccess: LiveData<String?> get() = _roomCreationSuccess
 
     // LiveData for room deletion success
     private val _roomDeletionSuccess = MutableLiveData<Boolean>()
     val roomDeletionSuccess: LiveData<Boolean> get() = _roomDeletionSuccess
-    private val _selectedHabitation = MutableLiveData<Habitation?>()
 
-    private val habitationRepository = HabitationRepository()
-    private val habitationViewModel: HabitationViewModel = HabitationViewModel()
+    // LiveData for room update success
+    private val _roomUpdateSuccess = MutableLiveData<Boolean>()
+    val roomUpdateSuccess: LiveData<Boolean> get() = _roomUpdateSuccess
+
+    private val _roomCreationSuccess = MutableLiveData<String?>()
+    val roomCreationSuccess: LiveData<String?> get() = _roomCreationSuccess
+
 
     init {
-        // Observe the selectedHabitation from HabitationViewModel
-        habitationViewModel.selectedHabitation.observeForever {
-            _selectedHabitation.value = it
-            // Whenever selectedHabitation changes, fetch rooms
-            it?.habitationId?.let { habitationId ->
-                getRoomsByHabitationId(habitationId)
+        // Fetch all rooms initially
+        refreshRooms()
+    }
+
+    // Function to create a room
+    // In RoomViewModel
+    fun createRoom(room: Room) {
+        viewModelScope.launch {
+            try {
+                val documentReference = roomRepository.createRoom(room)
+                // Notify observers about successful creation with document ID
+                _roomCreationSuccess.value = documentReference.id
+                // Refresh the list of rooms
+                refreshRooms()
+            } catch (e: Exception) {
+                // Handle failure
+                Log.e("RoomViewModel", "Failed to create room: $e")
             }
         }
     }
 
-    // Function to create a room
-    fun createRoom(habitationId: String, room: Room) {
+
+    // Function to update a room
+    fun updateRoom(room: Room) {
         viewModelScope.launch {
-            roomRepository.createRoom(
-                habitationId,
+            roomRepository.updateRoom(
                 room,
-                onSuccess = { documentId ->
-                    _roomCreationSuccess.value = documentId.toString()
+                onSuccess = {
+                    // Notify observers about successful update
+                    _roomUpdateSuccess.value = true
+                    // Refresh the list of rooms
+                    refreshRooms()
                 },
                 onFailure = { e ->
                     // Handle failure
-                    println("Failed to create room: $e")
+                    Log.e("RoomViewModel", "Failed to update room: $e")
                 }
-
             )
-
         }
     }
-    fun getRoomsByHabitationId(habitationId: String) {
+
+    // Function to delete a room
+    fun deleteRoom(roomId: String, roomId1: String) {
         viewModelScope.launch {
-            habitationRepository.getRoomsByHabitationId(
-                habitationId,
-                onSuccess = { rooms ->
-                    _rooms.value = rooms
+            roomRepository.deleteRoom(
+                roomId,
+                onSuccess = {
+                    // Notify observers about successful deletion
+                    _roomDeletionSuccess.value = true
+                    // Refresh the list of rooms
+                    refreshRooms()
                 },
                 onFailure = { e ->
                     // Handle failure
-                    Log.e("RoomViewModel", "Failed to fetch rooms: $e")
+                    Log.e("RoomViewModel", "Failed to delete room: $e")
                 }
             )
         }
     }
-
 
     // Function to refresh the list of rooms
     fun refreshRooms() {
@@ -90,32 +104,30 @@ class RoomViewModel : ViewModel() {
                 },
                 onFailure = { e ->
                     // Handle failure
-                    println("Failed to retrieve rooms: $e")
+                    Log.e("RoomViewModel", "Failed to retrieve rooms: $e")
                 }
             )
         }
     }
-
-    // Function to delete a room
-    fun deleteRoom(habitationId: String, roomId: String) {
-        viewModelScope.launch {
-            roomRepository.deleteRoom(
-                habitationId,
-                roomId,
-                onSuccess = {
-                    _roomDeletionSuccess.value = true
-                },
-                onFailure = { e ->
-                    // Handle failure
-                    println("Failed to delete room: $e")
-                }
-            )
-        }
-    }
-
 
     // Function to select a room
     fun selectRoom(room: Room) {
         _selectedRoom.value = room
+    }
+
+    fun getRoomsByHabitationId(habitationId: String) {
+        viewModelScope.launch {
+            roomRepository.getRoomsForHabitation(
+                habitationId,
+                onSuccess = { rooms ->
+                    _rooms.value = rooms
+                },
+                onFailure = { e ->
+                    // Handle failure
+                    Log.e("RoomViewModel", "Failed to retrieve rooms: $e")
+                }
+            )
+        }
+
     }
 }

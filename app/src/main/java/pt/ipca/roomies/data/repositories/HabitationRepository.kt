@@ -34,30 +34,30 @@ class HabitationRepository {
 
 
 
-    suspend fun getHabitations(
-            onSuccess: (List<Habitation>) -> Unit,
-            onFailure: (Exception) -> Unit
-        ) {
-            try {
-                val habitations = firestore.collection("habitations")
-                    .get()
-                    .await()
-                    .toObjects(Habitation::class.java)
+    // In HabitationRepository or wherever you query the database...
+    suspend fun getHabitations(onSuccess: (List<Habitation>) -> Unit, onFailure: (Exception) -> Unit) {
+        try {
+            val habitations = firestore.collection("habitations")
+                .get()
+                .await()
+                .toObjects(Habitation::class.java)
 
-                // Update each habitation with its document ID
-                for (habitation in habitations) {
-                    habitation.habitationId =
-                        habitation.habitationId // Assuming habitationId is the field in habitations
+            // Make sure each habitation has a non-empty habitationId
+            for (habitation in habitations) {
+                if (habitation.habitationId.isNullOrBlank()) {
+                    throw Exception("Habitation with invalid ID found: $habitation")
                 }
-
-                onSuccess(habitations)
-            } catch (e: Exception) {
-                onFailure(e)
             }
+
+            onSuccess(habitations)
+        } catch (e: Exception) {
+            onFailure(e)
         }
+    }
 
 
-        suspend fun deleteHabitation(
+
+    suspend fun deleteHabitation(
             habitationId: String,
             onSuccess: () -> Unit,
             onFailure: (Exception) -> Unit
@@ -126,24 +126,6 @@ class HabitationRepository {
         }
     }
 
-
-
-    suspend fun getRoomsByHabitationId(
-        habitationId: String,
-        onSuccess: (List<Room>) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        try {
-            val rooms = firestore.collection("rooms")
-                .whereEqualTo("habitationId", habitationId) // Assuming "habitationId" is the field in rooms
-                .get()
-                .await()
-                .toObjects(Room::class.java)
-            onSuccess(rooms)
-        } catch (e: Exception) {
-            onFailure(e)
-        }
-    }
 
 }
 

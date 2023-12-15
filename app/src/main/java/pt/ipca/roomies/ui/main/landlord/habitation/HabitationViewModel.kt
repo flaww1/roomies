@@ -119,24 +119,26 @@ class HabitationViewModel : ViewModel() {
                 .get()
                 .await()
 
-            snapshot.toObject(Habitation::class.java)
+            val habitation = snapshot.toObject(Habitation::class.java)
+            Log.d("HabitationViewModel", "Fetched habitation: $habitation")
+            habitation
         } catch (e: Exception) {
             // Handle the exception as needed
+            Log.e("HabitationViewModel", "Failed to fetch habitation: $e")
             null
         }
     }
 
-    fun setSelectedHabitationId(habitationId: String) {
-        viewModelScope.launch {
-            val habitation = getHabitationById(habitationId)
-            if (habitation != null) {
-                selectHabitation(habitation)
-            } else {
-                // Handle the case where habitation is not found
-                Log.d("HabitationViewModel", "Habitation not found")
-            }
-        }
+
+    suspend fun setSelectedHabitationId(habitationId: String) {
+        // Fetch the habitation with the given ID from your database
+        val habitation = getHabitationById(habitationId)
+
+        // Set the selectedHabitation value
+        _selectedHabitation.value = habitation ?: throw IllegalStateException("Habitation with ID $habitationId not found")
     }
+
+
 
     fun selectHabitation(habitation: Habitation) {
         _selectedHabitation.value = habitation
