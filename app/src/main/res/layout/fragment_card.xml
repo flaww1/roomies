@@ -9,4 +9,29 @@
         android:layout_centerInParent="true"
         android:textSize="18sp" />
 
+    <!-- Like and Dislike buttons -->
+    <!-- Move the buttons to the bottom -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom">
+
+        <Button
+            android:id="@+id/buttonLike"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Like"
+            style="?android:attr/buttonBarButtonStyle" />
+
+        <Button
+            android:id="@+id/buttonDislike"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Dislike"
+            style="?android:attr/buttonBarButtonStyle" />
+    </LinearLayout>
+
 </RelativeLayout>

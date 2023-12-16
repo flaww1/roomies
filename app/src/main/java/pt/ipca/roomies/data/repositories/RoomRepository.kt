@@ -49,6 +49,15 @@ class RoomRepository {
         }
     }
 
+    suspend fun getRoomById(roomId: String): Room? {
+        return try {
+            val document = firestore.collection("rooms").document(roomId).get().await()
+            document.toObject(Room::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     suspend fun deleteRoom(
         roomId: String,
         onSuccess: () -> Unit,

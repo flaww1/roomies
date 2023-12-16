@@ -1,3 +1,5 @@
+package pt.ipca.roomies.data.entities
+
 data class User(
     var userId: String,
     val firstName: String,
