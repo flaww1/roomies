@@ -14,16 +14,40 @@ class HabitationAdapter(
     private val habitations: List<Habitation>,
     private val onHabitationClickListener: OnHabitationClickListener
 ) : RecyclerView.Adapter<HabitationAdapter.HabitationViewHolder>() {
-    class HabitationViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class HabitationViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val habitationNameTextView: TextView = view.findViewById(R.id.habitationNameTextView)
         val editHabitationButton: Button = view.findViewById(R.id.editHabitationButton)
         val deleteHabitationButton: Button = view.findViewById(R.id.deleteHabitationButton)
+
+        init {
+            itemView.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onHabitationClickListener.onHabitationClick(habitations[position])
+                }
+            }
+
+            editHabitationButton.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onHabitationClickListener.onEditHabitationClick(habitations[position])
+                }
+            }
+
+            deleteHabitationButton.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onHabitationClickListener.onDeleteHabitationClick(habitations[position])
+                }
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HabitationViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.habitation_item, parent, false)
         return HabitationViewHolder(view)
     }
+
 
 
     override fun onBindViewHolder(holder: HabitationViewHolder, position: Int) {

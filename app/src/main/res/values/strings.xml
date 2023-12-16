@@ -14,6 +14,7 @@
     <string name="choose_room_type" />
     <string name="choose_room_size" />
     <string name="choose_lease_duration" />
+    <string name="create_room" />
 
 
 </resources>

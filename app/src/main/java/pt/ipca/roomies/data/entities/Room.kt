@@ -1,24 +1,43 @@
 package pt.ipca.roomies.data.entities
 
 data class Room(
-    val roomId: String = "",
-    val landlordId: String = "",
+    var roomId: String? = "",
+    val habitationId: String = "",
     val description: String = "",
     val price: Double = 0.0,
-    val roomAmenities: MutableList<RoomAmenities>,
+    val roomAmenities: List<RoomAmenities>,
     val likedByUsers: List<String> = emptyList(),
     val dislikedByUsers: List<String> = emptyList(),
     val matches: List<String> = emptyList(),
     val createdAt: Long = 0,
     val updatedAt: Long = 0,
-    val roomImages: List<String> = emptyList(),
+    var roomImages: List<String> = emptyList(),
     val leaseDuration: LeaseDuration,
     val roomType: RoomType,
     val roomStatus: RoomStatus,
-    val roomSize: RoomSize,
-
-
+    val roomSize: RoomSize
+) {
+    constructor() : this(
+        "",
+        "",
+        "",
+        0.0,
+        listOf(),
+        listOf(),
+        listOf(),
+        listOf(),
+        0,
+        0,
+        emptyList(),
+        LeaseDuration.ONE_MONTH,
+        RoomType.SINGLE,
+        RoomStatus.AVAILABLE,
+        RoomSize.SMALL
     )
+}
+
+
+
 
 enum class RoomType(s: String) {
     SINGLE("Single"),
