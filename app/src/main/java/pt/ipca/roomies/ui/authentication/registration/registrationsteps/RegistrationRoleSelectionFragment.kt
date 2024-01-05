@@ -8,9 +8,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.repositories.RegistrationRepository
+import pt.ipca.roomies.data.repositories.RegistrationViewModelFactory
 import pt.ipca.roomies.databinding.FragmentRegistrationRoleSelectionBinding
 
 
@@ -19,14 +22,17 @@ class RegistrationRoleSelectionFragment : Fragment() {
 
     private var _binding: FragmentRegistrationRoleSelectionBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: RegistrationViewModel
+    private val viewModel: RegistrationViewModel by viewModels {
+        RegistrationViewModelFactory(
+            registrationRepository = RegistrationRepository(requireContext())
+        )
 
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRegistrationRoleSelectionBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
 
         return binding.root
     }
@@ -52,6 +58,8 @@ class RegistrationRoleSelectionFragment : Fragment() {
     private fun navigateToHomeFragment() {
         findNavController().navigate(R.id.action_registrationRoleSelectionFragment_to_homeFragment)
     }
+
+
 
 
 }

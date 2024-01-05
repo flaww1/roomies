@@ -10,7 +10,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.google.firebase.auth.FirebaseAuth
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.local.AppDatabase
+import pt.ipca.roomies.data.repositories.LoginRepository
+import pt.ipca.roomies.data.repositories.LoginViewModelFactory
 import pt.ipca.roomies.databinding.FragmentLoginBinding
 import pt.ipca.roomies.ui.authentication.UserViewModel
 
@@ -28,8 +32,9 @@ class LoginFragment : Fragment() {
         return binding.root
     }
 
-    private val viewModel: LoginViewModel by viewModels()
-
+    private val viewModel: LoginViewModel by viewModels {
+        LoginViewModelFactory(LoginRepository(AppDatabase.getDatabase(requireContext()).userDao(), FirebaseAuth.getInstance()))
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d("pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment", "pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment onViewCreated")
 

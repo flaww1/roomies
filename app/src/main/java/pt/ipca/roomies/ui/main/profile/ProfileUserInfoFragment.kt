@@ -1,5 +1,6 @@
 package pt.ipca.roomies.ui.main.profile
 
+import pt.ipca.roomies.data.repositories.RoomRepository
 import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 import android.content.Intent
 import android.net.Uri
@@ -13,7 +14,6 @@ import android.widget.EditText
 import android.widget.Spinner
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.jaredrummler.materialspinner.MaterialSpinner
@@ -23,19 +23,39 @@ import pt.ipca.roomies.data.entities.UserProfile
 import android.app.Activity.RESULT_OK
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.fragment.app.viewModels
 import com.google.firebase.auth.FirebaseAuth
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.local.AppDatabase
 import pt.ipca.roomies.data.repositories.ProfileRepository
+import pt.ipca.roomies.data.repositories.RegistrationRepository
+import pt.ipca.roomies.data.repositories.RegistrationViewModelFactory
 import pt.ipca.roomies.databinding.FragmentProfileUserInfoBinding
 import java.util.Calendar
 
+
+
+
 class ProfileUserInfoFragment : Fragment() {
-    private lateinit var viewModelRegistration: RegistrationViewModel
+
+    private val viewModelRegistration by viewModels<RegistrationViewModel> {
+        RegistrationViewModelFactory(registrationRepository)
+    }
+
+
     private var _binding: FragmentProfileUserInfoBinding? = null
     private val binding get() = _binding!!
     private var selectedImageUri: Uri? = null
-    private val profileRepository = ProfileRepository()
+    private val profileRepository by lazy {
+        val userProfileDao = AppDatabase.getDatabase(requireContext()).userProfileDao()
+        ProfileRepository(userProfileDao)
+    }
+    private val registrationRepository by lazy {
+        RegistrationRepository(requireContext())
+    }
+
+
     private val locationsInPortugal = listOf("Porto", "Lisbon", "Faro", "Coimbra", "Braga", "Funchal", "Evora", "Aveiro", "Viseu")
 
 
@@ -64,7 +84,6 @@ class ProfileUserInfoFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentProfileUserInfoBinding.inflate(inflater, container, false)
-        viewModelRegistration = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
 
         return binding.root
     }

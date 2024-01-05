@@ -19,7 +19,10 @@ import kotlinx.coroutines.launch
 import pt.ipca.roomies.R
 import pt.ipca.roomies.data.entities.TagType
 import pt.ipca.roomies.data.entities.UserTags
-import pt.ipca.roomies.data.repositories.ProfileTagsRepository
+import pt.ipca.roomies.data.local.AppDatabase
+import pt.ipca.roomies.data.repositories.ProfileRepository
+import pt.ipca.roomies.data.repositories.ProfileTagRepository
+
 import pt.ipca.roomies.databinding.FragmentProfileUserInterestsBinding
 import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 
@@ -27,8 +30,14 @@ class ProfileUserInterestsFragment : Fragment() {
 
     private lateinit var binding: FragmentProfileUserInterestsBinding
     private lateinit var viewModel: ProfileUserInterestsViewModel
-    private lateinit var viewModelRegistration: RegistrationViewModel
-    private lateinit var profileTagsRepository: ProfileTagsRepository
+    private val profileTagsDao = AppDatabase.getDatabase(requireContext()).profileTagsDao()
+
+    private val viewModelRegistration: RegistrationViewModel by lazy {
+        ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
+    }
+    private val profileTagsRepository by lazy {
+        ProfileTagRepository(profileTagsDao)
+    }
     private var selectedTagsByType =
         mutableMapOf<TagType, MutableLiveData<MutableSet<UserTags>>>()
     private val areTagsSelected: MutableMap<TagType, Boolean> = mutableMapOf()
@@ -46,10 +55,7 @@ class ProfileUserInterestsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentProfileUserInterestsBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(this)[ProfileUserInterestsViewModel::class.java]
-        viewModelRegistration =
-            ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
-        profileTagsRepository = ProfileTagsRepository()
+
 
         // Initialize selectedTagsByType before using it
         selectedTagsByType = mutableMapOf<TagType, MutableLiveData<MutableSet<UserTags>>>().also { map ->
@@ -244,4 +250,5 @@ class ProfileUserInterestsFragment : Fragment() {
             tagName = profileTag.tagName
         )
     }
+
 }

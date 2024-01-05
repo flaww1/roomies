@@ -2,41 +2,53 @@ package pt.ipca.roomies.data.repositories
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import pt.ipca.roomies.data.dao.LikeMatchDao
+import pt.ipca.roomies.data.dao.RoomDao
+import pt.ipca.roomies.data.dao.UserDao
 import pt.ipca.roomies.data.entities.Card
 import pt.ipca.roomies.data.entities.Like
 import pt.ipca.roomies.data.entities.Match
 import pt.ipca.roomies.data.entities.Room
 import pt.ipca.roomies.data.entities.User
 
-class CardRepository {
+class CardRepository(
+    private val likeMatchDao: LikeMatchDao,
+    private val roomDao: RoomDao,
+    private val userDao: UserDao
+) {
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    private val db = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
     private val currentUserId: String?
         get() = auth.currentUser?.uid
-
     private val likedRooms = mutableSetOf<String>()
+    private val likes = mutableListOf<Like>()
     private val likedUsers = mutableSetOf<String>()
+    private val matches = mutableListOf<Match>()
     private val matchedRooms = mutableSetOf<String>()
     private val matchedUsers = mutableSetOf<String>()
+}
 
-    private val likes = mutableListOf<Like>()
-    private val matches = mutableListOf<Match>()
 
-    suspend fun getNextCardForUser(): Card? {
-        val room = getNextRoomForUser()
-        return room?.let { Card.RoomCard(it) }
+/*
+    private suspend fun getNextRoomForUser(): Room? {
+        return withContext(Dispatchers.IO) {
+            roomDao.getNextRoom()
+        }
     }
 
-    suspend fun getNextCardForLandlord(): Card? {
-        val user = getNextUserForLandlord()
-        return user?.let { Card.UserCard(it) }
+    private suspend fun getNextUserForLanlord(): User? {
+        return withContext(Dispatchers.IO) {
+            userDao.getNextUser()
+        }
     }
 
     suspend fun likeCard(card: Card, likedUserId: String) {
         when (card) {
-            is Card.RoomCard -> likeRoom(card.room.roomId!!, likedUserId)
+            is Card.RoomCard -> likeRoom(card.room.roomId!!, card.user.userId)
             is Card.UserCard -> likeUser(card.user.userId, likedUserId)
         }
     }
@@ -55,50 +67,39 @@ class CardRepository {
         }
     }
 
-    // Inside CardRepository
-    private suspend fun getNextRoomForUser(): Room? {
-        // Implement logic to fetch the next room for a regular user
-        return db.collection("rooms")
-            .limit(1)
-            .get()
-            .await()
-            .documents
-            .firstOrNull()
-            ?.toObject(Room::class.java)
-    }
-
-    private suspend fun getNextUserForLandlord(): User? {
-        // Implement logic to fetch the next user for a landlord
-        return db.collection("users")
-            .limit(1)
-            .get()
-            .await()
-            .documents
-            .firstOrNull()
-            ?.toObject(User::class.java)
-    }
 
 
     suspend fun likeRoom(roomId: String, likedUserId: String) {
-        likedRooms.add(roomId)
-        likes.add(Like(likedUserId, currentUserId ?: "", roomId, System.currentTimeMillis()))
+        withContext(Dispatchers.IO) {
+            likedRooms.add(roomId)
+            likes.add(Like(likedUserId, currentUserId ?: "", roomId, System.currentTimeMillis().toString()))
 
-        // Implement logic to update likes in Firestore
-        db.collection("likes").add(
-            mapOf(
-                "likedUserId" to likedUserId,
-                "likingUserId" to currentUserId,
-                "roomId" to roomId,
-                "timestamp" to System.currentTimeMillis()
-            )
-        ).await()
+            likeMatchDao.insertLike(Like(likedUserId, currentUserId ?: "", roomId, System.currentTimeMillis()))
+        }
+
+        // Create a map with the like information
+        val likeMap = mapOf(
+            "likedUserId" to likedUserId,
+            "likingUserId" to currentUserId,
+            "roomId" to roomId,
+            "timestamp" to System.currentTimeMillis()
+        )
+
+        // Update likes in Firestore
+        firestore.collection("likes").add(likeMap).await()
     }
 
+
+
     suspend fun dislikeRoom(roomId: String) {
-        likedRooms.remove(roomId)
+        withContext(Dispatchers.IO) {
+            likedRooms.remove(roomId)
+
+            currentUserId?.let { likeMatchDao.deleteLikes(it, roomId) }
+        }
 
         // Implement logic to update likes in Firestore
-        db.collection("likes")
+        firestore.collection("likes")
             .whereEqualTo("likingUserId", currentUserId)
             .whereEqualTo("roomId", roomId)
             .get()
@@ -108,25 +109,33 @@ class CardRepository {
     }
 
     suspend fun likeUser(userId: String, likedUserId: String) {
-        likedUsers.add(userId)
-        likes.add(Like(likedUserId, currentUserId ?: "", "roomId", System.currentTimeMillis()))
+        withContext(Dispatchers.IO) {
+            likedUsers.add(userId)
+            likes.add(Like(likedUserId, currentUserId ?: "", userId, System.currentTimeMillis()))
+
+            likeMatchDao.insertLike(Like(likedUserId, currentUserId ?: "", userId, System.currentTimeMillis()))
+        }
 
         // Implement logic to update likes in Firestore
-        db.collection("likes").add(
+        firestore.collection("likes").add(
             mapOf(
                 "likedUserId" to likedUserId,
                 "likingUserId" to currentUserId,
-                "roomId" to "roomId", // replace with the actual room ID or remove it if not needed
+                "userId" to userId, // replace with the actual user ID or remove it if not needed
                 "timestamp" to System.currentTimeMillis()
             )
         ).await()
     }
 
     suspend fun dislikeUser(userId: String) {
-        likedUsers.remove(userId)
+        withContext(Dispatchers.IO) {
+            likedUsers.remove(userId)
+
+            currentUserId?.let { likeMatchDao.deleteLikes(it, userId) }
+        }
 
         // Implement logic to update likes in Firestore
-        db.collection("likes")
+        firestore.collection("likes")
             .whereEqualTo("likingUserId", currentUserId)
             .whereEqualTo("likedUserId", userId)
             .get()
@@ -140,8 +149,12 @@ class CardRepository {
             matchedRooms.add(roomId)
             matches.add(Match(targetUserId, currentUserId ?: "", roomId, System.currentTimeMillis()))
 
+            withContext(Dispatchers.IO) {
+                likeMatchDao.insertMatch(Match(targetUserId, currentUserId ?: "", roomId, System.currentTimeMillis()))
+            }
+
             // Implement logic to update matches in Firestore
-            db.collection("matches").add(
+            firestore.collection("matches").add(
                 mapOf(
                     "targetUserId" to targetUserId,
                     "initiatorUserId" to currentUserId,
@@ -155,174 +168,143 @@ class CardRepository {
     suspend fun matchUser(userId: String, targetUserId: String) {
         if (likedUsers.contains(userId)) {
             matchedUsers.add(userId)
-            matches.add(Match(targetUserId, currentUserId ?: "", "roomId", System.currentTimeMillis()))
+            matches.add(Match(targetUserId, currentUserId ?: "", userId, System.currentTimeMillis()))
+
+            withContext(Dispatchers.IO) {
+                likeMatchDao.insertMatch(Match(targetUserId, currentUserId ?: "", userId, System.currentTimeMillis()))
+            }
 
             // Implement logic to update matches in Firestore
-            db.collection("matches").add(
+            firestore.collection("matches").add(
                 mapOf(
                     "targetUserId" to targetUserId,
                     "initiatorUserId" to currentUserId,
-                    "roomId" to "roomId", // replace with the actual room ID or remove it if not needed
+                    "userId" to userId,
                     "timestamp" to System.currentTimeMillis()
                 )
             ).await()
         }
     }
 
+
+
+
+
+
     suspend fun getLikedRooms(): Set<String> {
-        // Implement logic to fetch liked rooms from Firestore
-        val snapshot = db.collection("likes")
-            .whereEqualTo("likingUserId", currentUserId)
-            .get()
-            .await()
+        // Implement logic to fetch liked rooms from local Room database
+        val localLikedRooms = withContext(Dispatchers.IO) {
+            currentUserId?.let { likeMatchDao.getLikedRooms(it) }
+        }
 
         likedRooms.clear()
-        for (document in snapshot.documents) {
-            val roomId = document.getString("roomId")
-            roomId?.let { likedRooms.add(it) }
+        if (localLikedRooms != null) {
+            likedRooms.addAll(listOf(localLikedRooms.map { it.roomId }.toString()))
         }
 
         return likedRooms
     }
 
     suspend fun getLikedUsers(): Set<String> {
-        // Implement logic to fetch liked users from Firestore
-        val snapshot = db.collection("likes")
-            .whereEqualTo("likingUserId", currentUserId)
-            .get()
-            .await()
+        // Implement logic to fetch liked users from local Room database
+        val localLikedUsers = withContext(Dispatchers.IO) {
+            currentUserId?.let { likeMatchDao.getLikedUsers(it) }
+        }
 
         likedUsers.clear()
-        for (document in snapshot.documents) {
-            val likedUserId = document.getString("likedUserId")
-            likedUserId?.let { likedUsers.add(it) }
+        if (localLikedUsers != null) {
+            likedUsers.addAll(listOf(localLikedUsers.map { it.likedUserId }.toString()))
         }
 
         return likedUsers
     }
 
-    suspend fun getMatchedRooms(): Set<String> {
-        // Implement logic to fetch matched rooms from Firestore
-        val snapshot = db.collection("matches")
-            .whereEqualTo("initiatorUserId", currentUserId)
-            .get()
-            .await()
+    private suspend fun getMatchedRooms(): Set<String> {
+        // Implement logic to fetch matched rooms from local Room database
+        val localMatchedRooms = withContext(Dispatchers.IO) {
+            currentUserId?.let { likeMatchDao.getMatchedRooms(it) }
+        }
 
         matchedRooms.clear()
-        for (document in snapshot.documents) {
-            val roomId = document.getString("roomId")
-            roomId?.let { matchedRooms.add(it) }
+        if (localMatchedRooms != null) {
+            matchedRooms.addAll(listOf(localMatchedRooms.map { it.roomId }.toString()))
         }
 
         return matchedRooms
     }
 
-    suspend fun getMatchedUsers(): Set<String> {
-        // Implement logic to fetch matched users from Firestore
-        val snapshot = db.collection("matches")
-            .whereEqualTo("initiatorUserId", currentUserId)
-            .get()
-            .await()
+    private suspend fun getMatchedUsers(): Set<String> {
+        // Implement logic to fetch matched users from local Room database
+        val localMatchedUsers = withContext(Dispatchers.IO) {
+            currentUserId?.let { likeMatchDao.getMatchedUsers(it) }
+        }
 
         matchedUsers.clear()
-        for (document in snapshot.documents) {
-            val targetUserId = document.getString("targetUserId")
-            targetUserId?.let { matchedUsers.add(it) }
+        if (localMatchedUsers != null) {
+            matchedUsers.addAll(listOf(localMatchedUsers.map { it.targetUserId }.toString()))
         }
 
         return matchedUsers
     }
 
-    suspend fun getLikes(): List<Like> {
-        // Implement logic to fetch likes from Firestore
-        val snapshot = db.collection("likes")
-            .whereEqualTo("likingUserId", currentUserId)
-            .get()
-            .await()
-
-        likes.clear()
-        for (document in snapshot.documents) {
-            val likedUserId = document.getString("likedUserId")
-            val roomId = document.getString("roomId")
-            val timestamp = document.getLong("timestamp")
-
-            if (likedUserId != null && roomId != null && timestamp != null) {
-                likes.add(Like(likedUserId, currentUserId ?: "", roomId, timestamp))
-            }
+    private suspend fun getLikes(): List<Like> {
+        // Implement logic to fetch likes from local Room database
+        return withContext(Dispatchers.IO) {
+            likeMatchDao.getAllLikes(currentUserId)
         }
-
-        return likes
     }
 
-    suspend fun getMatches(): List<Match> {
-        // Implement logic to fetch matches from Firestore
-        val snapshot = db.collection("matches")
-            .whereEqualTo("initiatorUserId", currentUserId)
-            .get()
-            .await()
-
-        matches.clear()
-        for (document in snapshot.documents) {
-            val targetUserId = document.getString("targetUserId")
-            val roomId = document.getString("roomId")
-            val timestamp = document.getLong("timestamp")
-
-            if (targetUserId != null && roomId != null && timestamp != null) {
-                matches.add(Match(targetUserId, currentUserId ?: "", roomId, timestamp))
-            }
+    private suspend fun getMatches(): List<Match> {
+        // Implement logic to fetch matches from local Room database
+        return withContext(Dispatchers.IO) {
+            likeMatchDao.getAllMatches(currentUserId)
         }
-
-        return matches
     }
-
 
     suspend fun getLikedItems(): Set<String> {
-        // Implement logic to fetch liked items from Firestore
-        val snapshot = db.collection("likes")
-            .whereEqualTo("likingUserId", currentUserId)
-            .get()
-            .await()
+        // Implement logic to fetch liked items from local Room database
+        val localLikedRooms = withContext(Dispatchers.IO) {
+            currentUserId?.let { likeMatchDao.getLikedRooms(it) }
+        }
+
+        val localLikedUsers = withContext(Dispatchers.IO) {
+            currentUserId?.let { likeMatchDao.getLikedUsers(it) }
+        }
 
         likedRooms.clear()
+        if (localLikedRooms != null) {
+            likedRooms.addAll(listOf(localLikedRooms.map { it.roomId }.toString()))
+        }
+
         likedUsers.clear()
-        for (document in snapshot.documents) {
-            val likedUserId = document.getString("likedUserId")
-            val roomId = document.getString("roomId")
-
-            if (likedUserId != null) {
-                likedUsers.add(likedUserId)
-            }
-
-            if (roomId != null) {
-                likedRooms.add(roomId)
-            }
+        if (localLikedUsers != null) {
+            likedUsers.addAll(listOf(localLikedUsers.map { it.likedUserId }.toString()))
         }
 
         return likedRooms + likedUsers
     }
 
     suspend fun getMatchedItems(): Set<String> {
-        // Implement logic to fetch matched items from Firestore
-        val snapshot = db.collection("matches")
-            .whereEqualTo("initiatorUserId", currentUserId)
-            .get()
-            .await()
+        // Implement logic to fetch matched items from local Room database
+        val localMatchedRooms = withContext(Dispatchers.IO) {
+            currentUserId?.let { likeMatchDao.getMatchedRooms(it) }
+        }
+
+        val localMatchedUsers = withContext(Dispatchers.IO) {
+            currentUserId?.let { likeMatchDao.getMatchedUsers(it) }
+        }
 
         matchedRooms.clear()
+        if (localMatchedRooms != null) {
+            matchedRooms.addAll(listOf(localMatchedRooms.map { it.roomId }.toString()))
+        }
+
         matchedUsers.clear()
-        for (document in snapshot.documents) {
-            val targetUserId = document.getString("targetUserId")
-            val roomId = document.getString("roomId")
-
-            if (targetUserId != null) {
-                matchedUsers.add(targetUserId)
-            }
-
-            if (roomId != null) {
-                matchedRooms.add(roomId)
-            }
+        if (localMatchedUsers != null) {
+            matchedUsers.addAll(listOf(localMatchedUsers.map { it.targetUserId }.toString()))
         }
 
         return matchedRooms + matchedUsers
     }
 }
+*/

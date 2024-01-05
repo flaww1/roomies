@@ -1,17 +1,16 @@
 package pt.ipca.roomies.ui.main
 
+import pt.ipca.roomies.data.repositories.CardRepository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import pt.ipca.roomies.data.entities.Card
-import pt.ipca.roomies.data.repositories.CardRepository
-import pt.ipca.roomies.data.entities.User
+import pt.ipca.roomies.data.repositories.ProfileRepository
+import pt.ipca.roomies.data.repositories.RegistrationRepository
 
-class HomeViewModel : ViewModel() {
-
-    private val cardRepository = CardRepository()
+class HomeViewModel(private val cardRepository: CardRepository) : ViewModel() {
 
     private val _currentCard = MutableLiveData<Card?>()
     val currentCard: LiveData<Card?> get() = _currentCard
@@ -22,7 +21,9 @@ class HomeViewModel : ViewModel() {
     private val _matches = MutableLiveData<Set<String>>()
     val matches: LiveData<Set<String>> get() = _matches
     private lateinit var currentUserRole: String // Declare currentUserRole
+}
 
+/*
 
     init {
         viewModelScope.launch {
@@ -106,3 +107,4 @@ class HomeViewModel : ViewModel() {
     }
 
 }
+*/

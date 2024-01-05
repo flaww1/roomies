@@ -8,19 +8,33 @@ import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.entities.User
+import pt.ipca.roomies.data.local.AppDatabase
+import pt.ipca.roomies.data.repositories.ProfileRepository
 import pt.ipca.roomies.data.repositories.RegistrationRepository
+import pt.ipca.roomies.data.repositories.RegistrationViewModelFactory
 import pt.ipca.roomies.databinding.FragmentRegistrationBinding
 
 
 class RegistrationFragment : Fragment() {
     private lateinit var userId: String // Declare userId here
 
-    private val viewModel: RegistrationViewModel by viewModels()
-    private val registrationRepository = RegistrationRepository()
+    private val viewModel: RegistrationViewModel by viewModels {
+        RegistrationViewModelFactory(
+            registrationRepository = RegistrationRepository(requireContext())
+        )
+
+    }
+    private val registrationRepository by lazy {
+        RegistrationRepository(requireContext())
+    }
+
 
     private var _binding: FragmentRegistrationBinding? = null
     private val binding get() = _binding!!
@@ -40,6 +54,7 @@ class RegistrationFragment : Fragment() {
             Log.d("RegistrationFragment", "Obtained userId: $userId")
         }
 
+        // Inside your onViewCreated function or wherever appropriate
         binding.nextButton.setOnClickListener {
             val firstName = binding.editTextFirstName.text.toString()
             val lastName = binding.editTextLastName.text.toString()
@@ -52,9 +67,12 @@ class RegistrationFragment : Fragment() {
                 viewModel.register(firstName, lastName, email, password)
 
                 // Navigate to the next step in the registration process
-                registerUserWithEmailAndPassword(email, password)
+                lifecycleScope.launch {
+                    registerUserWithEmailAndPassword(email, password)
+                }
             }
         }
+
         binding.backButton.setOnClickListener {
             findNavController().navigateUp() // Use navigateUp instead of popBackStack
         }
@@ -138,7 +156,7 @@ class RegistrationFragment : Fragment() {
         // Return true only if all validations pass
         return isFirstNameValid && isLastNameValid && isEmailValid && isPasswordValid
     }
-    private fun registerUserWithEmailAndPassword(email: String, password: String) {
+    private suspend fun registerUserWithEmailAndPassword(email: String, password: String) {
         val firebaseAuth = FirebaseAuth.getInstance()
         firebaseAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(requireActivity()) { task ->
@@ -148,17 +166,40 @@ class RegistrationFragment : Fragment() {
                     val userId = user?.uid
 
                     if (userId != null) {
-                        // Store user information in Firestore during the initial registration
-                        registrationRepository.storeUserInFirestore(userId, email, password, binding.editTextFirstName.text.toString(), binding.editTextLastName.text.toString())
+                        // Call the suspend function within a coroutine scope
+                        lifecycleScope.launch {
+                            // Store user information in Firestore during the initial registration
+                            registrationRepository.storeUserInFirestore(
+                                userId,
+                                email,
+                                password,
+                                binding.editTextFirstName.text.toString(),
+                                binding.editTextLastName.text.toString()
+                            )
 
-                        // Update the user in the ViewModel with the obtained userId
-                        viewModel.updateUserId(userId)
+                            // Update the user in the ViewModel with the obtained userId
+                            viewModel.updateUserId(userId)
 
-                        // Log the userId for debugging
-                        Log.d("RegistrationFragment", "Obtained userId: $userId")
+                            // Insert or update user data in the local Room database
+                            registrationRepository.insertOrUpdateUserLocally(
+                                User(
+                                userId = userId,
+                                firstName = binding.editTextFirstName.text.toString(),
+                                lastName = binding.editTextLastName.text.toString(),
+                                email = email,
+                                userRole = "", // Set initial values as needed
+                                password = password,
+                                registrationDate = 0,
+                                userRating = 0
+                            )
+                            )
 
-                        // Navigate to the next step in the registration process
-                        navigateToRoleSelectionFragment()
+                            // Log the userId for debugging
+                            Log.d("RegistrationFragment", "Obtained userId: $userId")
+
+                            // Navigate to the next step in the registration process
+                            navigateToRoleSelectionFragment()
+                        }
                     } else {
                         // Handle the case where userId is null
                         Log.e("RegistrationFragment", "userId is null after successful registration")

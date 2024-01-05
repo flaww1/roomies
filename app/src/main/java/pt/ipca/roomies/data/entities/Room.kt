@@ -1,7 +1,28 @@
 package pt.ipca.roomies.data.entities
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
+import pt.ipca.roomies.data.entities.Converters.*
+
+
+
+
+
+@Entity(tableName = "rooms")
+@TypeConverters(
+    Converters.RoomAmenitiesListConverter::class,
+    Converters.LeaseDurationConverter::class,
+    Converters.RoomTypeConverter::class,
+    Converters.RoomStatusConverter::class,
+    Converters.RoomSizeConverter::class,
+    Converters.StringListConverter::class,
+
+)
+
 data class Room(
-    var roomId: String? = "",
+    @PrimaryKey(autoGenerate = true)
+    var roomId: Long = 0,
     val habitationId: String = "",
     val description: String = "",
     val price: Double = 0.0,
@@ -18,7 +39,7 @@ data class Room(
     val roomSize: RoomSize
 ) {
     constructor() : this(
-        "",
+        0,
         "",
         "",
         0.0,
@@ -39,44 +60,64 @@ data class Room(
 
 
 
-enum class RoomType(s: String) {
-    SINGLE("Single"),
-    DOUBLE("Double"),
-    TRIPLE("Triple"),
-    QUADRUPLE("Quadruple"),
+@TypeConverters(RoomTypeConverter::class)
+enum class RoomType {
+    SINGLE,
+    DOUBLE,
+    TRIPLE,
+    QUADRUPLE;
+
+    val type: String
+        get() = name
 }
 
-enum class RoomAmenities(s: String) {
-    AIR_CONDITIONING("Air Conditioning"),
-    HEATING("Heating"),
-    BALCONY("Balcony"),
-    PRIVATE_BATHROOM("Private Bathroom"),
+@TypeConverters(RoomAmenitiesConverter::class)
+enum class RoomAmenities {
+    AIR_CONDITIONING,
+    HEATING,
+    BALCONY,
+    PRIVATE_BATHROOM;
 
-    // Add other amenities as needed
-}
+    val amenity: String
+        get() = name
 
-enum class RoomStatus(s: String) {
-    AVAILABLE("Available"),
-    UNAVAILABLE("Unavailable"),
-    PENDING("Pending"),
-    RENTED("Rented"),
 
 }
 
-enum class RoomSize(s: String) {
-    SMALL("Small"),
-    MEDIUM("Medium"),
-    LARGE("Large"),
-    // Add other sizes as needed
+@TypeConverters(RoomStatusConverter::class)
+enum class RoomStatus {
+    AVAILABLE,
+    UNAVAILABLE,
+    PENDING,
+    RENTED;
+
+    val status: String
+        get() = name
+
+}
+@TypeConverters(RoomSizeConverter::class)
+enum class RoomSize {
+    SMALL,
+    MEDIUM,
+    LARGE;
+
+    val size: String
+        get() = name
+
 }
 
-enum class LeaseDuration(s: String){
-    ONE_MONTH("1 Month"),
-    THREE_MONTHS("3 Months"),
-    SIX_MONTHS("6 Months"),
-    ONE_YEAR("1 Year"),
-    TWO_YEARS("2 Years"),
-    THREE_YEARS("3 Years"),
+@TypeConverters(LeaseDurationConverter::class)
+enum class LeaseDuration {
+    ONE_MONTH,
+    THREE_MONTHS,
+    SIX_MONTHS,
+    ONE_YEAR,
+    TWO_YEARS,
+    THREE_YEARS;
+
+    val duration: String
+        get() = name
+
 }
 
 

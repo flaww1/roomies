@@ -1,6 +1,6 @@
 package pt.ipca.roomies.ui.authentication.registration
 
-import User
+
 import pt.ipca.roomies.data.entities.UserProfile
 import android.net.Uri
 import android.util.Log
@@ -8,11 +8,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import pt.ipca.roomies.data.entities.ProfileTags
+import pt.ipca.roomies.data.entities.User
+import pt.ipca.roomies.data.repositories.ProfileRepository
 import pt.ipca.roomies.data.repositories.RegistrationRepository
 
-class RegistrationViewModel : ViewModel() {
+class RegistrationViewModel(
+    private val registrationRepository: RegistrationRepository
+) : ViewModel() {
 
-    private val registrationRepository = RegistrationRepository()
+
+
     private val _userId = MutableLiveData<String?>()
     val userId: LiveData<String?> get() = _userId
     val _errorMessage = MutableLiveData<String?>()
@@ -99,6 +104,7 @@ class RegistrationViewModel : ViewModel() {
 
     fun handleRegistrationError(message: String?) {
         _errorMessage.value = message
-
+        // Clear the error message after handling it
+        _errorMessage.value = null
     }
 }

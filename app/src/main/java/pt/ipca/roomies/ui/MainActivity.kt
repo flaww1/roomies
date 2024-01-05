@@ -12,16 +12,22 @@ import com.google.firebase.appcheck.appCheck
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.google.firebase.initialize
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.entities.Room
+import pt.ipca.roomies.data.local.AppDatabase
 import pt.ipca.roomies.ui.authentication.UserViewModel
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var userViewModel: UserViewModel
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+
+
 
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {

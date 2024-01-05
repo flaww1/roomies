@@ -24,30 +24,35 @@ class CardFragment : Fragment() {
         btnLike = view.findViewById(R.id.buttonLike)
         btnDislike = view.findViewById(R.id.buttonDislike)
 
-        // Initialize pt.ipca.roomies.ui.main.HomeViewModel
-        homeViewModel = ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
 
         return view
     }
-
+/*
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        homeViewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
 
         // Customize the card content as needed
         val cardContent = arguments?.getString(ARG_CARD_CONTENT)
         view.findViewById<TextView>(R.id.textViewCardContent).text = cardContent
-
         btnLike.setOnClickListener {
-            // Implement your like functionality here
-            homeViewModel.likeCurrentCard()
+            try {
+                homeViewModel.likeCurrentCard()
+            } catch (e: Exception) {
+                // Handle the exception or log an error message
+            }
         }
 
         btnDislike.setOnClickListener {
-            // Implement your dislike functionality here
-            homeViewModel.dislikeCurrentCard()
+            try {
+                homeViewModel.dislikeCurrentCard()
+            } catch (e: Exception) {
+                // Handle the exception or log an error message
+            }
         }
-    }
 
+    }
+*/
     companion object {
         private const val ARG_CARD_CONTENT = "argCardContent"
 

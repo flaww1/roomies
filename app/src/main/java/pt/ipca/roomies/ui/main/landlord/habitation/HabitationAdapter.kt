@@ -11,7 +11,7 @@ import pt.ipca.roomies.data.entities.Habitation
 import pt.ipca.roomies.ui.main.landlord.habitation.HabitationViewModel
 
 class HabitationAdapter(
-    private val habitations: List<Habitation>,
+    private var habitations: MutableList<Habitation>,
     private val onHabitationClickListener: OnHabitationClickListener
 ) : RecyclerView.Adapter<HabitationAdapter.HabitationViewHolder>() {
     inner class HabitationViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -74,4 +74,12 @@ class HabitationAdapter(
         fun onEditHabitationClick(habitation: Habitation)
         fun onDeleteHabitationClick(habitation: Habitation)
     }
+
+    // Inside your HabitationAdapter class
+    fun updateData(newList: List<Habitation>) {
+        habitations.clear()
+        habitations.addAll(newList)
+        notifyItemChanged(0, newList.size)
+    }
+
 }

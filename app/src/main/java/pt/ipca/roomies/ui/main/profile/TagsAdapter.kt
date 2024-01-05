@@ -8,14 +8,14 @@ import androidx.recyclerview.widget.RecyclerView
 import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.data.entities.TagType
 import pt.ipca.roomies.data.entities.UserTags
-import pt.ipca.roomies.data.repositories.ProfileTagsRepository
+import pt.ipca.roomies.data.repositories.ProfileTagRepository
 import pt.ipca.roomies.databinding.ItemInterestBinding
 
 class TagsAdapter(
     private var tags: List<UserTags>,
     private val onTagClickListener: (UserTags, Boolean) -> Unit,
     private val recyclerView: RecyclerView,
-    private val profileTagsRepository: ProfileTagsRepository,
+    private val profileTagsRepository: ProfileTagRepository,
     private var userId: String,
     private val selectedTagsByType: MutableMap<TagType, MutableLiveData<MutableSet<UserTags>>> = mutableMapOf(),
     private val selectedTags: MutableSet<UserTags>
@@ -69,7 +69,7 @@ class TagsAdapter(
 
         fun bind(tag: UserTags) {
             binding.textInterestTag.text = tag.tagName
-            // Set the initial state of the checkbox
+            // Set the initial state of the checkbox using isTagSelected method
             binding.checkboxInterest.isChecked = isTagSelected(tag)
         }
     }
@@ -92,18 +92,20 @@ class TagsAdapter(
     fun updateData(newTags: List<UserTags>, tagType: TagType) {
         recyclerView.post {
             tags = newTags.filter { it.tagType == tagType }
-            notifyDataSetChanged()
+            notifyItemChanged(0, tags.size)
         }
     }
 
-
-    fun updateUserId(newUserId: String) {
-
-
+    // Improve method name for consistency
+    fun updateUserIdAndNotifyDataSetChanged(newUserId: String) {
         recyclerView.post {
             userId = newUserId
-            notifyDataSetChanged()
+            notifyItemChanged(0, tags.size)
         }
+    }
+
+    fun updateUserId(s: String) {
+        userId = s
 
     }
 }

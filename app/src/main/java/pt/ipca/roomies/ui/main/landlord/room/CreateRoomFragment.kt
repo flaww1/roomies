@@ -14,13 +14,34 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import pt.ipca.roomies.R
 import pt.ipca.roomies.data.entities.*
+import pt.ipca.roomies.data.local.AppDatabase
+import pt.ipca.roomies.data.repositories.HabitationViewModelFactory
+import pt.ipca.roomies.data.repositories.RoomRepository
+import pt.ipca.roomies.data.repositories.RoomViewModelFactory
+import pt.ipca.roomies.databinding.FragmentCreateRoomBinding
 import pt.ipca.roomies.ui.main.landlord.habitation.HabitationViewModel
 
 class CreateRoomFragment : Fragment() {
+    private lateinit var roomRecyclerView: RecyclerView
+    private var roomDao = AppDatabase.getDatabase(requireContext()).roomDao()
+    private val userProfileDao = AppDatabase.getDatabase(requireContext()).userProfileDao()
+    private val roomRepository = RoomRepository(userProfileDao, roomDao)
+    private val habitationDao = AppDatabase.getDatabase(requireContext()).habitationDao()
+
+    private val roomViewModel: RoomViewModel by viewModels {
+        RoomViewModelFactory(roomRepository)
+    }
+
+    private val habitationViewModel: HabitationViewModel by viewModels {
+        HabitationViewModelFactory(habitationDao)
+    }
+    private var _binding: FragmentCreateRoomBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var editTextDescription: EditText
     private lateinit var editTextPrice: EditText
@@ -33,37 +54,35 @@ class CreateRoomFragment : Fragment() {
     private lateinit var backButton: Button
     private lateinit var btnSelectImages: Button
     private lateinit var selectedImages: MutableList<Uri>
-    private lateinit var roomViewModel: RoomViewModel
-    private lateinit var habitationViewModel: HabitationViewModel
     private val MAX_IMAGES = 5
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_create_room, container, false)
+    ): View {
+        _binding = FragmentCreateRoomBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        habitationViewModel = ViewModelProvider(requireActivity())[HabitationViewModel::class.java]
-        roomViewModel = ViewModelProvider(requireActivity())[RoomViewModel::class.java]
-        initializeViews(view)
+
+        initializeViews()
         setupViews()
         setupListeners()
     }
 
-    private fun initializeViews(view: View) {
-        editTextDescription = view.findViewById(R.id.editTextDescription)
-        editTextPrice = view.findViewById(R.id.editTextPrice)
-        spinnerRoomType = view.findViewById(R.id.spinnerRoomType)
-        spinnerRoomSize = view.findViewById(R.id.spinnerRoomSize)
-        spinnerLeaseDuration = view.findViewById(R.id.spinnerLeaseDuration)
-        checkBoxAirConditioning = view.findViewById(R.id.checkBoxAirConditioning)
-        checkBoxHeating = view.findViewById(R.id.checkBoxHeating)
-        createRoomButton = view.findViewById(R.id.createRoomButton)
-        backButton = view.findViewById(R.id.backButton)
-        btnSelectImages = view.findViewById(R.id.btnSelectImages)
+    private fun initializeViews() {
+        editTextDescription = binding.editTextDescription
+        editTextPrice = binding.editTextPrice
+        spinnerRoomType = binding.spinnerRoomType
+        spinnerRoomSize = binding.spinnerRoomSize
+        spinnerLeaseDuration = binding.spinnerLeaseDuration
+        checkBoxAirConditioning = binding.checkBoxAirConditioning
+        checkBoxHeating = binding.checkBoxHeating
+        createRoomButton = binding.createRoomButton
+        backButton = binding.backButton
+        btnSelectImages = binding.btnSelectImages
         selectedImages = mutableListOf()
     }
 
@@ -77,41 +96,45 @@ class CreateRoomFragment : Fragment() {
         spinnerRoomType.adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_dropdown_item,
-            RoomType.values()
+            RoomType.entries.toTypedArray()
         )
 
         spinnerRoomSize.adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_dropdown_item,
-            RoomSize.values()
+            RoomSize.entries.toTypedArray()
         )
 
         spinnerLeaseDuration.adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_dropdown_item,
-            LeaseDuration.values()
+            LeaseDuration.entries.toTypedArray()
         )
     }
 
+    // Inside CreateRoomFragment
     private fun setupHabitationObserver() {
         habitationViewModel.selectedHabitation.observe(viewLifecycleOwner) { habitation ->
-            if (habitation == null) {
+            // Use habitation.habitationId to create a room
+            // Make sure habitation is not null and habitationId is not blank
+            if (habitation == null || habitation.habitationId.isBlank()) {
                 showToast("No habitation selected")
                 findNavController().navigateUp()
             }
         }
     }
 
+
     private fun setupInputValidation() {
         editTextDescription.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus && editTextDescription.text.isEmpty()) {
-                editTextDescription.error = "Description cannot be empty"
+                editTextDescription.error = getString(R.string.error_description_empty)
             }
         }
 
         editTextPrice.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus && editTextPrice.text.isEmpty()) {
-                editTextPrice.error = "Price cannot be empty"
+                editTextPrice.error = getString(R.string.error_price_empty)
             }
         }
     }
@@ -136,24 +159,15 @@ class CreateRoomFragment : Fragment() {
 
     private fun createOrUpdateRoom() {
         val habitation = habitationViewModel.selectedHabitation.value
-        if (habitation == null || habitation.habitationId?.isBlank() != false) {
-            showToast("Invalid habitation ID")
+        if (habitation == null || habitation.habitationId.isBlank()) {
+            showToast(getString(R.string.invalid_habitation_id))
             return
         }
 
-        Log.d("CreateRoomFragment", "Creating a room for habitation: ${habitation.habitationId}")
-
-        val room = if (roomViewModel.selectedRoom.value != null) {
-            // If selectedRoom is not null, it means we are updating an existing room
-            updateRoomObject(habitation.habitationId!!, roomViewModel.selectedRoom.value!!)
-        } else {
-            // If selectedRoom is null, it means we are creating a new room
-            createRoomObject(habitation.habitationId!!)
-        }
-
-        // Create the room in Firestore and get the DocumentReference
+        // Use habitation.habitationId to create or update the room
+        val room = createRoomObject(habitation.habitationId)
         roomViewModel.createRoom(room)
-        findNavController().navigateUp()
+        // Navigate back or update UI accordingly
     }
 
 
@@ -171,7 +185,6 @@ class CreateRoomFragment : Fragment() {
             roomImages = emptyList()
         )
     }
-
 
     private fun updateRoomObject(habitationId: String, existingRoom: Room): Room {
         return Room(
@@ -201,7 +214,7 @@ class CreateRoomFragment : Fragment() {
             intent.type = "image/*"
             pickImageLauncher.launch(intent)
         } else {
-            showToast("Maximum $MAX_IMAGES images allowed.")
+            showToast(getString(R.string.max_images_limit, MAX_IMAGES))
         }
     }
 
@@ -217,7 +230,7 @@ class CreateRoomFragment : Fragment() {
         }
 
     private fun updateSelectImagesButton() {
-        btnSelectImages.text = "Select Images (${selectedImages.size}/$MAX_IMAGES)"
+        btnSelectImages.text = getString(R.string.select_images_count, selectedImages.size, MAX_IMAGES)
         updateCreateRoomButtonState()
     }
 
@@ -254,5 +267,10 @@ class CreateRoomFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
