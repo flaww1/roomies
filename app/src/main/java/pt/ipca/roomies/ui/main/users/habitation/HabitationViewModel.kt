@@ -1,4 +1,4 @@
-package pt.ipca.roomies.ui.main.landlord.habitation
+package pt.ipca.roomies.ui.main.users.habitation
 
 import android.util.Log
 import androidx.lifecycle.LiveData

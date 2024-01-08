@@ -5,6 +5,8 @@ plugins {
     id("com.google.devtools.ksp") version "1.9.22-1.0.16"
     kotlin("kapt") version "1.9.22"
     id("androidx.navigation.safeargs.kotlin")
+    id ("kotlin-parcelize")
+
 
 
 }

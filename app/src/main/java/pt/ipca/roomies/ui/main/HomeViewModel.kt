@@ -1,14 +1,13 @@
 package pt.ipca.roomies.ui.main
 
-import pt.ipca.roomies.data.repositories.CardRepository
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import pt.ipca.roomies.data.entities.Card
-import pt.ipca.roomies.data.repositories.ProfileRepository
-import pt.ipca.roomies.data.repositories.RegistrationRepository
+import pt.ipca.roomies.data.repositories.CardRepository
 
 class HomeViewModel(private val cardRepository: CardRepository) : ViewModel() {
 
@@ -20,10 +19,8 @@ class HomeViewModel(private val cardRepository: CardRepository) : ViewModel() {
 
     private val _matches = MutableLiveData<Set<String>>()
     val matches: LiveData<Set<String>> get() = _matches
-    private lateinit var currentUserRole: String // Declare currentUserRole
-}
 
-/*
+    private lateinit var currentUserRole: String // Declare currentUserRole
 
     init {
         viewModelScope.launch {
@@ -32,32 +29,40 @@ class HomeViewModel(private val cardRepository: CardRepository) : ViewModel() {
 
             // Load initial data
             loadNextCard(currentUserRole)
+            loadLikedUsers()
+            loadMatchedUsers()
+            loadLikedRooms()
+            loadMatchedRooms()
 
-            loadLikedItems()
-            loadMatchedItems()
         }
     }
-    // Inside HomeViewModel
+
     suspend fun loadNextCard(userRole: String) {
+        Log.d("HomeViewModel", "Loading next card for user role: $userRole")
         _currentCard.postValue(
-            (if (userRole == "LANDLORD") {
-                        cardRepository.getNextCardForLandlord()
-                    } else {
-                        cardRepository.getNextCardForUser()
-                    })
+            when (userRole) {
+                "Landlord" -> cardRepository.getNextUserForLanlord()
+                "User" -> cardRepository.getNextRoomForUser()
+                else -> null
+            } as Card?
         )
     }
-
-
-
-
 
     fun likeCurrentCard() {
         viewModelScope.launch {
             _currentCard.value?.let { card ->
+                Log.d("HomeViewModel", "Liking current card: $card")
                 when (card) {
-                    is Card.RoomCard -> card.room.roomId?.let { cardRepository.likeRoom(it, "likedUserId") }
-                    is Card.UserCard -> cardRepository.likeUser(card.user.userId, "likedUserId")
+                    is Card.RoomCard -> {
+                        card.room.roomId.let { roomId ->
+                            cardRepository.likeRoom(roomId, "likedUserId")
+                        }
+                    }
+                    is Card.UserCard -> {
+                        card.user.userId.let { userId ->
+                            cardRepository.likeUser(userId, "likedUserId")
+                        }
+                    }
                 }
                 loadNextCard(currentUserRole)
             }
@@ -67,21 +72,38 @@ class HomeViewModel(private val cardRepository: CardRepository) : ViewModel() {
     fun dislikeCurrentCard() {
         viewModelScope.launch {
             _currentCard.value?.let { card ->
+                Log.d("HomeViewModel", "Disliking current card: $card")
                 when (card) {
-                    is Card.RoomCard -> card.room.roomId?.let { cardRepository.dislikeRoom(it) }
-                    is Card.UserCard -> cardRepository.dislikeUser(card.user.userId)
+                    is Card.RoomCard -> {
+                        card.room.roomId.let { roomId ->
+                            cardRepository.dislikeRoom(roomId)
+                        }
+                    }
+                    is Card.UserCard -> {
+                        card.user.userId.let { userId ->
+                            cardRepository.dislikeUser(userId)
+                        }
+                    }
                 }
                 loadNextCard(currentUserRole)
             }
         }
     }
 
-    private suspend fun loadLikedItems() {
-        _likes.postValue(cardRepository.getLikedItems())
+    suspend fun loadLikedUsers() {
+        _likes.postValue(cardRepository.getLikedUsers())
     }
 
-    private suspend fun loadMatchedItems() {
-        _matches.postValue(cardRepository.getMatchedItems())
+    suspend fun loadMatchedUsers() {
+        _matches.postValue(cardRepository.getMatchedUsers())
+    }
+
+    suspend fun loadLikedRooms() {
+        _likes.postValue(cardRepository.getLikedRooms())
+    }
+
+    suspend fun loadMatchedRooms() {
+        _matches.postValue(cardRepository.getMatchedRooms())
     }
 
     fun matchWithLikedCard() {
@@ -91,20 +113,67 @@ class HomeViewModel(private val cardRepository: CardRepository) : ViewModel() {
                     is Card.RoomCard -> {
                         val likedUsers = cardRepository.getLikedUsers()
                         for (likedUserId in likedUsers) {
-                            card.room.roomId?.let { cardRepository.matchRoom(it, likedUserId) }
+                            card.room.roomId.let { roomId ->
+                                cardRepository.matchRoom(roomId, likedUserId)
+                            }
                         }
                     }
                     is Card.UserCard -> {
                         val likedRooms = cardRepository.getLikedRooms()
                         for (likedRoomId in likedRooms) {
-                            cardRepository.matchUser(card.user.userId, likedRoomId)
+                            card.user.userId.let { userId ->
+                                cardRepository.matchUser(userId, likedRoomId)
+                            }
                         }
                     }
                 }
-                loadNextCard(currentUserRole) // Pass currentUserRole here
+                loadNextCard(currentUserRole)
             }
         }
     }
 
+    fun unmatchWithMatchedCard() {
+        viewModelScope.launch {
+            _currentCard.value?.let { card ->
+                when (card) {
+                    is Card.RoomCard -> {
+                        val matchedUsers = cardRepository.getMatchedUsers()
+                        for (matchedUserId in matchedUsers) {
+                            card.room.roomId.let { roomId ->
+                                cardRepository.unmatchRoom(roomId, matchedUserId)
+                            }
+                        }
+                    }
+                    is Card.UserCard -> {
+                        val matchedRooms = cardRepository.getMatchedRooms()
+                        for (matchedRoomId in matchedRooms) {
+                            card.user.userId.let { userId ->
+                                cardRepository.unmatchUser(userId, matchedRoomId)
+                            }
+                        }
+                    }
+                }
+                loadNextCard(currentUserRole)
+            }
+        }
+    }
+
+    fun loadNextRoomCard() {
+        viewModelScope.launch {
+            val nextRoom = cardRepository.getNextRoomForUser()
+            val nextCard = nextRoom?.let { room -> Card.RoomCard(room) }
+            _currentCard.postValue(nextCard)
+        }
+    }
+
+
+    fun loadNextUserCard() {
+        viewModelScope.launch {
+            val nextUser = cardRepository.getNextUserForLanlord()
+            val nextCard = nextUser?.let { user -> Card.UserCard(user) }
+            _currentCard.postValue(nextCard)
+        }
+    }
+
+
 }
-*/

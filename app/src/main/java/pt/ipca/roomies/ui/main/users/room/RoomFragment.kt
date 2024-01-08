@@ -1,4 +1,4 @@
-package pt.ipca.roomies.ui.main.landlord.room
+package pt.ipca.roomies.ui.main.users.room
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,7 +21,7 @@ import pt.ipca.roomies.data.local.AppDatabase
 import pt.ipca.roomies.data.repositories.HabitationViewModelFactory
 import pt.ipca.roomies.data.repositories.RoomRepository
 import pt.ipca.roomies.data.repositories.RoomViewModelFactory
-import pt.ipca.roomies.ui.main.landlord.habitation.HabitationViewModel
+import pt.ipca.roomies.ui.main.users.habitation.HabitationViewModel
 
 class RoomFragment : Fragment() {
     private val args: RoomFragmentArgs by navArgs()

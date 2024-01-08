@@ -1,4 +1,4 @@
-package pt.ipca.roomies.ui.main.landlord.room
+package pt.ipca.roomies.ui.main.users.room
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -74,7 +74,7 @@ class RoomViewModel(private val roomRepository: RoomRepository) : ViewModel() {
     }
 
     // Function to delete a room
-    fun deleteRoom(habitationId: String, roomId: Long) {
+    fun deleteRoom(habitationId: String, roomId: String) {
         viewModelScope.launch {
             roomRepository.deleteRoomFirebase(
                 roomId,

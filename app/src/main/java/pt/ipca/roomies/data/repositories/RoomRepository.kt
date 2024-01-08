@@ -95,7 +95,7 @@ class RoomRepository(
     }
 
     suspend fun deleteRoomFirebase(
-        roomId: Long,
+        roomId: String,
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {

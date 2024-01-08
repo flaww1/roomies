@@ -1,4 +1,4 @@
-package pt.ipca.roomies.ui.main.landlord.habitation
+package pt.ipca.roomies.ui.main.users.habitation
 
 import android.app.AlertDialog
 import android.content.Context
@@ -7,11 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.recyclerview.widget.RecyclerView
 import pt.ipca.roomies.R
 import pt.ipca.roomies.data.entities.Habitation
-import pt.ipca.roomies.ui.main.landlord.habitation.HabitationViewModel
 
 class HabitationAdapter(
     private var habitations: MutableList<Habitation>,

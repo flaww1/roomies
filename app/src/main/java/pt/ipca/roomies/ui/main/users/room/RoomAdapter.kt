@@ -1,4 +1,4 @@
-package pt.ipca.roomies.ui.main.landlord.room
+package pt.ipca.roomies.ui.main.users.room
 
 import android.view.LayoutInflater
 import android.view.View

@@ -25,7 +25,7 @@ import pt.ipca.roomies.data.entities.*
         SelectedTag::class
 
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 
@@ -66,26 +66,54 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
         // Define the migration from version 1 to version 2
-        // Define the migration from version 1 to version 2
+
         private val MIGRATION_1_2: Migration = object : Migration(1, 2) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                // Create the new table
-                db.execSQL(
-                    "CREATE TABLE IF NOT EXISTS `habitations_temp` (`habitationId` TEXT NOT NULL, `landlordId` TEXT NOT NULL, `address` TEXT NOT NULL, `city` TEXT NOT NULL, `numberOfRooms` INTEGER NOT NULL, `numberOfBathrooms` INTEGER NOT NULL, `habitationType` TEXT NOT NULL, `description` TEXT NOT NULL, `habitationAmenities` TEXT NOT NULL, `securityMeasures` TEXT NOT NULL, `petsAllowed` INTEGER NOT NULL, `smokingPolicy` TEXT NOT NULL, `noiseLevel` TEXT NOT NULL, `guestPolicy` TEXT NOT NULL, PRIMARY KEY(`habitationId`))"
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Create a new table with the updated schema
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `rooms_new` (" +
+                            "`roomId` TEXT NOT NULL, " +
+                            "`habitationId` TEXT NOT NULL, " +
+                            "`description` TEXT NOT NULL, " +
+                            "`price` REAL NOT NULL, " +
+                            "`roomAmenities` TEXT NOT NULL, " +
+                            "`likedByUsers` TEXT NOT NULL, " +
+                            "`dislikedByUsers` TEXT NOT NULL, " +
+                            "`matches` TEXT NOT NULL, " +
+                            "`createdAt` INTEGER NOT NULL, " +
+                            "`updatedAt` INTEGER NOT NULL, " +
+                            "`roomImages` TEXT NOT NULL, " +
+                            "`leaseDuration` TEXT NOT NULL, " +
+                            "`roomType` TEXT NOT NULL, " +
+                            "`roomStatus` TEXT NOT NULL, " +
+                            "`roomSize` TEXT NOT NULL, " +
+                            "PRIMARY KEY(`roomId`))"
                 )
 
-                // Copy data from the old table to the new table, specifying the columns
-                db.execSQL(
-                    "INSERT INTO `habitations_temp` (`habitationId`, `landlordId`, `address`, `city`, `numberOfRooms`, `numberOfBathrooms`, `habitationType`, `description`, `habitationAmenities`, `securityMeasures`, `petsAllowed`, `smokingPolicy`, `noiseLevel`, `guestPolicy`) SELECT `habitationId`, `landlordId`, `address`, `city`, `numberOfRooms`, `numberOfBathrooms`, `habitationType`, `description`, `habitationAmenities`, `securityMeasures`, `petsAllowed`, `smokingPolicy`, `noiseLevel`, `guestPolicy` FROM `habitations`"
+                // Copy data from the old table to the new table
+                database.execSQL(
+                    "INSERT INTO `rooms_new` (" +
+                            "`roomId`, `habitationId`, `description`, `price`, " +
+                            "`roomAmenities`, `likedByUsers`, `dislikedByUsers`, `matches`, " +
+                            "`createdAt`, `updatedAt`, `roomImages`, `leaseDuration`, " +
+                            "`roomType`, `roomStatus`, `roomSize`) " +
+                            "SELECT CAST(`roomId` AS TEXT) NOT NULL, `habitationId`, `description`, `price`, " +
+                            "`roomAmenities`, `likedByUsers`, `dislikedByUsers`, `matches`, " +
+                            "`createdAt`, `updatedAt`, `roomImages`, `leaseDuration`, " +
+                            "`roomType`, `roomStatus`, `roomSize` FROM `rooms`"
                 )
 
                 // Remove the old table
-                db.execSQL("DROP TABLE IF EXISTS `habitations`")
+                database.execSQL("DROP TABLE IF EXISTS `rooms`")
 
                 // Rename the new table to the original table name
-                db.execSQL("ALTER TABLE `habitations_temp` RENAME TO `habitations`")
+                database.execSQL("ALTER TABLE `rooms_new` RENAME TO `rooms`")
             }
         }
+
+
+
+
 
     }
 }

@@ -23,36 +23,25 @@ class CardFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_card, container, false)
         btnLike = view.findViewById(R.id.buttonLike)
         btnDislike = view.findViewById(R.id.buttonDislike)
-
-
         return view
     }
-/*
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        homeViewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
+        homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
 
-        // Customize the card content as needed
+        // Ensure that arguments are not null before accessing
         val cardContent = arguments?.getString(ARG_CARD_CONTENT)
-        view.findViewById<TextView>(R.id.textViewCardContent).text = cardContent
-        btnLike.setOnClickListener {
-            try {
-                homeViewModel.likeCurrentCard()
-            } catch (e: Exception) {
-                // Handle the exception or log an error message
-            }
+        if (!cardContent.isNullOrEmpty()) {
+            view.findViewById<TextView>(R.id.textViewCardContent).text = cardContent
         }
 
-        btnDislike.setOnClickListener {
-            try {
-                homeViewModel.dislikeCurrentCard()
-            } catch (e: Exception) {
-                // Handle the exception or log an error message
-            }
-        }
+        // Simplified click listeners using lambda syntax
+        btnLike.setOnClickListener { homeViewModel.likeCurrentCard() }
 
+        btnDislike.setOnClickListener { homeViewModel.dislikeCurrentCard() }
     }
-*/
+
     companion object {
         private const val ARG_CARD_CONTENT = "argCardContent"
 

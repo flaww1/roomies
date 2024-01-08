@@ -1,4 +1,4 @@
-package pt.ipca.roomies.ui.main.landlord.room
+package pt.ipca.roomies.ui.main.users.room
 
 import android.app.Activity
 import android.content.Intent
@@ -11,10 +11,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
@@ -28,10 +25,7 @@ import pt.ipca.roomies.data.repositories.HabitationViewModelFactory
 import pt.ipca.roomies.data.repositories.RoomRepository
 import pt.ipca.roomies.data.repositories.RoomViewModelFactory
 import pt.ipca.roomies.databinding.FragmentCreateRoomBinding
-import pt.ipca.roomies.ui.main.landlord.habitation.HabitationViewModel
-import androidx.lifecycle.Observer
-import androidx.lifecycle.LiveData
-import com.bumptech.glide.Glide
+import pt.ipca.roomies.ui.main.users.habitation.HabitationViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 class CreateRoomFragment : Fragment() {

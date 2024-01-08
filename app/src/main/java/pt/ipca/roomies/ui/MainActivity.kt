@@ -20,14 +20,10 @@ import pt.ipca.roomies.ui.authentication.UserViewModel
 class MainActivity : AppCompatActivity() {
     private lateinit var userViewModel: UserViewModel
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-
-
 
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -54,10 +50,6 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
-
-
-
-
 
         Firebase.initialize(context = this)
         Firebase.appCheck.installAppCheckProviderFactory(

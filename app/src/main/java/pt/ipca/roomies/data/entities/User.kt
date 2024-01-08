@@ -1,10 +1,12 @@
 package pt.ipca.roomies.data.entities
 
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.firebase.firestore.Exclude
-
+import kotlinx.parcelize.Parcelize
 @Entity(tableName = "users")
+@Parcelize
 data class User(
     @PrimaryKey
     var userId: String,
@@ -12,11 +14,18 @@ data class User(
     val lastName: String? = null,
     val email: String? = null,
     @get:Exclude
-    val password: String? = null,
+    var password: String? = null,
     var registrationDate: Long? = null,
     val userRating: Int? = null,
     val userRole: String? = null
-)
+) : Parcelable {
+    constructor() : this("", "", "", "", "", 0, 0, "")
+
+    val fullName: String
+        get() = "$firstName $lastName"
+
+
+}
 
 
 

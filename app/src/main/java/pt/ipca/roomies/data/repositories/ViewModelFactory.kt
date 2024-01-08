@@ -6,9 +6,8 @@ import androidx.lifecycle.ViewModelProvider
 import pt.ipca.roomies.data.dao.HabitationDao
 import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 import pt.ipca.roomies.ui.main.HomeViewModel
-import pt.ipca.roomies.ui.main.landlord.habitation.HabitationViewModel
-import pt.ipca.roomies.ui.main.landlord.room.RoomViewModel
-import pt.ipca.roomies.ui.main.profile.ProfileUserInterestsViewModel
+import pt.ipca.roomies.ui.main.users.habitation.HabitationViewModel
+import pt.ipca.roomies.ui.main.users.room.RoomViewModel
 import pt.ipca.roomies.ui.main.profile.ProfileViewModel
 
 class LoginViewModelFactory(private val loginRepository: LoginRepository) : ViewModelProvider.Factory {

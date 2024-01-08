@@ -1,4 +1,4 @@
-package pt.ipca.roomies.ui.main.landlord.habitation
+package pt.ipca.roomies.ui.main.users.habitation
 
 import android.os.Bundle
 import android.text.Editable
@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import pt.ipca.roomies.R

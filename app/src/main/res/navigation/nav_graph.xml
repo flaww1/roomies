@@ -125,7 +125,7 @@
 
     <fragment
         android:id="@+id/navigation_habitations"
-        android:name="pt.ipca.roomies.ui.main.landlord.habitation.HabitationFragment"
+        android:name="pt.ipca.roomies.ui.main.users.habitation.HabitationFragment"
         android:label="Habitations"
         tools:layout="@layout/fragment_habitation" >
         <action
@@ -141,7 +141,7 @@
     </fragment>
     <fragment
         android:id="@+id/habitationFragment"
-        android:name="pt.ipca.roomies.ui.main.landlord.habitation.HabitationFragment"
+        android:name="pt.ipca.roomies.ui.main.users.habitation.HabitationFragment"
         android:label="fragment_habitation"
         tools:layout="@layout/fragment_habitation" >
         <action
@@ -166,7 +166,7 @@
 
     <fragment
         android:id="@+id/editHabitationFragment"
-        android:name="pt.ipca.roomies.ui.main.landlord.habitation.EditHabitationFragment"
+        android:name="pt.ipca.roomies.ui.main.users.habitation.EditHabitationFragment"
         android:label="EditHabitationFragment"
         tools:layout="@layout/fragment_edit_habitation">
 
@@ -234,7 +234,7 @@
 
     <fragment
         android:id="@+id/createHabitationFragment"
-        android:name="pt.ipca.roomies.ui.main.landlord.habitation.CreateHabitationFragment"
+        android:name="pt.ipca.roomies.ui.main.users.habitation.CreateHabitationFragment"
         android:label="CreateHabitationFragment" >
         <argument
             android:name="habitationId"
@@ -247,7 +247,7 @@
 
     <fragment
         android:id="@+id/roomFragment"
-        android:name="pt.ipca.roomies.ui.main.landlord.room.RoomFragment"
+        android:name="pt.ipca.roomies.ui.main.users.room.RoomFragment"
         android:label="fragment_room"
         tools:layout="@layout/fragment_room">
         <argument
@@ -266,7 +266,7 @@
 
     <fragment
         android:id="@+id/createRoomFragment"
-        android:name="pt.ipca.roomies.ui.main.landlord.room.CreateRoomFragment"
+        android:name="pt.ipca.roomies.ui.main.users.room.CreateRoomFragment"
         android:label="fragment_create_room"
         tools:layout="@layout/fragment_create_room">
 

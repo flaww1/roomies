@@ -12,6 +12,8 @@
 
     </androidx.viewpager2.widget.ViewPager2>
 
+
+
     <!-- Your other UI elements -->
 
 </RelativeLayout>
