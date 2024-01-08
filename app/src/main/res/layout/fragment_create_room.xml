@@ -48,6 +48,13 @@
                 android:layout_marginTop="8dp"
                 android:prompt="@string/choose_lease_duration"/>
 
+            <Spinner
+                android:id="@+id/spinnerHabitation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:prompt="@string/select_habitation"  />
+
             <CheckBox
                 android:id="@+id/checkBoxAirConditioning"
                 android:layout_width="wrap_content"

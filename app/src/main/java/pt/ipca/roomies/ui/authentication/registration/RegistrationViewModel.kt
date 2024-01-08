@@ -71,21 +71,15 @@ class RegistrationViewModel(
     }
 
 
-    fun updateUserRole(role: String) {
-        _user.value?.let { user ->
-            val updatedUser = user.copy(userRole = role)
-            Log.d("RegistrationViewModel", "Updated user role: $updatedUser")
-            registrationRepository.updateUserInFirestore(updatedUser)
-        }
-    }
-    fun register(firstName: String, lastName: String, email: String, password: String) {
+
+    fun register(firstName: String, lastName: String, email: String, password: String, userRole: String) {
         // Set up initial user data
         val user = User(
             userId = "",
             firstName = firstName,
             lastName = lastName,
             email = email,
-            userRole = "",
+            userRole = userRole,  // Pass the user role directly
             password = password,
             registrationDate = 0,
             userRating = 0
@@ -93,8 +87,8 @@ class RegistrationViewModel(
 
         // Update LiveData in the ViewModel
         setUser(user)
-
     }
+
 
     private fun setUser(user: User) {
         _user.value = user

@@ -147,4 +147,14 @@ class HabitationRepository(private val habitationDao: HabitationDao) {
 
 
     }
+
+
+    suspend fun getHabitationsByUserId(userId: String, onSuccess: (List<Habitation>) -> Unit, onFailure: (Exception) -> Unit) {
+        try {
+            val habitations = habitationDao.getHabitationsByLandlordId(userId)
+            onSuccess(habitations)
+        } catch (e: Exception) {
+            onFailure(e)
+        }
+    }
 }

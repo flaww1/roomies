@@ -8,24 +8,18 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.launch
 import pt.ipca.roomies.R
 import pt.ipca.roomies.data.dao.HabitationDao
 import pt.ipca.roomies.data.entities.Habitation
+import pt.ipca.roomies.data.entities.HabitationAmenities
+import pt.ipca.roomies.data.entities.SecurityMeasures
 import pt.ipca.roomies.data.local.AppDatabase
-import pt.ipca.roomies.data.repositories.HabitationRepository
 import pt.ipca.roomies.data.repositories.HabitationViewModelFactory
-import pt.ipca.roomies.data.repositories.RegistrationRepository
-import pt.ipca.roomies.data.repositories.RegistrationViewModelFactory
-import pt.ipca.roomies.ui.authentication.registration.RegistrationViewModel
 
 
 class HabitationFragment : Fragment() {
@@ -108,37 +102,53 @@ class HabitationFragment : Fragment() {
         return object : HabitationAdapter.OnHabitationClickListener {
             override fun onHabitationClick(habitation: Habitation) {
                 Log.d("HabitationFragment", "Clicked on Habitation: $habitation")
-                val selectedHabitationId = habitation.habitationId
-                if (selectedHabitationId != null) {
-                    if (selectedHabitationId.isNotBlank()) {
-                        Log.d(
-                            "HabitationFragment",
-                            "Selected Habitation Before setSelectedHabitationId: $selectedHabitationId"
-                        )
-                        viewModel.viewModelScope.launch {
-                            viewModel.setSelectedHabitationId(selectedHabitationId)
-                        }
-                        val selectedHabitation = viewModel.selectedHabitation.value
-                        Log.d(
-                            "HabitationFragment",
-                            "Selected Habitation After setSelectedHabitationId: $selectedHabitation"
-                        )
-                    }
-                }
-
+                // Set the selected habitation in the ViewModel
                 viewModel.selectHabitation(habitation)
-                Log.d("HabitationFragment", "Selected Habitation after selectHabitation: $habitation")
-                findNavController().navigate(R.id.action_habitationFragment_to_roomFragment)
+                // Pass the habitationId as a bundle argument to the RoomFragment
+                val bundle = Bundle().apply {
+                    putString("habitationId", habitation.habitationId)
+                }
+                findNavController().navigate(R.id.action_habitationFragment_to_roomFragment, bundle)
             }
 
             override fun onEditHabitationClick(habitation: Habitation) {
                 // Navigate to the habitation editing screen
                 viewModel.selectHabitation(habitation)
-                //findNavController().navigate(R.id.action_habitationFragment_to_editHabitationFragment)
+                val bundle = Bundle().apply {
+                    // Pass the existing fields as arguments
+                    putString("address", habitation.address)
+                    putString("city", habitation.city.name) // Assuming city is an enum, use its name
+                    putString("numberOfRooms", habitation.numberOfRooms.toString())
+                    putString("numberOfBathrooms", habitation.numberOfBathrooms.toString())
+                    putString("habitationType", habitation.habitationType.type)
+                    putString("description", habitation.description)
+                    putBoolean("internet", HabitationAmenities.INTERNET in habitation.habitationAmenities)
+                    putBoolean("parking", HabitationAmenities.PARKING in habitation.habitationAmenities)
+                    putBoolean("kitchen", HabitationAmenities.KITCHEN in habitation.habitationAmenities)
+                    putBoolean("laundry", HabitationAmenities.LAUNDRY in habitation.habitationAmenities)
+                    putBoolean("petsAllowed", habitation.petsAllowed)
+                    putString("smokingPolicy", habitation.smokingPolicy.name) // Assuming smokingPolicy is an enum, use its name
+                    putString("noiseLevel", habitation.noiseLevel.name) // Assuming noiseLevel is an enum, use its name
+                    putString("guestPolicy", habitation.guestPolicy.name) // Assuming guestPolicy is an enum, use its name
+                    putBoolean("securityCameras", SecurityMeasures.SECURITY_CAMERAS in habitation.securityMeasures)
+                    putBoolean("securityGuard", SecurityMeasures.SECURITY_GUARD in habitation.securityMeasures)
+                    putBoolean("cardedEntrance", SecurityMeasures.CARDED_ENTRANCE in habitation.securityMeasures)
+                    putBoolean("codedEntrance", SecurityMeasures.CODED_ENTRANCE in habitation.securityMeasures)
+
+
+
+                }
+
+                findNavController().navigate(
+
+                    R.id.action_habitationFragment_to_editHabitationFragment,
+                    bundle
+                )
             }
 
+
             override fun onDeleteHabitationClick(habitation: Habitation) {
-                viewModel.deleteHabitation(habitation.habitationId!!)
+                viewModel.deleteHabitation(habitation.habitationId)
             }
         }
     }

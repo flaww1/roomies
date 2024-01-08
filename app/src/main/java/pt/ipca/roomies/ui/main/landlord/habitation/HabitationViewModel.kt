@@ -98,16 +98,74 @@ class HabitationViewModel(private val habitationRepository: HabitationRepository
         }
     }
 
-    suspend fun setSelectedHabitationId(habitationId: String) {
-        val habitation = getHabitationById(habitationId)
-        _selectedHabitation.value =
-            habitation ?: throw IllegalStateException("Habitation with ID $habitationId not found")
-    }
+
 
     fun selectHabitation(habitation: Habitation) {
         _selectedHabitation.value = habitation
     }
 
+
+    fun getHabitationsByLandlordId(landlordId: String) {
+        viewModelScope.launch {
+            habitationRepository.getHabitationsByLandlordId(
+                landlordId,
+                onSuccess = { habitations ->
+                    _habitations.value = habitations
+                },
+                onFailure = { e ->
+                    Log.e("HabitationViewModel", "Failed to fetch habitations", e)
+                }
+            )
+        }
+    }
+
+    fun setSelectedHabitationId(habitationId: String) {
+        viewModelScope.launch {
+            val habitation = getHabitationById(habitationId)
+            _selectedHabitation.value =
+                habitation ?: throw IllegalStateException("Habitation with ID $habitationId not found")
+        }
+    }
+
+    fun getAllHabitations(): LiveData<List<Habitation>> {
+        viewModelScope.launch {
+            try {
+                habitationRepository.getHabitations(
+                    onSuccess = { habitations ->
+                        _habitations.value = habitations
+                        Log.d("HabitationViewModel", "Fetched habitations: $habitations")
+                    },
+                    onFailure = { e ->
+                        Log.e("HabitationViewModel", "Failed to fetch habitations", e)
+                    }
+                )
+            } catch (e: Exception) {
+                Log.e("HabitationViewModel", "Exception during fetching habitations", e)
+            }
+        }
+        return _habitations
+    }
+
+    // Define the function to set the selected habitation
+    fun setSelectedHabitation(habitation: Habitation) {
+        _selectedHabitation.value = habitation
+    }
+
+    private val _habitationsByUserId = MutableLiveData<List<Habitation>>()
+    val habitationsByUserId: LiveData<List<Habitation>> get() = _habitationsByUserId
+    fun getHabitationsByUserId(userId: String) {
+        viewModelScope.launch {
+            habitationRepository.getHabitationsByUserId(
+                userId,
+                onSuccess = { habitations ->
+                    _habitationsByUserId.value = habitations
+                },
+                onFailure = { e ->
+                    Log.e("HabitationViewModel", "Failed to fetch habitations", e)
+                }
+            )
+        }
+    }
 
     fun updateHabitation(habitationId: String, updatedHabitation: Habitation) {
         viewModelScope.launch {
@@ -124,17 +182,5 @@ class HabitationViewModel(private val habitationRepository: HabitationRepository
         }
     }
 
-    fun getHabitationsByLandlordId(landlordId: String) {
-        viewModelScope.launch {
-            habitationRepository.getHabitationsByLandlordId(
-                landlordId,
-                onSuccess = { habitations ->
-                    _habitations.value = habitations
-                },
-                onFailure = { e ->
-                    Log.e("HabitationViewModel", "Failed to fetch habitations", e)
-                }
-            )
-        }
-    }
+
 }

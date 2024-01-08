@@ -4,6 +4,8 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp") version "1.9.22-1.0.16"
     kotlin("kapt") version "1.9.22"
+    id("androidx.navigation.safeargs.kotlin")
+
 
 }
 
@@ -86,5 +88,6 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation ("com.google.code.gson:gson:2.9.0")
+
 
 }

@@ -64,7 +64,8 @@ class RegistrationRepository(private val applicationContext: Context) {
         email: String,
         password: String,
         firstName: String,
-        lastName: String
+        lastName: String,
+        userRole : String
     ) {
         // Create a user object with basic information
         val user = User(
@@ -72,7 +73,7 @@ class RegistrationRepository(private val applicationContext: Context) {
             firstName = firstName,
             lastName = lastName,
             email = email,
-            userRole = "",
+            userRole = userRole,
             password = password,
             registrationDate = Calendar.getInstance().timeInMillis,
             userRating = 0
@@ -96,4 +97,5 @@ class RegistrationRepository(private val applicationContext: Context) {
                 }
         }
     }
+
 }

@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -24,6 +24,7 @@ import pt.ipca.roomies.data.repositories.RoomViewModelFactory
 import pt.ipca.roomies.ui.main.landlord.habitation.HabitationViewModel
 
 class RoomFragment : Fragment() {
+    private val args: RoomFragmentArgs by navArgs()
 
     private lateinit var roomRecyclerView: RecyclerView
     private lateinit var roomDao: RoomDao
@@ -56,13 +57,30 @@ class RoomFragment : Fragment() {
         roomRecyclerView = view.findViewById(R.id.roomRecyclerView)
         roomRecyclerView.layoutManager = LinearLayoutManager(context)
 
+        val habitationId = args.habitationId
+        val selectedHabitationId = arguments?.getString("habitationId") ?: ""
+
+        if (habitationId.isNullOrBlank()) {
+            Toast.makeText(
+                requireContext(),
+                "No habitation selected",
+                Toast.LENGTH_SHORT
+            ).show()
+            findNavController().navigateUp()
+        } else {
+            // Use the habitationId to load rooms and set it in the ViewModel
+            roomViewModel.getRoomsByHabitationId(habitationId)
+            habitationViewModel.setSelectedHabitationId(selectedHabitationId)
+        }
+
         habitationViewModel.selectedHabitation.observe(viewLifecycleOwner) { selectedHabitation ->
             selectedHabitation?.let { habitation ->
-                habitation.habitationId?.let {
+                habitation.habitationId.let {
                     roomViewModel.getRoomsByHabitationId(it)
                 }
             }
         }
+
 
         roomViewModel.rooms.observe(viewLifecycleOwner) { rooms ->
             roomRecyclerView.adapter = RoomAdapter(
@@ -102,7 +120,7 @@ class RoomFragment : Fragment() {
         val fabCreateRoom: FloatingActionButton = view.findViewById(R.id.fabCreateRoom)
         fabCreateRoom.setOnClickListener {
             val selectedHabitation = habitationViewModel.selectedHabitation.value
-            if (selectedHabitation == null || selectedHabitation.habitationId.isNullOrBlank()) {
+            if (selectedHabitation == null || selectedHabitation.habitationId.isBlank()) {
                 Toast.makeText(
                     requireContext(),
                     "No habitation selected",
@@ -110,11 +128,13 @@ class RoomFragment : Fragment() {
                 ).show()
                 return@setOnClickListener
             } else {
-                val bundle = Bundle().apply {
-                    putString("habitationId", selectedHabitation.habitationId)
-                }
-                findNavController().navigate(R.id.action_roomFragment_to_createRoomFragment, bundle)
+
+                findNavController().navigate(R.id.action_roomFragment_to_createRoomFragment)
             }
         }
+
+
+
     }
+
 }

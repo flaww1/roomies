@@ -36,7 +36,9 @@ data class Habitation(
     val noiseLevel: NoiseLevels = NoiseLevels.QUIET,
     val guestPolicy: GuestPolicies = GuestPolicies.GUESTS_NOT_ALLOWED,
     val tenants: List<User> = listOf()
-)
+) {
+
+}
 
 
 @TypeConverters(HabitationTypeConverter::class)

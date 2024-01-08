@@ -14,10 +14,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.dao.HabitationDao
+import pt.ipca.roomies.data.dao.RoomDao
+import pt.ipca.roomies.data.dao.UserProfileDao
 import pt.ipca.roomies.data.entities.*
 import pt.ipca.roomies.data.local.AppDatabase
 import pt.ipca.roomies.data.repositories.HabitationViewModelFactory
@@ -25,21 +29,25 @@ import pt.ipca.roomies.data.repositories.RoomRepository
 import pt.ipca.roomies.data.repositories.RoomViewModelFactory
 import pt.ipca.roomies.databinding.FragmentCreateRoomBinding
 import pt.ipca.roomies.ui.main.landlord.habitation.HabitationViewModel
+import androidx.lifecycle.Observer
+import androidx.lifecycle.LiveData
+import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
 
 class CreateRoomFragment : Fragment() {
+    val firebaseAuth = FirebaseAuth.getInstance()
+
+    private lateinit var habitationSpinner: Spinner
+    private lateinit var habitationAdapter: ArrayAdapter<Habitation>
+
     private lateinit var roomRecyclerView: RecyclerView
-    private var roomDao = AppDatabase.getDatabase(requireContext()).roomDao()
-    private val userProfileDao = AppDatabase.getDatabase(requireContext()).userProfileDao()
-    private val roomRepository = RoomRepository(userProfileDao, roomDao)
-    private val habitationDao = AppDatabase.getDatabase(requireContext()).habitationDao()
+    private lateinit var roomDao: RoomDao
+    private lateinit var userProfileDao: UserProfileDao
+    private lateinit var roomRepository: RoomRepository
+    private lateinit var habitationDao: HabitationDao
 
-    private val roomViewModel: RoomViewModel by viewModels {
-        RoomViewModelFactory(roomRepository)
-    }
-
-    private val habitationViewModel: HabitationViewModel by viewModels {
-        HabitationViewModelFactory(habitationDao)
-    }
+    private lateinit var roomViewModel: RoomViewModel
+    private lateinit var habitationViewModel: HabitationViewModel
     private var _binding: FragmentCreateRoomBinding? = null
     private val binding get() = _binding!!
 
@@ -56,11 +64,32 @@ class CreateRoomFragment : Fragment() {
     private lateinit var selectedImages: MutableList<Uri>
     private val MAX_IMAGES = 5
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCreateRoomBinding.inflate(inflater, container, false)
+
+        roomDao = AppDatabase.getDatabase(requireContext()).roomDao()
+        userProfileDao = AppDatabase.getDatabase(requireContext()).userProfileDao()
+        roomRepository = RoomRepository(userProfileDao, roomDao)
+        habitationDao = AppDatabase.getDatabase(requireContext()).habitationDao()
+
+        // Initialize the view models here
+        roomViewModel = RoomViewModelFactory(roomRepository).create(RoomViewModel::class.java)
+        habitationViewModel = HabitationViewModelFactory(habitationDao)
+            .create(HabitationViewModel::class.java)
+
+        habitationSpinner = binding.spinnerHabitation
+        habitationAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_dropdown_item,
+            mutableListOf()
+        )
+
+        habitationSpinner.adapter = habitationAdapter
+
         return binding.root
     }
 
@@ -70,6 +99,38 @@ class CreateRoomFragment : Fragment() {
         initializeViews()
         setupViews()
         setupListeners()
+        habitationAdapter = HabitationSpinnerAdapter()
+        habitationSpinner.adapter = habitationAdapter
+
+        val currentUser = firebaseAuth.currentUser
+        val userId = currentUser?.uid
+
+        if (userId != null) {
+            // Observe habitations using LiveData
+            habitationViewModel.habitationsByUserId.observe(viewLifecycleOwner) { habitations: List<Habitation> ->
+                habitationAdapter.clear()
+                habitationAdapter.addAll(habitations)
+                habitationAdapter.notifyDataSetChanged()
+            }
+
+            // Fetch habitations using userId
+            habitationViewModel.getHabitationsByUserId(userId)
+
+        } else {
+            // Handle no user logged in
+            Log.d("CreateRoomFragment", "No user logged in")
+            Toast.makeText(requireContext(), "No user logged in", Toast.LENGTH_SHORT).show()
+
+        }
+
+
+        // Observe the selected room LiveData
+        roomViewModel.selectedRoom.observe(viewLifecycleOwner) { room ->
+            // Update UI or perform actions based on the selected room, if needed
+            Log.d("CreateRoomFragment", "Observed selectedRoom: $room")
+        }
+
+
     }
 
     private fun initializeViews() {
@@ -112,18 +173,25 @@ class CreateRoomFragment : Fragment() {
         )
     }
 
-    // Inside CreateRoomFragment
     private fun setupHabitationObserver() {
-        habitationViewModel.selectedHabitation.observe(viewLifecycleOwner) { habitation ->
-            // Use habitation.habitationId to create a room
-            // Make sure habitation is not null and habitationId is not blank
-            if (habitation == null || habitation.habitationId.isBlank()) {
-                showToast("No habitation selected")
-                findNavController().navigateUp()
+        habitationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                val selectedHabitation = habitationAdapter.getItem(position)
+                if (selectedHabitation != null) {
+                    habitationViewModel.setSelectedHabitation(selectedHabitation)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Handle nothing selected if needed
             }
         }
     }
-
 
     private fun setupInputValidation() {
         editTextDescription.setOnFocusChangeListener { _, hasFocus ->
@@ -158,19 +226,37 @@ class CreateRoomFragment : Fragment() {
     }
 
     private fun createOrUpdateRoom() {
-        val habitation = habitationViewModel.selectedHabitation.value
-        if (habitation == null || habitation.habitationId.isBlank()) {
-            showToast(getString(R.string.invalid_habitation_id))
+        val habitationId = habitationViewModel.selectedHabitation.value?.habitationId
+
+        val existingRoom = roomViewModel.selectedRoom.value
+
+        Log.d("CreateRoomFragment", "Habitation ID: $habitationId")
+
+        if (habitationId.isNullOrBlank()) {
+            showToast("No habitation selected")
+            findNavController().navigateUp()
             return
         }
 
-        // Use habitation.habitationId to create or update the room
-        val room = createRoomObject(habitation.habitationId)
-        roomViewModel.createRoom(room)
+        if (existingRoom == null) {
+            // Create a new room
+            val room = createRoomObject(habitationId)
+            uploadImages(selectedImages) { imageUrls ->
+                room.roomImages = imageUrls
+                roomViewModel.createRoom(room)
+            }
+        } else {
+            // Update the existing room
+            val room = updateRoomObject(habitationId, existingRoom)
+            uploadImages(selectedImages) { imageUrls ->
+                room.roomImages = imageUrls
+                roomViewModel.updateRoom(room)
+            }
+        }
+
+        findNavController().navigateUp()
         // Navigate back or update UI accordingly
     }
-
-
 
     private fun createRoomObject(habitationId: String): Room {
         return Room(
@@ -240,9 +326,19 @@ class CreateRoomFragment : Fragment() {
     }
 
     private fun validateRoomInputs(): Boolean {
-        return editTextDescription.text.isNotEmpty() &&
-                editTextPrice.text.isNotEmpty() &&
-                selectedImages.isNotEmpty()
+        if (editTextDescription.text.isEmpty()) {
+            showToast("Description cannot be empty.")
+            return false
+        }
+        if (editTextPrice.text.isEmpty()) {
+            showToast("Price cannot be empty.")
+            return false
+        }
+        if (selectedImages.isEmpty()) {
+            showToast("Please select at least one image.")
+            return false
+        }
+        return true
     }
 
     private fun uploadImages(images: List<Uri>, onComplete: (List<String>) -> Unit) {
@@ -266,6 +362,35 @@ class CreateRoomFragment : Fragment() {
                     }
                 }
             }
+        }
+    }
+
+    private inner class HabitationSpinnerAdapter : ArrayAdapter<Habitation>(
+        requireContext(),
+        android.R.layout.simple_spinner_dropdown_item,
+        mutableListOf()
+    ) {
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            return createView(position, convertView, parent)
+        }
+
+        override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+            return createView(position, convertView, parent)
+        }
+
+        private fun createView(position: Int, convertView: View?, parent: ViewGroup): View {
+            val view = convertView ?: LayoutInflater.from(context).inflate(
+                android.R.layout.simple_spinner_item,
+                parent,
+                false
+            )
+
+            val habitation = getItem(position)
+            habitation?.let {
+                view.findViewById<TextView>(android.R.id.text1).text = it.address
+            }
+
+            return view
         }
     }
 
