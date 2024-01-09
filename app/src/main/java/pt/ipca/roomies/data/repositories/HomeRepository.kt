@@ -43,7 +43,7 @@ class HomeRepository(private val AppDatabase: AppDatabase) {
         val roomDocument = room.roomId.let { db.collection("rooms").document(it.toString()) }
 
         try {
-            roomDocument?.get()?.addOnSuccessListener { documentSnapshot ->
+            roomDocument.get().addOnSuccessListener { documentSnapshot ->
                 if (documentSnapshot.exists()) {
                     // Room exists in Firestore, update it
                     roomDocument.set(room).addOnSuccessListener {

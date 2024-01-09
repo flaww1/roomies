@@ -65,7 +65,7 @@ class RegistrationRepository(private val applicationContext: Context) {
         password: String,
         firstName: String,
         lastName: String,
-        userRole : String
+        userRole: String
     ) {
         // Create a user object with basic information
         val user = User(
@@ -85,7 +85,9 @@ class RegistrationRepository(private val applicationContext: Context) {
 
         // Store user information in Firestore asynchronously
         withContext(Dispatchers.IO) {
-            firestore.collection("users").document(userId).set(user)
+            val userDocument = firestore.collection("users").document(userId)
+
+            userDocument.set(user)
                 .addOnCompleteListener { userTask ->
                     if (!userTask.isSuccessful) {
                         // Handle the failure
@@ -93,9 +95,21 @@ class RegistrationRepository(private val applicationContext: Context) {
                     } else {
                         // Handle success if needed
                         Log.d("RegistrationRepository", "User stored successfully in Firestore")
+
+                        // Update user's role directly in Firestore
+                        userDocument.update("userRole", userRole)
+                            .addOnCompleteListener { roleUpdateTask ->
+                                if (roleUpdateTask.isSuccessful) {
+                                    Log.d("RegistrationRepository", "User role updated successfully in Firestore")
+                                } else {
+                                    Log.e("RegistrationRepository", "Failed to update user role in Firestore", roleUpdateTask.exception)
+                                }
+                            }
                     }
                 }
         }
     }
+
+
 
 }

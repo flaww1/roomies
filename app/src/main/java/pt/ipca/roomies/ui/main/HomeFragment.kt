@@ -20,6 +20,7 @@ import pt.ipca.roomies.data.local.AppDatabase
 import pt.ipca.roomies.data.repositories.CardRepository
 import pt.ipca.roomies.data.repositories.HomeRepository
 import pt.ipca.roomies.data.repositories.HomeViewModelFactory
+import pt.ipca.roomies.data.repositories.LoginRepository
 
 class HomeFragment : Fragment() {
 
@@ -28,6 +29,7 @@ class HomeFragment : Fragment() {
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var homeRepository: HomeRepository
     private lateinit var cardRepository: CardRepository
+    private lateinit var loginRepository: LoginRepository
     private lateinit var likeMatchDao: LikeMatchDao
     private lateinit var roomDao: RoomDao
     private lateinit var userDao: UserDao
@@ -47,11 +49,12 @@ class HomeFragment : Fragment() {
 
         // Initialize CardRepository
         cardRepository = CardRepository(likeMatchDao, roomDao, userDao)
+        loginRepository = LoginRepository(userDao)
 
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
         // Initialize HomeViewModel with CardRepository
-        homeViewModel = ViewModelProvider(this, HomeViewModelFactory(cardRepository))[HomeViewModel::class.java]
+        homeViewModel = ViewModelProvider(this, HomeViewModelFactory(cardRepository, loginRepository))[HomeViewModel::class.java]
 
         // Initialize views and adapters
         initView(view)
@@ -76,9 +79,11 @@ class HomeFragment : Fragment() {
     private suspend fun initObservers() {
         // Observe changes in the current card
         homeViewModel.currentCard.observe(viewLifecycleOwner, Observer { card ->
-            // Notify the adapter that the data set has changed
-            cardAdapter.setCurrentCard(card)
-            Log.d("HomeFragment", "Observed change in current card: $card")
+            card?.let {
+                // Assuming you have a list of cards and the current card should be the first in the list
+                cardAdapter.setCardList(listOf(it)) // Replace with the actual list if you have more cards
+
+            }
         })
 
         val userRole = homeRepository.getCurrentUserRole()

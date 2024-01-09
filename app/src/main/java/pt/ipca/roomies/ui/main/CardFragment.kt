@@ -16,6 +16,8 @@ class CardFragment : Fragment() {
     private lateinit var btnDislike: Button
     private lateinit var homeViewModel: HomeViewModel
 
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -28,6 +30,7 @@ class CardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
 
         // Ensure that arguments are not null before accessing

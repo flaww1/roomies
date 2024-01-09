@@ -67,11 +67,11 @@ class HabitationViewModelFactory(private val habitationDao: HabitationDao) :
     }
 }
 
-class HomeViewModelFactory(private val cardRepository: CardRepository) : ViewModelProvider.Factory {
+class HomeViewModelFactory(private val cardRepository: CardRepository, private val loginRepository: LoginRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return HomeViewModel(cardRepository) as T
+            return HomeViewModel(cardRepository, loginRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

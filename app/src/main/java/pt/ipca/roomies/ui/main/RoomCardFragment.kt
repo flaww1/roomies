@@ -1,15 +1,22 @@
 package pt.ipca.roomies.ui.main.card
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.dao.LikeMatchDao
+import pt.ipca.roomies.data.dao.RoomDao
+import pt.ipca.roomies.data.dao.UserDao
 import pt.ipca.roomies.data.entities.Room
+import pt.ipca.roomies.data.local.AppDatabase
+import pt.ipca.roomies.data.repositories.CardRepository
+import pt.ipca.roomies.data.repositories.HomeViewModelFactory
+import pt.ipca.roomies.data.repositories.LoginRepository
 import pt.ipca.roomies.ui.main.HomeViewModel
 
 class RoomCardFragment : Fragment() {
@@ -19,6 +26,34 @@ class RoomCardFragment : Fragment() {
     private lateinit var btnDislike: Button
 
     private lateinit var homeViewModel: HomeViewModel
+    private lateinit var cardRepository: CardRepository
+    private lateinit var loginRepository: LoginRepository
+    private lateinit var likeMatchDao: LikeMatchDao
+    private lateinit var roomDao: RoomDao
+    private lateinit var userDao: UserDao
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Initialize room from arguments
+        arguments?.let {
+            room = it.getParcelable(ARG_ROOM) ?: Room()
+        }
+
+        // Initialize DAOs
+        likeMatchDao = AppDatabase.getDatabase(requireContext()).likeMatchDao()
+        roomDao = AppDatabase.getDatabase(requireContext()).roomDao()
+        userDao = AppDatabase.getDatabase(requireContext()).userDao()
+
+        // Initialize repositories
+        cardRepository = CardRepository(likeMatchDao, roomDao, userDao)
+        loginRepository = LoginRepository(userDao)
+
+        // Initialize homeViewModel
+        homeViewModel = ViewModelProvider(requireActivity(), HomeViewModelFactory(cardRepository, loginRepository))[HomeViewModel::class.java]
+
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,7 +63,6 @@ class RoomCardFragment : Fragment() {
         btnLike = view.findViewById(R.id.buttonLike)
         btnDislike = view.findViewById(R.id.buttonDislike)
 
-        // Display room information in your layout as needed
         view.findViewById<TextView>(R.id.roomDescriptionTextView).text = room.description
 
         return view
@@ -37,18 +71,9 @@ class RoomCardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Log.d("RoomCardFragment", "onViewCreated: $room")
-
         // Simplified click listeners using lambda syntax
-        btnLike.setOnClickListener {
-            Log.d("RoomCardFragment", "Like button clicked")
-            homeViewModel.likeCurrentCard()
-        }
-
-        btnDislike.setOnClickListener {
-            Log.d("RoomCardFragment", "Dislike button clicked")
-            homeViewModel.dislikeCurrentCard()
-        }
+        btnLike.setOnClickListener { homeViewModel.likeCurrentCard() }
+        btnDislike.setOnClickListener { homeViewModel.dislikeCurrentCard() }
     }
 
     companion object {

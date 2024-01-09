@@ -17,7 +17,7 @@ data class User(
     var password: String? = null,
     var registrationDate: Long? = null,
     val userRating: Int? = null,
-    val userRole: String? = null
+    var userRole: String? = null
 ) : Parcelable {
     constructor() : this("", "", "", "", "", 0, 0, "")
 

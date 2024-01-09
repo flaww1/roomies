@@ -8,8 +8,9 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import pt.ipca.roomies.data.entities.Card
 import pt.ipca.roomies.data.repositories.CardRepository
+import pt.ipca.roomies.data.repositories.LoginRepository
 
-class HomeViewModel(private val cardRepository: CardRepository) : ViewModel() {
+class HomeViewModel(private val cardRepository: CardRepository, private val loginRepository: LoginRepository) : ViewModel() {
 
     private val _currentCard = MutableLiveData<Card?>()
     val currentCard: LiveData<Card?> get() = _currentCard
@@ -20,21 +21,24 @@ class HomeViewModel(private val cardRepository: CardRepository) : ViewModel() {
     private val _matches = MutableLiveData<Set<String>>()
     val matches: LiveData<Set<String>> get() = _matches
 
-    private lateinit var currentUserRole: String // Declare currentUserRole
+    private lateinit var currentUserRole: String
 
     init {
         viewModelScope.launch {
-            // Set currentUserRole based on your logic
-            currentUserRole = "LANDLORD" // or "USER" or however you determine it
-
             // Load initial data
+            currentUserRole = loadUserRole()
             loadNextCard(currentUserRole)
             loadLikedUsers()
             loadMatchedUsers()
             loadLikedRooms()
             loadMatchedRooms()
-
         }
+    }
+    // Change the loadUserRole function to return a String instead of setting the value
+    private suspend fun loadUserRole(): String {
+        val currentUser = loginRepository.getCurrentUser()
+        return loginRepository.fetchUserRole(currentUser)
+        Log.d("HomeViewModel", "Loading user role: $currentUserRole")
     }
 
     suspend fun loadNextCard(userRole: String) {

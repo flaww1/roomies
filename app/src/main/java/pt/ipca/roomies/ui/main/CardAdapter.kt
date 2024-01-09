@@ -2,6 +2,7 @@ package pt.ipca.roomies.ui.main
 
 import android.util.Log
 import androidx.fragment.app.Fragment
+import androidx.viewpager.widget.PagerAdapter.POSITION_NONE
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import pt.ipca.roomies.data.entities.Card
 import pt.ipca.roomies.ui.main.card.UserCardFragment
@@ -41,6 +42,8 @@ class CardAdapter(fragment: Fragment, homeViewModel: HomeViewModel) :
             Log.d("CardAdapter", "Setting current card at position $position")
         }
     }
+
+    // In your CardAdapter
 
 
 }
