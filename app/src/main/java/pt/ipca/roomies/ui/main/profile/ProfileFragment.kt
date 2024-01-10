@@ -15,6 +15,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.dao.RoomDao
+import pt.ipca.roomies.data.dao.UserProfileDao
 import pt.ipca.roomies.data.local.AppDatabase
 import pt.ipca.roomies.data.repositories.ProfileRepository
 import pt.ipca.roomies.data.repositories.ProfileViewModelFactory
@@ -28,13 +30,12 @@ import java.util.Locale
 
 class ProfileFragment : Fragment() {
 
-    val userProfileDao = AppDatabase.getDatabase(requireContext()).userProfileDao()
-    val roomDao = AppDatabase.getDatabase(requireContext()).roomDao()
-    val roomRepository = RoomRepository(userProfileDao, roomDao)
-    val profileRepository = ProfileRepository(userProfileDao)
-    private val viewModel by viewModels<ProfileViewModel> {
-        ProfileViewModelFactory(roomRepository, profileRepository)
-    }
+    private lateinit var userProfileDao: UserProfileDao
+    private lateinit var roomDao: RoomDao
+    private lateinit var profileRepository: ProfileRepository
+    private lateinit var roomRepository: RoomRepository
+    private lateinit var viewModel: ProfileViewModel
+
     private lateinit var combinedProfileLayout: View
     private lateinit var createProfileLayout: View
     private lateinit var displayProfileLayout: View
@@ -53,6 +54,14 @@ class ProfileFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
+        userProfileDao = AppDatabase.getDatabase(requireContext()).userProfileDao()
+        roomDao = AppDatabase.getDatabase(requireContext()).roomDao()
+        profileRepository = ProfileRepository(userProfileDao)
+        roomRepository = RoomRepository(userProfileDao, roomDao)
+
+        viewModel = ViewModelProvider(this, ProfileViewModelFactory(roomRepository, profileRepository))[ProfileViewModel::class.java]
+
         // Inflate the combined profile layout using data binding
         combinedProfileLayout = inflater.inflate(R.layout.profile_combined_layout, container, false)
 

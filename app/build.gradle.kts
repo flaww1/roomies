@@ -90,6 +90,8 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation ("com.google.code.gson:gson:2.9.0")
+    implementation ("com.yuyakaido.android:card-stack-view:2.3.4")
+
 
 
 }

@@ -1,6 +1,7 @@
 package pt.ipca.roomies.ui.main.card
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -71,8 +72,32 @@ class RoomCardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Simplified click listeners using lambda syntax
-        btnLike.setOnClickListener { homeViewModel.likeCurrentCard() }
+        // Initially disable the buttons until a card is loaded
+        btnLike.isEnabled = false
+        btnDislike.isEnabled = false
+
+        // Observe changes in the current card
+        homeViewModel.currentCard.observe(viewLifecycleOwner) { card ->
+            if (card != null) {
+                // Enable the buttons because we have a card loaded
+                btnLike.isEnabled = true
+                btnDislike.isEnabled = true
+            } else {
+                // Disable the buttons if there is no card loaded
+                btnLike.isEnabled = false
+                btnDislike.isEnabled = false
+            }
+        }
+
+
+        btnLike.setOnClickListener {
+            Log.d("UserCardFragment", "Like button clicked")
+            try {
+                homeViewModel.likeCurrentCard()
+            } catch (e: Exception) {
+                Log.e("pt.ipca.roomies.ui.main.HomeFragment", "Exception in likeCurrentCard: $e")
+            }
+        }
         btnDislike.setOnClickListener { homeViewModel.dislikeCurrentCard() }
     }
 

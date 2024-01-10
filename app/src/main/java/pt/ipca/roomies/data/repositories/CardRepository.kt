@@ -1,5 +1,6 @@
 package pt.ipca.roomies.data.repositories
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
@@ -438,6 +439,17 @@ class CardRepository(
             .forEach { it.reference.delete() }
     }
 
+    suspend fun getAllUsersAsCards(): List<Card.UserCard> {
+        // Implement logic to fetch all users from Firestore and convert them to UserCard objects
+        val users = firestore.collection("users").get().await().toObjects(User::class.java)
+        return users.map { user -> Card.UserCard(user) }
+    }
+
+    suspend fun getAllRoomsAsCards(): List<Card.RoomCard> {
+        // Implement logic to fetch all rooms from Firestore and convert them to RoomCard objects
+        val rooms = firestore.collection("rooms").get().await().toObjects(Room::class.java)
+        return rooms.map { room -> Card.RoomCard(room) }
+    }
 
 }
 

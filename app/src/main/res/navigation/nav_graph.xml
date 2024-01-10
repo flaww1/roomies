@@ -56,12 +56,12 @@
 
 
 
-    <!-- pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment -->
+    <!-- pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment -->
     <fragment
         android:id="@+id/homeFragment"
         android:name="pt.ipca.roomies.ui.main.HomeFragment"
         android:label="HomeFragment">
-        <!-- No back track action defined for pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment -->
+        <!-- No back track action defined for pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment -->
         <action
             android:id="@+id/action_homeFragment_to_profileFragment"
             app:destination="@id/profileFragment" />

@@ -10,7 +10,10 @@ import pt.ipca.roomies.data.entities.Card
 import pt.ipca.roomies.data.repositories.CardRepository
 import pt.ipca.roomies.data.repositories.LoginRepository
 
-class HomeViewModel(private val cardRepository: CardRepository, private val loginRepository: LoginRepository) : ViewModel() {
+class HomeViewModel(
+    private val cardRepository: CardRepository,
+    private val loginRepository: LoginRepository
+) : ViewModel() {
 
     private val _currentCard = MutableLiveData<Card?>()
     val currentCard: LiveData<Card?> get() = _currentCard
@@ -23,52 +26,50 @@ class HomeViewModel(private val cardRepository: CardRepository, private val logi
 
     private lateinit var currentUserRole: String
 
+    private var shuffledCards: MutableList<Card> = mutableListOf()
+
+    private val _cardList = MutableLiveData<List<Card>>()
+    val cardList: LiveData<List<Card>> get() = _cardList
+
+    private val _selectedCard = MutableLiveData<Card?>()
+    val selectedCard: LiveData<Card?> get() = _selectedCard
+
+
     init {
         viewModelScope.launch {
             // Load initial data
             currentUserRole = loadUserRole()
             loadNextCard(currentUserRole)
-            loadLikedUsers()
-            loadMatchedUsers()
-            loadLikedRooms()
-            loadMatchedRooms()
+            loadLikedAndMatched(currentUserRole)
         }
     }
-    // Change the loadUserRole function to return a String instead of setting the value
+
     private suspend fun loadUserRole(): String {
         val currentUser = loginRepository.getCurrentUser()
-        return loginRepository.fetchUserRole(currentUser)
-        Log.d("HomeViewModel", "Loading user role: $currentUserRole")
-    }
-
-    suspend fun loadNextCard(userRole: String) {
-        Log.d("HomeViewModel", "Loading next card for user role: $userRole")
-        _currentCard.postValue(
-            when (userRole) {
-                "Landlord" -> cardRepository.getNextUserForLanlord()
-                "User" -> cardRepository.getNextRoomForUser()
-                else -> null
-            } as Card?
-        )
+        return loginRepository.fetchUserRole(currentUser).also {
+            Log.d("HomeViewModel", "Loading user role: $it")
+        }
     }
 
     fun likeCurrentCard() {
         viewModelScope.launch {
-            _currentCard.value?.let { card ->
-                Log.d("HomeViewModel", "Liking current card: $card")
-                when (card) {
-                    is Card.RoomCard -> {
-                        card.room.roomId.let { roomId ->
-                            cardRepository.likeRoom(roomId, "likedUserId")
+            try {
+                _currentCard.value?.let { card ->
+                    Log.d("HomeViewModel", "Liking current card: $card")
+                    when (card) {
+                        is Card.RoomCard -> {
+                            Log.d("HomeViewModel", "RoomCard liked: ${card.room.roomId}")
+                            cardRepository.likeRoom(card.room.roomId, "likedUserId")
+                        }
+                        is Card.UserCard -> {
+                            Log.d("HomeViewModel", "UserCard liked: ${card.user.userId}")
+                            cardRepository.likeUser(card.user.userId, "likedUserId")
                         }
                     }
-                    is Card.UserCard -> {
-                        card.user.userId.let { userId ->
-                            cardRepository.likeUser(userId, "likedUserId")
-                        }
-                    }
+                    loadNextCard(currentUserRole)
                 }
-                loadNextCard(currentUserRole)
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Exception in likeCurrentCard: $e")
             }
         }
     }
@@ -94,20 +95,17 @@ class HomeViewModel(private val cardRepository: CardRepository, private val logi
         }
     }
 
-    suspend fun loadLikedUsers() {
-        _likes.postValue(cardRepository.getLikedUsers())
-    }
-
-    suspend fun loadMatchedUsers() {
-        _matches.postValue(cardRepository.getMatchedUsers())
-    }
-
-    suspend fun loadLikedRooms() {
-        _likes.postValue(cardRepository.getLikedRooms())
-    }
-
-    suspend fun loadMatchedRooms() {
-        _matches.postValue(cardRepository.getMatchedRooms())
+    private suspend fun loadLikedAndMatched(userRole: String) {
+        when (userRole) {
+            "User" -> {
+                _likes.postValue(cardRepository.getLikedUsers())
+                _matches.postValue(cardRepository.getMatchedUsers())
+            }
+            "Landlord" -> {
+                _likes.postValue(cardRepository.getLikedRooms())
+                _matches.postValue(cardRepository.getMatchedRooms())
+            }
+        }
     }
 
     fun matchWithLikedCard() {
@@ -162,21 +160,65 @@ class HomeViewModel(private val cardRepository: CardRepository, private val logi
         }
     }
 
-    fun loadNextRoomCard() {
-        viewModelScope.launch {
-            val nextRoom = cardRepository.getNextRoomForUser()
-            val nextCard = nextRoom?.let { room -> Card.RoomCard(room) }
-            _currentCard.postValue(nextCard)
+    private var isUserRoleLoaded = false
+
+    fun loadNextCard(currentUserRole: String) {
+        if (!isUserRoleLoaded) {
+            viewModelScope.launch {
+                // Load user role only once
+                this@HomeViewModel.currentUserRole = loadUserRole()
+                isUserRoleLoaded = true
+
+                // Continue with loading the cards
+                loadInitialCards(currentUserRole)
+                loadNextCard(currentUserRole)
+            }
+        } else {
+            shuffledCards.let {
+                if (it.isNotEmpty()) {
+                    val nextCard = it.removeAt(0)
+                    _currentCard.postValue(nextCard)
+                } else {
+                    viewModelScope.launch {
+                        loadInitialCards(currentUserRole)
+                        loadNextCard(currentUserRole)
+                    }
+                }
+            }
         }
     }
 
 
-    fun loadNextUserCard() {
-        viewModelScope.launch {
-            val nextUser = cardRepository.getNextUserForLanlord()
-            val nextCard = nextUser?.let { user -> Card.UserCard(user) }
-            _currentCard.postValue(nextCard)
+    private fun <T> List<T>.fisherYatesShuffle(): List<T> {
+        val shuffledList = this.toMutableList()
+        val random = java.util.Random()
+
+        for (i in shuffledList.size - 1 downTo 1) {
+            val j = random.nextInt(i + 1)
+            val temp = shuffledList[i]
+            shuffledList[i] = shuffledList[j]
+            shuffledList[j] = temp
         }
+
+        return shuffledList
+    }
+
+    private suspend fun loadInitialCards(userRole: String) {
+        val cards = when (userRole) {
+            "Landlord" -> cardRepository.getAllUsersAsCards()
+            "User" -> cardRepository.getAllRoomsAsCards()
+            else -> emptyList()
+        }
+
+        shuffledCards = cards.fisherYatesShuffle().toMutableList()
+        _cardList.postValue(shuffledCards)
+    }
+    fun onCardSelected(card: Card) {
+        _selectedCard.value = card
+    }
+
+    fun onCardDetailsNavigated() {
+        _selectedCard.value = null
     }
 
 

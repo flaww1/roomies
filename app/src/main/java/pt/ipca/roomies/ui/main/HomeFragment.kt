@@ -16,6 +16,7 @@ import pt.ipca.roomies.R
 import pt.ipca.roomies.data.dao.LikeMatchDao
 import pt.ipca.roomies.data.dao.RoomDao
 import pt.ipca.roomies.data.dao.UserDao
+import pt.ipca.roomies.data.entities.Card
 import pt.ipca.roomies.data.local.AppDatabase
 import pt.ipca.roomies.data.repositories.CardRepository
 import pt.ipca.roomies.data.repositories.HomeRepository
@@ -67,6 +68,7 @@ class HomeFragment : Fragment() {
         return view
     }
 
+
     private fun initView(view: View) {
         viewPager = view.findViewById(R.id.viewPager)
         cardAdapter = CardAdapter(this, homeViewModel)
@@ -77,24 +79,46 @@ class HomeFragment : Fragment() {
     }
 
     private suspend fun initObservers() {
-        // Observe changes in the current card
-        homeViewModel.currentCard.observe(viewLifecycleOwner, Observer { card ->
-            card?.let {
-                // Assuming you have a list of cards and the current card should be the first in the list
-                cardAdapter.setCardList(listOf(it)) // Replace with the actual list if you have more cards
-
-            }
-        })
 
         val userRole = homeRepository.getCurrentUserRole()
 
-        // Determine which card type to load based on user role
-        if (userRole == "User") {
-            Log.d("HomeFragment", "Loading next room card")
-            homeViewModel.loadNextRoomCard()
+        if (userRole != null) {
+            homeViewModel.loadNextCard(userRole)
+        }
+
+        homeViewModel.cardList.observe(viewLifecycleOwner, Observer { cards ->
+            cards?.let {
+                // Update UI based on the card list if needed
+                updateUI(cards)
+            }
+        })
+
+    }
+    private fun updateUI(cards: List<Card>) {
+        // Assuming cardAdapter is an instance of your pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.CardAdapter
+        cardAdapter.setCardList(cards)
+
+        // Assuming you have a TextView to display card information
+        if (cards.isNotEmpty()) {
+            val currentCard = cards[0]
+            // Update UI elements based on the current card
+            when (currentCard) {
+                is Card.RoomCard -> {
+                    Log.d("pt.ipca.roomies.ui.main.HomeFragment", "Displaying RoomCard: ${currentCard.room.roomId}")
+                    // Update TextView or other UI elements with room card information
+                }
+                is Card.UserCard -> {
+                    Log.d("pt.ipca.roomies.ui.main.HomeFragment", "Displaying UserCard: ${currentCard.user.userId}")
+                    // Update TextView or other UI elements with user card information
+                }
+            }
         } else {
-            Log.d("HomeFragment", "Loading next user card")
-            homeViewModel.loadNextUserCard()
+            // Handle the case where there are no cards to display
+            Log.d("pt.ipca.roomies.ui.main.HomeFragment", "No cards to display")
         }
     }
+
+
+
+
 }

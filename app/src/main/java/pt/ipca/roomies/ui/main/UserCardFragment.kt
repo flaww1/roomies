@@ -46,7 +46,6 @@ class UserCardFragment : Fragment() {
             user = it.getParcelable(ARG_USER) ?: User()
         }
 
-        homeViewModel = ViewModelProvider(requireActivity(), HomeViewModelFactory(cardRepository, loginRepository))[HomeViewModel::class.java]
     }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,6 +60,7 @@ class UserCardFragment : Fragment() {
         view.findViewById<TextView>(R.id.userNameTextView).text = user.fullName
 
         // Add more fields as needed
+        homeViewModel = ViewModelProvider(this, HomeViewModelFactory(cardRepository, loginRepository))[HomeViewModel::class.java]
 
         return view
     }
@@ -73,13 +73,22 @@ class UserCardFragment : Fragment() {
         // Simplified click listeners using lambda syntax
         btnLike.setOnClickListener {
             Log.d("UserCardFragment", "Like button clicked")
-            homeViewModel.likeCurrentCard()
+            Log.d("UserCardFragment", "homeViewModel: $homeViewModel")
+            try {
+                Log.d("UserCardFragment", "Inside try block")
+                homeViewModel.likeCurrentCard()
+            } catch (e: Exception) {
+                Log.e("pt.ipca.roomies.ui.main.HomeFragment", "Exception in likeCurrentCard: $e")
+            }
         }
+
 
         btnDislike.setOnClickListener {
             Log.d("UserCardFragment", "Dislike button clicked")
             homeViewModel.dislikeCurrentCard()
         }
+
+
     }
 
     companion object {
