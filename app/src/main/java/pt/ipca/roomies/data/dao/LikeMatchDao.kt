@@ -5,7 +5,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import pt.ipca.roomies.data.entities.Like
 import pt.ipca.roomies.data.entities.Match
-
+//room ajuda no processo de co-rotinas, threds secundarias assim como um nivel de abstração 
+//é o room que usa essas anotacoes para realizar as operacoes, como uma interface
 @Dao
 interface LikeMatchDao {
 
@@ -13,7 +14,7 @@ interface LikeMatchDao {
     suspend fun insertLike(like: Like)
 
     @Query("SELECT * FROM likes WHERE likeId = :likeId")
-    suspend fun getLikeById(likeId: String): Like?
+    suspend fun getLikeById(likeId: String): Like? //indicacao que like pode ser nulo,caso nao enconte o respetivo ID
 
 
     @Query("SELECT * FROM matches WHERE matchId = :matchId")
