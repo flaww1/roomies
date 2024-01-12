@@ -4,7 +4,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import pt.ipca.roomies.data.entities.Habitation
 
-class HabitationRepository {
+class HabitationRepository { //objetivo operacoes CRUD ligacao firebase e  base de dados noSQL ou seja não relacional
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
