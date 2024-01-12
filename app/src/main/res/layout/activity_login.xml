@@ -7,7 +7,7 @@
 
     <!-- Other views in your activity -->
 
-    <FrameLayout
+    <FrameLayout   //bloquear uma área na tela para exibir um único item. Geralmente, FrameLayout para manter uma única visualização secundária,  mais facil para evitar sobreposição
         android:id="@+id/login_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
