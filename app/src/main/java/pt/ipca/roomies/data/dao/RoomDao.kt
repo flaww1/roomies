@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Room
 import androidx.room.Update
+import pt.ipca.roomies.data.entities.Habitation
 
 @Dao
 interface RoomDao {

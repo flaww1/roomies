@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.dao.HabitationDao
 import pt.ipca.roomies.data.dao.LikeMatchDao
 import pt.ipca.roomies.data.dao.RoomDao
 import pt.ipca.roomies.data.dao.UserDao
@@ -32,13 +33,15 @@ class UserCardFragment : Fragment() {
     private lateinit var likeMatchDao: LikeMatchDao
     private lateinit var roomDao: RoomDao
     private lateinit var userDao: UserDao
+    private lateinit var habitationDao: HabitationDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         likeMatchDao = AppDatabase.getDatabase(requireContext()).likeMatchDao()
         roomDao = AppDatabase.getDatabase(requireContext()).roomDao()
         userDao = AppDatabase.getDatabase(requireContext()).userDao()
-        cardRepository = CardRepository( likeMatchDao, roomDao, userDao)
+        habitationDao = AppDatabase.getDatabase(requireContext()).habitationDao()
+        cardRepository = CardRepository( likeMatchDao, roomDao, habitationDao ,userDao)
         loginRepository = LoginRepository(userDao)
 
         // Initialize user from arguments

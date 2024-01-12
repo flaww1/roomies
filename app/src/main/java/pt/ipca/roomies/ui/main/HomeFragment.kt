@@ -13,9 +13,6 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import pt.ipca.roomies.R
-import pt.ipca.roomies.data.dao.LikeMatchDao
-import pt.ipca.roomies.data.dao.RoomDao
-import pt.ipca.roomies.data.dao.UserDao
 import pt.ipca.roomies.data.local.AppDatabase
 import pt.ipca.roomies.data.repositories.CardRepository
 import pt.ipca.roomies.data.repositories.HomeRepository
@@ -23,16 +20,12 @@ import pt.ipca.roomies.data.repositories.HomeViewModelFactory
 import pt.ipca.roomies.data.repositories.LoginRepository
 
 class HomeFragment : Fragment() {
-
     private lateinit var viewPager: ViewPager2
     private lateinit var cardAdapter: CardAdapter
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var homeRepository: HomeRepository
     private lateinit var cardRepository: CardRepository
     private lateinit var loginRepository: LoginRepository
-    private lateinit var likeMatchDao: LikeMatchDao
-    private lateinit var roomDao: RoomDao
-    private lateinit var userDao: UserDao
 
     private val auth = FirebaseAuth.getInstance()
 
@@ -40,26 +33,22 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        likeMatchDao = AppDatabase.getDatabase(requireContext()).likeMatchDao()
-        roomDao = AppDatabase.getDatabase(requireContext()).roomDao()
-        userDao = AppDatabase.getDatabase(requireContext()).userDao()
+        val appDatabase = AppDatabase.getDatabase(requireContext())
+        val likeMatchDao = appDatabase.likeMatchDao()
+        val roomDao = appDatabase.roomDao()
+        val userDao = appDatabase.userDao()
+        val habitationDao = appDatabase.habitationDao()
 
-        // Initialize HomeRepository with AppDatabase
-        homeRepository = HomeRepository(AppDatabase.getDatabase(requireContext()))
-
-        // Initialize CardRepository
-        cardRepository = CardRepository(likeMatchDao, roomDao, userDao)
+        homeRepository = HomeRepository(appDatabase)
+        cardRepository = CardRepository(likeMatchDao, roomDao, habitationDao,userDao)
         loginRepository = LoginRepository(userDao)
 
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-        // Initialize HomeViewModel with CardRepository
         homeViewModel = ViewModelProvider(this, HomeViewModelFactory(cardRepository, loginRepository))[HomeViewModel::class.java]
 
-        // Initialize views and adapters
         initView(view)
 
-        // Launch a coroutine to call suspend function initObservers
         lifecycleScope.launch {
             initObservers()
         }
@@ -72,28 +61,49 @@ class HomeFragment : Fragment() {
         cardAdapter = CardAdapter(this, homeViewModel)
         viewPager.adapter = cardAdapter
 
-        // Optionally, customize ViewPager2 behavior
         viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
+
+        homeViewModel.cardProcessed.observe(viewLifecycleOwner, Observer { isProcessed ->
+            if (isProcessed) {
+                // Since 'cardProcessed' is a MutableLiveData, we can call 'setValue'
+                homeViewModel.cardProcessed.observe(viewLifecycleOwner, Observer { isProcessed ->
+                    if (isProcessed) {
+                        homeViewModel.resetCardProcessed() // Reset the cardProcessed value using ViewModel method
+
+                        lifecycleScope.launch {
+                            val userRole = homeRepository.getCurrentUserRole()
+                            if (userRole == "User") {
+                                Log.d("HomeFragment", "Loading next room card")
+                                homeViewModel.loadNextRoomCard()
+                            } else {
+                                Log.d("HomeFragment", "Loading next user card")
+                                homeViewModel.loadNextUserCard()
+                            }
+                        }
+                    }
+                })
+            }
+        })
+
     }
 
     private suspend fun initObservers() {
-        // Observe changes in the current card
         homeViewModel.currentCard.observe(viewLifecycleOwner, Observer { card ->
             card?.let {
-                // Assuming you have a list of cards and the current card should be the first in the list
-                cardAdapter.setCardList(listOf(it)) // Replace with the actual list if you have more cards
+                cardAdapter.setCardList(listOf(it))
+            }
+        })
 
+        homeViewModel.nextCard.observe(viewLifecycleOwner, Observer { card ->
+            card?.let {
+                cardAdapter.setCardList(cardAdapter.cardList + it)
             }
         })
 
         val userRole = homeRepository.getCurrentUserRole()
-
-        // Determine which card type to load based on user role
         if (userRole == "User") {
-            Log.d("HomeFragment", "Loading next room card")
             homeViewModel.loadNextRoomCard()
         } else {
-            Log.d("HomeFragment", "Loading next user card")
             homeViewModel.loadNextUserCard()
         }
     }

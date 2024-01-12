@@ -5,10 +5,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import pt.ipca.roomies.data.dao.HabitationDao
 import pt.ipca.roomies.data.dao.LikeMatchDao
 import pt.ipca.roomies.data.dao.RoomDao
 import pt.ipca.roomies.data.dao.UserDao
 import pt.ipca.roomies.data.entities.Card
+import pt.ipca.roomies.data.entities.Habitation
 import pt.ipca.roomies.data.entities.Like
 import pt.ipca.roomies.data.entities.Match
 import pt.ipca.roomies.data.entities.Room
@@ -17,6 +19,7 @@ import pt.ipca.roomies.data.entities.User
 class CardRepository(
     private val likeMatchDao: LikeMatchDao,
     private val roomDao: RoomDao,
+    private val habitationDao: HabitationDao,
     private val userDao: UserDao
 ) {
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -438,6 +441,40 @@ class CardRepository(
             .forEach { it.reference.delete() }
     }
 
+    suspend fun getHabitationByRoomId(roomId: String): Habitation? {
+        return withContext(Dispatchers.IO) {
+            // Fetch the Room by its ID
+            val room = roomDao.getRoomById(roomId) // Assuming you have a method to fetch a room by ID
+
+            // If the Room is found, fetch the associated Habitation
+            room?.habitationId?.let { habitationId ->
+                return@withContext habitationDao.getHabitationById(habitationId) // Assuming you have a method to fetch a Habitation by ID
+            }
+
+            return@withContext null
+        }
+    }
+
+
+    fun getRoomById(roomId: String): Any {
+        return firestore.collection("rooms").document(roomId).get()
+
+    }
+
+    fun likeUser(userId: String) {
+        firestore.collection("likes").add(
+            mapOf(
+                "likedUserId" to userId,
+                "likingUserId" to currentUserId,
+                "timestamp" to System.currentTimeMillis()
+            )
+        )
+
+    }
+
 
 }
+
+
+
 

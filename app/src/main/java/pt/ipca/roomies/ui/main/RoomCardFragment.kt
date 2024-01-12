@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.dao.HabitationDao
 import pt.ipca.roomies.data.dao.LikeMatchDao
 import pt.ipca.roomies.data.dao.RoomDao
 import pt.ipca.roomies.data.dao.UserDao
@@ -29,6 +30,7 @@ class RoomCardFragment : Fragment() {
     private lateinit var cardRepository: CardRepository
     private lateinit var loginRepository: LoginRepository
     private lateinit var likeMatchDao: LikeMatchDao
+    private lateinit var habitationDao: HabitationDao
     private lateinit var roomDao: RoomDao
     private lateinit var userDao: UserDao
 
@@ -44,9 +46,10 @@ class RoomCardFragment : Fragment() {
         likeMatchDao = AppDatabase.getDatabase(requireContext()).likeMatchDao()
         roomDao = AppDatabase.getDatabase(requireContext()).roomDao()
         userDao = AppDatabase.getDatabase(requireContext()).userDao()
+        habitationDao = AppDatabase.getDatabase(requireContext()).habitationDao()
 
         // Initialize repositories
-        cardRepository = CardRepository(likeMatchDao, roomDao, userDao)
+        cardRepository = CardRepository(likeMatchDao, roomDao, habitationDao ,userDao)
         loginRepository = LoginRepository(userDao)
 
         // Initialize homeViewModel
@@ -72,7 +75,11 @@ class RoomCardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Simplified click listeners using lambda syntax
-        btnLike.setOnClickListener { homeViewModel.likeCurrentCard() }
+        btnLike.setOnClickListener {
+
+            homeViewModel.likeCurrentCard()
+        }
+
         btnDislike.setOnClickListener { homeViewModel.dislikeCurrentCard() }
     }
 
