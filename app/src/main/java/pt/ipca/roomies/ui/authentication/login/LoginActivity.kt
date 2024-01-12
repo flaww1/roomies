@@ -19,7 +19,7 @@ class LoginActivity : AppCompatActivity() {
 
         // Load the initial registration fragment
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
+        val navController = navHostFragment.navController //transicao entre diferentes fragmentos, para outros destinos e partes da interface
 
         if (savedInstanceState == null) {
             // Use the navigation controller to navigate to the start destination
