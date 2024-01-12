@@ -38,9 +38,7 @@
         android:id="@+id/registrationFragment"
         android:name="pt.ipca.roomies.ui.authentication.registration.RegistrationFragment"
         android:label="RegistrationFragment">
-        <action
-            android:id="@+id/action_registrationFragment_to_registrationRoleSelectionFragment"
-            app:destination="@id/registrationRoleSelectionFragment" />
+
         <action
             android:id="@+id/action_registrationFragment_to_loginFragment"
             app:destination="@id/loginFragment"
@@ -51,27 +49,12 @@
             app:destination="@id/mainFragment"
             app:popUpTo="@id/mainFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_registrationFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
     </fragment>
 
-    <!-- RegistrationRoleSelectionFragment and its connections -->
-    <fragment
-        android:id="@+id/registrationRoleSelectionFragment"
-        android:name="pt.ipca.roomies.ui.authentication.registration.registrationsteps.RegistrationRoleSelectionFragment"
-        android:label="registrationRoleSelectionFragment">
-        <action
-            android:id="@+id/action_registrationRoleSelectionFragment_to_homeFragment"
-            app:destination="@id/homeFragment" />
-        <action
-            android:id="@+id/action_registrationRoleSelectionFragment_to_registrationFragment"
-            app:destination="@id/registrationFragment"
-            app:popUpTo="@id/mainFragment"
-            app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_registrationRoleSelectionFragment_to_mainFragment"
-            app:destination="@id/mainFragment"
-            app:popUpTo="@id/mainFragment"
-            app:popUpToInclusive="true" />
-    </fragment>
+
 
     <!-- pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment -->
     <fragment
@@ -142,7 +125,7 @@
 
     <fragment
         android:id="@+id/navigation_habitations"
-        android:name="pt.ipca.roomies.ui.main.landlord.habitation.HabitationFragment"
+        android:name="pt.ipca.roomies.ui.main.users.habitation.HabitationFragment"
         android:label="Habitations"
         tools:layout="@layout/fragment_habitation" >
         <action
@@ -158,8 +141,9 @@
     </fragment>
     <fragment
         android:id="@+id/habitationFragment"
-        android:name="pt.ipca.roomies.ui.main.landlord.habitation.HabitationFragment"
-        android:label="HabitationFragment" >
+        android:name="pt.ipca.roomies.ui.main.users.habitation.HabitationFragment"
+        android:label="fragment_habitation"
+        tools:layout="@layout/fragment_habitation" >
         <action
             android:id="@+id/action_habitationFragment_to_createHabitationFragment"
             app:destination="@id/createHabitationFragment" />
@@ -168,12 +152,93 @@
             android:id="@+id/action_habitationFragment_to_roomFragment"
             app:destination="@id/roomFragment" />
 
+        <action
+            android:id="@+id/action_habitationFragment_to_editHabitationFragment"
+            app:destination="@id/editHabitationFragment" />
+
+
+
+
+
+
 
     </fragment>
+
+    <fragment
+        android:id="@+id/editHabitationFragment"
+        android:name="pt.ipca.roomies.ui.main.users.habitation.EditHabitationFragment"
+        android:label="EditHabitationFragment"
+        tools:layout="@layout/fragment_edit_habitation">
+
+        <!-- Add arguments for the fields -->
+        <argument
+            android:name="address"
+            app:argType="string" />
+        <argument
+            android:name="city"
+            app:argType="string" />
+        <argument
+            android:name="numberOfRooms"
+            app:argType="string" />
+        <argument
+            android:name="numberOfBathrooms"
+            app:argType="string" />
+        <argument
+            android:name="habitationType"
+            app:argType="string" />
+        <argument
+            android:name="description"
+            app:argType="string" />
+        <argument
+            android:name="internet"
+            app:argType="boolean" />
+        <argument
+            android:name="parking"
+            app:argType="boolean" />
+        <argument
+            android:name="kitchen"
+            app:argType="boolean" />
+        <argument
+            android:name="laundry"
+            app:argType="boolean" />
+        <argument
+            android:name="petsAllowed"
+            app:argType="boolean" />
+        <argument
+            android:name="smokingPolicy"
+            app:argType="string" />
+        <argument
+            android:name="noiseLevel"
+            app:argType="string" />
+        <argument
+            android:name="guestPolicy"
+            app:argType="string" />
+        <argument
+            android:name="securityCameras"
+            app:argType="boolean" />
+        <argument
+            android:name="securityGuards"
+            app:argType="boolean" />
+        <argument
+            android:name="cardedEntrance"
+            app:argType="boolean" />
+        <argument
+            android:name="codedEntrance"
+            app:argType="boolean" />
+        <argument
+            android:name="lockedEntrance"
+            app:argType="boolean" />
+
+    </fragment>
+
+
     <fragment
         android:id="@+id/createHabitationFragment"
-        android:name="pt.ipca.roomies.ui.main.landlord.habitation.CreateHabitationFragment"
+        android:name="pt.ipca.roomies.ui.main.users.habitation.CreateHabitationFragment"
         android:label="CreateHabitationFragment" >
+        <argument
+            android:name="habitationId"
+            app:argType="string" />
         <action
             android:id="@+id/action_createHabitationFragment_to_habitationFragment"
             app:destination="@id/habitationFragment" />
@@ -182,22 +247,30 @@
 
     <fragment
         android:id="@+id/roomFragment"
-        android:name="pt.ipca.roomies.ui.main.landlord.room.RoomFragment"
-        android:label="RoomFragment" >
+        android:name="pt.ipca.roomies.ui.main.users.room.RoomFragment"
+        android:label="fragment_room"
+        tools:layout="@layout/fragment_room">
+        <argument
+            android:name="habitationId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
         <action
             android:id="@+id/action_roomFragment_to_createRoomFragment"
             app:destination="@id/createRoomFragment" />
         <action
             android:id="@+id/action_roomFragment_to_habitationFragment"
             app:destination="@id/habitationFragment" />
-
     </fragment>
+
 
     <fragment
         android:id="@+id/createRoomFragment"
-        android:name="pt.ipca.roomies.ui.main.landlord.room.CreateRoomFragment"
-        android:label="CreateRoomFragment" >
-        <action
+        android:name="pt.ipca.roomies.ui.main.users.room.CreateRoomFragment"
+        android:label="fragment_create_room"
+        tools:layout="@layout/fragment_create_room">
+
+    <action
             android:id="@+id/action_createRoomFragment_to_roomFragment"
             app:destination="@id/roomFragment" />
     </fragment>
@@ -236,6 +309,7 @@
             android:id="@+id/action_messageChatFragment_to_messageFragment"
             app:destination="@id/messageFragment" />
     </fragment>
+
 
 
 

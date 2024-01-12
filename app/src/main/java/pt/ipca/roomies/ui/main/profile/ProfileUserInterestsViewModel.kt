@@ -6,19 +6,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
-import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.data.entities.TagType
 import pt.ipca.roomies.data.entities.UserTags
-import pt.ipca.roomies.data.repositories.ProfileTagsRepository
+import pt.ipca.roomies.data.repositories.ProfileTagRepository
 
+class ProfileUserInterestsViewModel(
+    private val profileRepository: ProfileTagRepository,
+    private val profileTagRepository: ProfileTagRepository
+) : ViewModel() {
 
-
-
-class ProfileUserInterestsViewModel : ViewModel() {
-
-    private val profileTagsRepository = ProfileTagsRepository()
-    private val selectedTagsByType =
-        mutableMapOf<TagType, MutableLiveData<MutableSet<UserTags>>>()
+    private val selectedTagsByType = mutableMapOf<TagType, MutableLiveData<MutableSet<UserTags>>>()
     val availableTagsMap = mutableMapOf<TagType, MutableLiveData<List<UserTags>>>()
     private val _selectedTags = mutableMapOf<TagType, MutableLiveData<List<UserTags>>>()
     private val areTagsSelected = mutableMapOf<TagType, Boolean>()
@@ -46,46 +43,18 @@ class ProfileUserInterestsViewModel : ViewModel() {
 
     private fun fetchAvailableTagsByType(tagType: TagType) {
         viewModelScope.launch {
-            profileTagsRepository.getTagsByType(
-                tagType,
-                onSuccess = { snapshots ->
-                    // Convert DocumentSnapshots to UserTags
-                    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-                    val userTagsList = snapshots.map { snapshot ->
-                        //val profileTag = snapshot.documents[0].toObject(ProfileTags::class.java)
-                        val documentId = snapshot.tagId
+            try {
+                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                val userTagsList = profileRepository.getSelectedTags(userId)
 
-                        //convertToUserTags(profileTag!!, userId, documentId)
-                    }
-                  //  availableTagsMap[tagType]?.value = userTagsList
-                },
-                onFailure = { e ->
-                    // Handle failure
-                    println("Failed to fetch available tags of type $tagType: $e")
-                }
-            )
-        }
-
-        selectedTagsByType.forEach { (tagType, selectedTagsLiveData) ->
-            selectedTagsLiveData.observeForever { selectedTags ->
-                val filteredAvailableTags = availableTagsMap[tagType]?.value?.filterNot {
-                    it in selectedTags
-                } ?: emptyList()
-                availableTagsMap[tagType]?.value = filteredAvailableTags
+                availableTagsMap[tagType]?.value = userTagsList
+            } catch (e: Exception) {
+                // Handle failure
+                println("Failed to fetch available tags of type $tagType: $e")
             }
+
+            // Rest of the code remains unchanged
         }
-    }
-
-
-
-    private fun convertToUserTags(profileTag: ProfileTags, userId: String, documentId: String): UserTags {
-        return UserTags(
-            userId = userId,
-            tagId = documentId,
-            tagType = profileTag.tagType,
-            isSelected = profileTag.isSelected,
-            tagName = profileTag.tagName
-        )
     }
 
 
@@ -130,4 +99,10 @@ class ProfileUserInterestsViewModel : ViewModel() {
             _selectedTags[tagType]?.value = currentSelectedTags.toList()
         }
     }
+
+    fun getSelectedTags(tagType: TagType): List<UserTags> {
+        return selectedTagsByType[tagType]?.value?.toList() ?: emptyList()
+    }
+
+
 }

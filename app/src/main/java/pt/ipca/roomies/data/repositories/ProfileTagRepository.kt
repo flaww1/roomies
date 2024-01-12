@@ -1,27 +1,34 @@
 package pt.ipca.roomies.data.repositories
+
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
+import pt.ipca.roomies.data.dao.ProfileTagsDao
 import pt.ipca.roomies.data.entities.ProfileTags
 import pt.ipca.roomies.data.entities.TagType
 import pt.ipca.roomies.data.entities.UserTags
 
-class ProfileTagsRepository {
+class ProfileTagRepository(private val profileTagsDao: ProfileTagsDao) {
 
     private val db = FirebaseFirestore.getInstance()
 
-    fun createTag(tag: ProfileTags, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+    suspend fun createTag(tag: ProfileTags) {
+        // Add tag to local Room database
+        profileTagsDao.insertProfileTags(listOf(tag))
+
+        // Add tag to Firestore
         db.collection("profileTags")
             .add(tag)
             .addOnSuccessListener { documentReference ->
-                val tagId = documentReference.id
-                onSuccess.invoke(tagId)
+                val tagId =
+                documentReference.id
+                // Notify success if needed
             }
-            .addOnFailureListener { e ->
-                onFailure.invoke(e)
+            .addOnFailureListener {
+                // Notify failure if needed
             }
     }
 
-    fun associateTagWithUser(userId: String, tagId: String, tagType: TagType, isSelected: Boolean) {
-
+    suspend fun associateTagWithUser(userId: String, tagId: String, tagType: TagType, isSelected: Boolean) {
         val userTag = UserTags(userId, tagId, tagType, isSelected)
 
         // Query the UserTags table to find an existing entry for this user and tag
@@ -45,22 +52,19 @@ class ProfileTagsRepository {
             }
     }
 
-    fun getTagsByType(tagType: TagType, onSuccess: (List<ProfileTags>) -> Unit, onFailure: (Exception) -> Unit) {
-        db.collection("profileTags")
-            .whereEqualTo("tagType", tagType)
-            .get()
-            .addOnSuccessListener { documents ->
-                val tags = mutableListOf<ProfileTags>()
-                for (document in documents) {
-                    val tag = document.toObject(ProfileTags::class.java)
-                    tags.add(tag)
-                }
-                onSuccess.invoke(tags)
-            }
-            .addOnFailureListener { e ->
-                onFailure.invoke(e)
-            }
+    suspend fun getTagsByType(tagType: TagType): List<ProfileTags> {
+        return try {
+            db.collection("profileTags")
+                .whereEqualTo("tagType", tagType.name)
+                .get()
+                .await()
+                .toObjects(ProfileTags::class.java)
+        } catch (e: Exception) {
+            // Handle any exceptions (e.g., network issues)
+            emptyList()
+        }
     }
+
     fun getAllTagTypes(onSuccess: (List<String>) -> Unit, onFailure: (Exception) -> Unit) {
         // Use Firestore or any other data source to fetch all unique tag types from "profileTags" collection
         val profileTagsCollection = FirebaseFirestore.getInstance().collection("profileTags")
@@ -79,6 +83,18 @@ class ProfileTagsRepository {
                 onFailure(e)
             }
     }
+
+    suspend fun getSelectedTags(userId: String): List<UserTags>? {
+        return try {
+            db.collection("userTags")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("isSelected", true)
+                .get()
+                .await()
+                .toObjects(UserTags::class.java)
+        } catch (e: Exception) {
+            // Handle any exceptions (e.g., network issues)
+            null
+        }
+    }
 }
-
-

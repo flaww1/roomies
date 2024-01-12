@@ -1,9 +1,27 @@
 package pt.ipca.roomies.data.entities
 
-import User
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverter
+import androidx.room.TypeConverters
+import com.google.common.reflect.TypeToken
+import com.google.firebase.firestore.Exclude
+import pt.ipca.roomies.data.entities.Converters.*
+import javax.annotation.Nonnull
 
+
+@Entity(tableName = "habitations")
+@TypeConverters(HabitationUserListConverter::class,
+    HabitationAmenitiesListConverter::class,
+    SecurityMeasuresListConverter::class,
+    CitiesConverter::class,
+    HabitationTypeConverter::class,
+    NoiseLevelsConverter::class,
+    SmokingPoliciesConverter::class,
+    GuestPoliciesConverter::class)
 data class Habitation(
-    var habitationId: String? , // Set it to String? (nullable) to allow Firestore to generate the ID
+    @PrimaryKey
+    var habitationId: String = "",
     val landlordId: String = "",
     val address: String = "",
     val city: Cities = Cities.AVEIRO,
@@ -17,59 +35,23 @@ data class Habitation(
     val smokingPolicy: SmokingPolicies = SmokingPolicies.SMOKING_NOT_ALLOWED,
     val noiseLevel: NoiseLevels = NoiseLevels.QUIET,
     val guestPolicy: GuestPolicies = GuestPolicies.GUESTS_NOT_ALLOWED,
-    val tenants: List<User> = listOf(),
+    val tenants: List<User> = listOf()
 ) {
-    // No-argument constructor for Firebase Firestore deserialization
-    constructor() : this("", "", "", Cities.AVEIRO, 0, 0, HabitationType.APARTMENT, "", listOf(), listOf(),
-        false, SmokingPolicies.SMOKING_NOT_ALLOWED, NoiseLevels.QUIET, GuestPolicies.GUESTS_NOT_ALLOWED, listOf())
+
 }
 
 
-
-enum class HabitationAmenities {
-    INTERNET,
-    PARKING,
-    KITCHEN,
-    LAUNDRY
-}
-
-enum class SecurityMeasures {
-    SECURITY_CAMERAS,
-    KEY_ENTRANCE,
-    SECURITY_GUARD,
-    CODED_ENTRANCE,
-    CARDED_ENTRANCE
-}
-
-
-enum class GuestPolicies(s: String) {
-    GUESTS_ALLOWED("Guests allowed"),
-    GUESTS_NOT_ALLOWED("Guests not allowed"),
-    GUESTS_ALLOWED_WITH_RESTRICTIONS("Guests allowed with restrictions"),
-    // Add other types as needed
-}
-enum class NoiseLevels(s: String) {
-    QUIET("Quiet"),
-    MODERATE("Moderate"),
-    LOUD("Loud"),
-    // Add other types as needed
-}
-enum class SmokingPolicies(s: String) {
-    SMOKING_ALLOWED("Smoking allowed"),
-    SMOKING_NOT_ALLOWED("Smoking not allowed"),
-    SMOKING_ALLOWED_OUTSIDE_ONLY("Smoking allowed outside only"),
-    // Add other types as needed
-}
-
-
-enum class HabitationType(s: String) {
+@TypeConverters(HabitationTypeConverter::class)
+enum class HabitationType(val type: String) {
     APARTMENT("Apartment"),
     HOUSE("House"),
     ROOM("Room"),
     STUDIO("Studio"),
     // Add other types as needed
 }
-enum class Cities(s: String) {
+
+@TypeConverters(CitiesConverter::class)
+enum class Cities(val city: String) {
     AVEIRO("Aveiro"),
     BEJA("Beja"),
     BRAGA("Braga"),
@@ -88,6 +70,43 @@ enum class Cities(s: String) {
     VIANA_DO_CASTELO("Viana do Castelo"),
     VILA_REAL("Vila Real"),
     VISEU("Viseu"),
-    ILHA_DA_MADEIRA("Ilha da Madeira"),
+    ILHA_DA_MADEIRA("Ilha da Madeira")
+}
 
+@TypeConverters(HabitationAmenitiesConverter::class)
+enum class HabitationAmenities(val amenity: String) {
+    INTERNET("Internet"),
+    PARKING("Parking"),
+    KITCHEN("Kitchen"),
+    LAUNDRY("Laundry")
+}
+
+@TypeConverters(SecurityMeasuresConverter::class)
+enum class SecurityMeasures(val measure: String) {
+    SECURITY_CAMERAS("Security Cameras"),
+    KEY_ENTRANCE("Key Entrance"),
+    SECURITY_GUARD("Security Guard"),
+    CODED_ENTRANCE("Coded Entrance"),
+    CARDED_ENTRANCE("Carded Entrance")
+}
+
+@TypeConverters(GuestPoliciesConverter::class)
+enum class GuestPolicies(val policy: String) {
+    GUESTS_ALLOWED("Guests allowed"),
+    GUESTS_NOT_ALLOWED("Guests not allowed"),
+    GUESTS_ALLOWED_WITH_RESTRICTIONS("Guests allowed with restrictions")
+}
+
+@TypeConverters(NoiseLevelsConverter::class)
+enum class NoiseLevels(val level: String) {
+    QUIET("Quiet"),
+    MODERATE("Moderate"),
+    LOUD("Loud")
+}
+
+@TypeConverters(SmokingPoliciesConverter::class)
+enum class SmokingPolicies(val policy: String) {
+    SMOKING_ALLOWED("Smoking allowed"),
+    SMOKING_NOT_ALLOWED("Smoking not allowed"),
+    SMOKING_ALLOWED_OUTSIDE_ONLY("Smoking allowed outside only")
 }

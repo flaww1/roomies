@@ -16,6 +16,8 @@ class CardFragment : Fragment() {
     private lateinit var btnDislike: Button
     private lateinit var homeViewModel: HomeViewModel
 
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -23,29 +25,24 @@ class CardFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_card, container, false)
         btnLike = view.findViewById(R.id.buttonLike)
         btnDislike = view.findViewById(R.id.buttonDislike)
-
-        // Initialize pt.ipca.roomies.ui.main.HomeViewModel
-        homeViewModel = ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
-
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Customize the card content as needed
+        homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
+
+        // Ensure that arguments are not null before accessing
         val cardContent = arguments?.getString(ARG_CARD_CONTENT)
-        view.findViewById<TextView>(R.id.textViewCardContent).text = cardContent
-
-        btnLike.setOnClickListener {
-            // Implement your like functionality here
-            homeViewModel.likeCurrentCard()
+        if (!cardContent.isNullOrEmpty()) {
+            view.findViewById<TextView>(R.id.textViewCardContent).text = cardContent
         }
 
-        btnDislike.setOnClickListener {
-            // Implement your dislike functionality here
-            homeViewModel.dislikeCurrentCard()
-        }
+        // Simplified click listeners using lambda syntax
+        btnLike.setOnClickListener { homeViewModel.likeCurrentCard() }
+
+        btnDislike.setOnClickListener { homeViewModel.dislikeCurrentCard() }
     }
 
     companion object {

@@ -1,6 +1,6 @@
 package pt.ipca.roomies.ui.authentication.registration
 
-import User
+
 import pt.ipca.roomies.data.entities.UserProfile
 import android.net.Uri
 import android.util.Log
@@ -8,11 +8,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import pt.ipca.roomies.data.entities.ProfileTags
+import pt.ipca.roomies.data.entities.User
+import pt.ipca.roomies.data.repositories.ProfileRepository
 import pt.ipca.roomies.data.repositories.RegistrationRepository
 
-class RegistrationViewModel : ViewModel() {
+class RegistrationViewModel(
+    private val registrationRepository: RegistrationRepository
+) : ViewModel() {
 
-    private val registrationRepository = RegistrationRepository()
+
+
     private val _userId = MutableLiveData<String?>()
     val userId: LiveData<String?> get() = _userId
     val _errorMessage = MutableLiveData<String?>()
@@ -66,21 +71,15 @@ class RegistrationViewModel : ViewModel() {
     }
 
 
-    fun updateUserRole(role: String) {
-        _user.value?.let { user ->
-            val updatedUser = user.copy(userRole = role)
-            Log.d("RegistrationViewModel", "Updated user role: $updatedUser")
-            registrationRepository.updateUserInFirestore(updatedUser)
-        }
-    }
-    fun register(firstName: String, lastName: String, email: String, password: String) {
+
+    fun register(firstName: String, lastName: String, email: String, password: String, userRole: String) {
         // Set up initial user data
         val user = User(
             userId = "",
             firstName = firstName,
             lastName = lastName,
             email = email,
-            userRole = "",
+            userRole = userRole,  // Pass the user role directly
             password = password,
             registrationDate = 0,
             userRating = 0
@@ -88,8 +87,8 @@ class RegistrationViewModel : ViewModel() {
 
         // Update LiveData in the ViewModel
         setUser(user)
-
     }
+
 
     private fun setUser(user: User) {
         _user.value = user
@@ -99,6 +98,7 @@ class RegistrationViewModel : ViewModel() {
 
     fun handleRegistrationError(message: String?) {
         _errorMessage.value = message
-
+        // Clear the error message after handling it
+        _errorMessage.value = null
     }
 }

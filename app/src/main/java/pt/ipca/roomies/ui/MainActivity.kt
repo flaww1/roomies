@@ -12,6 +12,8 @@ import com.google.firebase.appcheck.appCheck
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.google.firebase.initialize
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.entities.Room
+import pt.ipca.roomies.data.local.AppDatabase
 import pt.ipca.roomies.ui.authentication.UserViewModel
 
 
@@ -48,10 +50,6 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
-
-
-
-
 
         Firebase.initialize(context = this)
         Firebase.appCheck.installAppCheckProviderFactory(

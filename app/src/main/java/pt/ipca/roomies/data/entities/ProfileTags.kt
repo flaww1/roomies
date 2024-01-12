@@ -1,35 +1,77 @@
 package pt.ipca.roomies.data.entities
 
-data class ProfileTags(
-    val tagId: String = "",
-    val tagName: String = "",
-    val tagType: TagType = TagType.Interest,// Replace with an appropriate default value
-    val isSelected: Boolean = false
-) {
-    // Default constructor with default values
-    constructor() : this("", "", TagType.Interest)
-}
+import androidx.room.ColumnInfo
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.Relation
 
+@Entity(tableName = "profile_tags")
+data class ProfileTags(
+    @PrimaryKey
+    @ColumnInfo(name = "tagId")
+    val tagId: String = "",
+    @ColumnInfo(name = "tagName")
+    val tagName: String = "",
+    @ColumnInfo(name = "tagType")
+    val tagType: TagType = TagType.Interest,
+    @ColumnInfo(name = "isSelected")
+    val isSelected: Boolean = false
+)
+
+
+
+@Entity(tableName = "user_tags")
 data class UserTags(
-    val userId: String, // Foreign key referencing User table
-    val tagId: String, // Foreign key referencing ProfileTags table
-    val tagType: TagType, // Store the type of tag
+    @PrimaryKey
+    @ColumnInfo(name = "userId")
+    val userId: String,
+    @ColumnInfo(name = "tagId")
+    val tagId: String,
+    @ColumnInfo(name = "tagType")
+    val tagType: TagType,
+    @ColumnInfo(name = "isSelected")
     var isSelected: Boolean,
+    @ColumnInfo(name = "tagName")
     val tagName: String = ""
 )
+
 enum class TagType {
     Language, Interest, Personality
 }
 
+@Entity(tableName = "selected_tags")
 data class SelectedTag(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    @ColumnInfo(name = "userId")
+    val userId: String,
+    @ColumnInfo(name = "tagId")
     val tagId: String,
-    val tagName: String,
+    @ColumnInfo(name = "tagType")
     val tagType: TagType,
+    @ColumnInfo(name = "isSelected")
     val isSelected: Boolean
-
 )
 
+
+
+@Entity(tableName = "user_profiles_with_tags")
 data class UserProfileWithTags(
-    val userProfile: UserProfile,
+    @Embedded val userProfile: UserProfile,
+    @Relation(
+        parentColumn = "userId",
+        entityColumn = "userId"
+    )
+    val userTags: List<UserTags>,
+    @Relation(
+        parentColumn = "tagId",
+        entityColumn = "tagId"
+    )
+    val profileTags: List<ProfileTags>,
+    @Relation(
+        parentColumn = "userId",
+        entityColumn = "userId"
+    )
     val selectedTags: List<SelectedTag>
 )

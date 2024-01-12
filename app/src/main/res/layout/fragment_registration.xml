@@ -72,6 +72,29 @@
                 android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <RadioGroup
+            android:id="@+id/roleSelectionGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/landlordRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="I am a landlord"
+                android:textSize="18sp"
+                android:layout_marginStart="16dp"/>
+
+            <RadioButton
+                android:id="@+id/userRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="I am a user"
+                android:textSize="18sp"
+                android:layout_marginStart="16dp"/>
+        </RadioGroup>
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/backButton"
             android:layout_width="match_parent"
@@ -86,6 +109,8 @@
             android:text="Next"
             android:layout_marginTop="16dp"
             android:enabled="false"/> <!-- Initially disabled -->
+
+
 
     </LinearLayout>
 </layout>

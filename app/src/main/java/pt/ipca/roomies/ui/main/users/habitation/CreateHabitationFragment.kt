@@ -1,4 +1,4 @@
-package pt.ipca.roomies.ui.main.landlord.habitation
+package pt.ipca.roomies.ui.main.users.habitation
 
 import android.os.Bundle
 import android.text.Editable
@@ -9,18 +9,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.dao.HabitationDao
 import pt.ipca.roomies.data.entities.*
+import pt.ipca.roomies.data.local.AppDatabase
+import pt.ipca.roomies.data.repositories.HabitationViewModelFactory
 import pt.ipca.roomies.databinding.FragmentCreateHabitationBinding
 
 class CreateHabitationFragment : Fragment() {
 
-    private val viewModel: HabitationViewModel by lazy {
-        ViewModelProvider(this)[HabitationViewModel::class.java]
+    private lateinit var habitationDao: HabitationDao
+    private val viewModel: HabitationViewModel by viewModels {
+        HabitationViewModelFactory(habitationDao)
     }
+
     private lateinit var addressEditText: EditText
     private lateinit var citySpinner: Spinner
     private lateinit var numberOfRoomsEditText: EditText
@@ -44,9 +49,7 @@ class CreateHabitationFragment : Fragment() {
     private lateinit var backButton: Button
     private lateinit var binding: FragmentCreateHabitationBinding
 
-    private val habitationViewModel: HabitationViewModel by lazy {
-        ViewModelProvider(requireActivity())[HabitationViewModel::class.java]
-    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -57,6 +60,8 @@ class CreateHabitationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        habitationDao = AppDatabase.getDatabase(requireContext()).habitationDao()
 
         addressEditText = view.findViewById(R.id.editTextAddress)
         citySpinner = view.findViewById(R.id.spinnerCity)
@@ -85,11 +90,11 @@ class CreateHabitationFragment : Fragment() {
     }
 
     private fun setupSpinners() {
-        citySpinner.adapter = createEnumAdapter(Cities.values())
-        habitationTypeSpinner.adapter = createEnumAdapter(HabitationType.values())
-        smokingPolicySpinner.adapter = createEnumAdapter(SmokingPolicies.values())
-        noiseLevelSpinner.adapter = createEnumAdapter(NoiseLevels.values())
-        guestPolicySpinner.adapter = createEnumAdapter(GuestPolicies.values())
+        citySpinner.adapter = createEnumAdapter<Cities>()
+        habitationTypeSpinner.adapter = createEnumAdapter<HabitationType>()
+        smokingPolicySpinner.adapter = createEnumAdapter<SmokingPolicies>()
+        noiseLevelSpinner.adapter = createEnumAdapter<NoiseLevels>()
+        guestPolicySpinner.adapter = createEnumAdapter<GuestPolicies>()
     }
 
 
@@ -183,16 +188,11 @@ class CreateHabitationFragment : Fragment() {
     }
     private fun getTextWatcher(): TextWatcher {
         return object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-                // code before text is changed
-            }
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                // code when text is changing
-            }
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable) {
-                // code after text has changed
                 createHabitationButton.isEnabled = isInputValid(
                     addressEditText.text.toString(),
                     numberOfRoomsEditText.text.toString().toIntOrNull(),
@@ -233,7 +233,8 @@ class CreateHabitationFragment : Fragment() {
         ).filterNotNull().toSet()
     }
 
-    private inline fun <reified T : Enum<T>> createEnumAdapter(values: Array<T>): ArrayAdapter<T> {
+    private inline fun <reified T : Enum<T>> createEnumAdapter(): ArrayAdapter<T> {
+        val values = enumValues<T>()
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, values)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         return adapter

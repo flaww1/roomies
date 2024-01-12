@@ -46,7 +46,7 @@ class MessagesRepository {
 
     fun getChatMessages(targetUserId: String): LiveData<List<Message>> {
         val messagesLiveData = MutableLiveData<List<Message>>()
-        var registration: ListenerRegistration? = null
+        var registration: ListenerRegistration?
 
         // Reference to the "messages" collection in Firestore
         val messagesRef = db.collection("messages")

@@ -1,4 +1,4 @@
-package pt.ipca.roomies.ui.main.landlord.room
+package pt.ipca.roomies.ui.main.users.room
 
 import android.view.LayoutInflater
 import android.view.View
@@ -27,8 +27,9 @@ class RoomAdapter(private val rooms: List<Room>, private val onRoomClickListener
         holder.roomNameTextView.text = room.description
 
         holder.editRoomButton.setOnClickListener {
-            // Implement the logic for editing a room
+            onRoomClickListener.onEditRoomClick(room)
         }
+
 
         holder.deleteRoomButton.setOnClickListener {
             onRoomClickListener.onDeleteRoomClick(room)
@@ -44,5 +45,7 @@ class RoomAdapter(private val rooms: List<Room>, private val onRoomClickListener
     interface OnRoomClickListener {
         fun onRoomClick(room: Room)
         fun onDeleteRoomClick(room: Room)
+        fun onEditRoomClick(room: Room)
     }
+
 }

@@ -10,13 +10,15 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.play.integrity.internal.c
 import com.google.firebase.auth.FirebaseAuth
 import pt.ipca.roomies.R
+import pt.ipca.roomies.data.local.AppDatabase
+import pt.ipca.roomies.data.repositories.ProfileRepository
+import pt.ipca.roomies.data.repositories.ProfileViewModelFactory
+import pt.ipca.roomies.data.repositories.RoomRepository
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -26,6 +28,13 @@ import java.util.Locale
 
 class ProfileFragment : Fragment() {
 
+    val userProfileDao = AppDatabase.getDatabase(requireContext()).userProfileDao()
+    val roomDao = AppDatabase.getDatabase(requireContext()).roomDao()
+    val roomRepository = RoomRepository(userProfileDao, roomDao)
+    val profileRepository = ProfileRepository(userProfileDao)
+    private val viewModel by viewModels<ProfileViewModel> {
+        ProfileViewModelFactory(roomRepository, profileRepository)
+    }
     private lateinit var combinedProfileLayout: View
     private lateinit var createProfileLayout: View
     private lateinit var displayProfileLayout: View
@@ -36,7 +45,6 @@ class ProfileFragment : Fragment() {
     private lateinit var linearLayoutTags: LinearLayout
 
     private lateinit var textViewMessage: TextView
-    private var viewModel = ProfileViewModel()
     private val currentUser = FirebaseAuth.getInstance().currentUser
     private var userProfile: UserProfile? = null
 
@@ -70,15 +78,13 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity())[ProfileViewModel::class.java]
+
 
         viewModel.userProfile.observe(viewLifecycleOwner) { userProfile ->
             if (userProfile != null) {
-                // User has a profile, show display layout and hide create layout
                 showProfileDisplayLayout(userProfile)
                 Log.d("ProfileFragment", "User Profile: $userProfile")
             } else {
-                // User does not have a profile, show create layout and hide display layout
                 showProfileCreationLayout()
                 Log.d("ProfileFragment", "User does not have a profile")
             }
@@ -86,24 +92,16 @@ class ProfileFragment : Fragment() {
 
 
 
-
-        // Fetch the user profile
         viewModel.getUserProfile()
     }
 
 
 
 
+
     private fun showProfileCreationLayout() {
-
-        Log.d("ProfileFragment", "Profile Creation Layout Visibility: ${createProfileLayout.visibility}")
-
-        // Set visibility for profile creation layout
         createProfileLayout.visibility = View.VISIBLE
-
-        // Set visibility for profile display layout
         displayProfileLayout.visibility = View.GONE
-
         textViewMessage.text = "You don't have a profile yet. Create one now!"
     }
 
@@ -118,8 +116,9 @@ class ProfileFragment : Fragment() {
         displayProfileLayout.visibility = View.VISIBLE
 
         // Set profile picture (replace "placeholder_url" with the actual URL from userProfile)
-        Glide.with(this).load(userProfile.profilePictureUrl ?: "placeholder_url")
-            .into(imageViewProfilePicture)
+        userProfile.profilePictureUrl.let {
+            Glide.with(this).load(it).into(imageViewProfilePicture)
+        }
 
 
         val nameText = currentUser?.displayName ?: "Unknown User"

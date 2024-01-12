@@ -1,101 +1,107 @@
 package pt.ipca.roomies.ui.main.profile
 
-import pt.ipca.roomies.data.entities.UserProfile
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import pt.ipca.roomies.data.entities.SelectedTag
+import pt.ipca.roomies.data.entities.UserProfile
+import pt.ipca.roomies.data.entities.UserTags
+import pt.ipca.roomies.data.repositories.ProfileRepository
+import pt.ipca.roomies.data.repositories.RoomRepository
 
-class ProfileViewModel : ViewModel() {
-    private val db = FirebaseFirestore.getInstance()
+class ProfileViewModel(
+    private val roomRepository: RoomRepository,
+    private val profileRepository: ProfileRepository
+) : ViewModel() {
+
     private val _userProfile = MutableLiveData<UserProfile?>()
     val userProfile: LiveData<UserProfile?>
         get() = _userProfile
 
+    private val _selectedTags = MutableLiveData<List<SelectedTag>?>()
+    val selectedTags: MutableLiveData<List<SelectedTag>?>
+        get() = _selectedTags
 
-    private suspend fun fetchUserProfile(userId: String): UserProfile? {
-        return try {
-            val snapshot = db.collection("userProfiles")
-                .whereEqualTo("userId", userId)
-                .get()
-                .await()
+    fun getUserProfileAndTags() {
+        viewModelScope.launch {
+            try {
+                val userId = roomRepository.getCurrentUserId()
 
-            if (!snapshot.isEmpty) {
-                val userProfile = snapshot.documents[0].toObject(UserProfile::class.java)
-                Log.d("ProfileViewModel", "Fetched user profile: $userProfile")
-                userProfile?.copy(userId = userId)
-            } else {
-                Log.d("ProfileViewModel", "User profile not found for userId: $userId")
+                if (userId != null) {
+                    // Attempt to fetch from Room
+                    fetchUserProfileFromRoom(userId)
 
-                null
+                    // Fetch from Firebase
+                    fetchUserProfileFromFirestore(userId)
+
+                    // Fetch selected tags
+                    fetchSelectedTags(userId)
+                }
+            } catch (e: Exception) {
+                // Handle exception
+            }
+        }
+    }
+
+    private suspend fun fetchUserProfileFromRoom(userId: String) {
+        val localUserProfile = roomRepository.getUserProfileByUserId(userId).value
+        _userProfile.postValue(localUserProfile)
+    }
+
+    private suspend fun fetchUserProfileFromFirestore(userId: String) {
+        try {
+            val remoteUserProfile = profileRepository.getUserProfileByUserId(userId).value
+            remoteUserProfile?.let {
+                // Update Room with Firebase data
+                roomRepository.insertOrUpdateUserProfileLocally(it)
+                _userProfile.postValue(it)
             }
         } catch (e: Exception) {
             // Handle exception
-            Log.e("ProfileViewModel", "Error fetching user profile: ${e.message}")
-            null
         }
     }
+
+
+    private suspend fun fetchSelectedTags(userId: String) {
+        try {
+            val userTagsList = profileRepository.getSelectedTags(userId)
+            val selectedTags = convertToSelectedTags(userId, userTagsList)
+            _selectedTags.postValue(selectedTags)
+        } catch (e: Exception) {
+            // Handle exception
+        }
+    }
+
+    private fun convertToSelectedTags(userId: String, userTagsList: List<UserTags>): List<SelectedTag>? {
+        return userTagsList.map { userTag ->
+            SelectedTag(
+                userId = userId,  // Pass the userId to the SelectedTag constructor
+                tagId = userTag.tagId,
+                tagType = userTag.tagType,
+                isSelected = userTag.isSelected
+            )
+        }
+    }
+
+
 
     fun getUserProfile() {
-        // Get the current user ID from Firebase Authentication
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        viewModelScope.launch {
+            try {
+                val userId = roomRepository.getCurrentUserId()
 
-        // Check if the user is authenticated
-        if (userId != null) {
-            // Use viewModelScope.launch to perform asynchronous operations
-            viewModelScope.launch {
-                Log.d("ProfileViewModel", "Fetching user profile for userId: $userId")
-                try {
-                    // Replace this with your actual logic to fetch the user profile
-                    val userProfile = fetchUserProfile(userId)
+                if (userId != null) {
+                    // Attempt to fetch from Room
+                    fetchUserProfileFromRoom(userId)
 
-                    // Only update _userProfile if userProfile is not null
-                    userProfile?.let {
-                        _userProfile.postValue(userProfile)
-                    } ?: run {
-                        // Handle the case when the user profile is not found
-                        Log.e("ProfileViewModel", "User profile not found")
-                    }
-                } catch (e: Exception) {
-                    // Handle error, log, or report to analytics
-                    e.printStackTrace()
+                    // Fetch from Firebase
+                    fetchUserProfileFromFirestore(userId)
                 }
+            } catch (e: Exception) {
+                // Handle exception
             }
-        } else {
-            // Handle the case when the user is not authenticated
-            // You might want to show an error message or navigate to the login screen
-            Log.e("ProfileViewModel", "User not authenticated")
         }
     }
-
-
-    private suspend fun getSelectedTags(userId: String): List<SelectedTag> {
-        return try {
-            val snapshot = db.collection("selectedTags")
-                .whereEqualTo("userId", userId)
-                .get()
-                .await()
-
-            val selectedTags = mutableListOf<SelectedTag>()
-            for (document in snapshot.documents) {
-                val tag = document.toObject(SelectedTag::class.java)
-                tag?.let {
-                    selectedTags.add(it)
-                }
-            }
-
-            selectedTags
-        } catch (e: Exception) {
-            // Handle exception
-            emptyList()
-        }
-    }
-
-
 }

@@ -15,6 +15,13 @@
     <string name="choose_room_size" />
     <string name="choose_lease_duration" />
     <string name="create_room" />
+    <string name="error_description_empty" />
+    <string name="error_price_empty" />
+    <string name="max_images_limit">Maximum images limit reached &gt; %1$d</string>
+    <string name="select_images_count">Select Images (%1$d/%2$d)</string>
+    <string name="create_profile">Create Profile</string>
+    <string name="invalid_habitation_id">Invalid habitation ID</string>
+    <string name="select_habitation" />
 
 
 </resources>

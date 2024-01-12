@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.main.landlord.LandlordActivity">
+    tools:context=".ui.main.users.UsersActivity">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/landlordNavHostFragment"

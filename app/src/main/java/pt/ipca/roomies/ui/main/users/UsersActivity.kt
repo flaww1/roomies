@@ -1,17 +1,15 @@
-package pt.ipca.roomies.ui.main.landlord
+package pt.ipca.roomies.ui.main.users
 
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import pt.ipca.roomies.R
 
-class LandlordActivity : AppCompatActivity() {
+class UsersActivity : AppCompatActivity() {
 
     private lateinit var navController: NavController
 
