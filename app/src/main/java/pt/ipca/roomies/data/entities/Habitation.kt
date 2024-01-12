@@ -9,7 +9,8 @@ import com.google.firebase.firestore.Exclude
 import pt.ipca.roomies.data.entities.Converters.*
 import javax.annotation.Nonnull
 
-
+//representacao de tabela na base de dados, @primarykey,TypeConverters...
+//typeconvereters permite a conver~sao e recuperacao de tipo de dados, de forma a que o room compreenda,pode  sre aplicado a classe para todos os campos ou metodo soemete a um 
 @Entity(tableName = "habitations")
 @TypeConverters(HabitationUserListConverter::class,
     HabitationAmenitiesListConverter::class,
