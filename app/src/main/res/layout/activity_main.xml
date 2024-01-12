@@ -22,11 +22,14 @@
         app:navGraph="@navigation/nav_graph" />
 
     <!-- Bottom Navigation Bar -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
+    <com.google.android.material.bottomnavigation.BottomNavigationView  <!--consultar https://m2.material.io/components/bottom-navigation -->
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         app:menu="@menu/bottom_navigation_menu" />
+<!-- tela com conteiner principal, barra de navegação para baixo, e um conteiner de fragmentos -->
+
+
 
 </RelativeLayout>
