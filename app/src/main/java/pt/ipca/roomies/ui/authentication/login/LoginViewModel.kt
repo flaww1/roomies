@@ -10,7 +10,7 @@ import pt.ipca.roomies.data.repositories.LoginRepository
 
 // pt.ipca.roomies.ui.authentication.login.LoginViewModel.kt
 //LiveData para atualizacao da interface do utilizador, conforme o resultado do login
-class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel() { //view model, para parametro do constr tem o loginRepository
+class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel() { //view model, para parametro do constr tem o loginRepository, intermedeia o repositorio e a interface
 
     private val _loginResult = MutableLiveData<LoginResult>()
     val loginResult: LiveData<LoginResult> get() = _loginResult
