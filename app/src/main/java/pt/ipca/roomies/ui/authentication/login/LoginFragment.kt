@@ -18,13 +18,15 @@ import pt.ipca.roomies.data.repositories.LoginViewModelFactory
 import pt.ipca.roomies.databinding.FragmentLoginBinding
 import pt.ipca.roomies.ui.authentication.UserViewModel
 
+//classe trabalha com o loginviewwmodel, permite navegação, intereacoes da interface assocciadas com o login, obsertva os resiltados e atualiza
+
 class LoginFragment : Fragment() {
     private lateinit var userViewModel: UserViewModel
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
 
-    override fun onCreateView(
+    override fun onCreateView( //esta função está a criar a interface do utilizador do fragmento a partir de um arquivo de layout XML específico (FragmentLoginBinding). O resultado é armazenado na variável _binding.
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
@@ -39,7 +41,7 @@ class LoginFragment : Fragment() {
         Log.d("pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment", "pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.pt.ipca.roomies.ui.main.HomeFragment onViewCreated")
 
         super.onViewCreated(view, savedInstanceState)
-        userViewModel = activity?.run {
+        userViewModel = activity?.run { //iniciacao de componentes do user, ouvinte de ckick, chama loginUser
             ViewModelProvider(this)[UserViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
@@ -83,7 +85,7 @@ class LoginFragment : Fragment() {
     }
 
 
-    override fun onDestroyView() {
+    override fun onDestroyView() { //final ciclo de vida, destroi e limpa a referencia de visualização
         super.onDestroyView()
         _binding = null
     }
